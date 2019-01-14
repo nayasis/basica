@@ -1,7 +1,7 @@
 package io.nayasis.common.base;
 
-import org.nybatis.core.exception.unchecked.ClassNotExistException;
-import org.nybatis.core.exception.unchecked.EncodingException;
+import io.nayasis.common.exception.unchecked.ClassNotExistException;
+import io.nayasis.common.exception.unchecked.EncodingException;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -853,7 +853,7 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws ClassNotExistException if class is not found in class loader.
      */
-    public static Object decode( Object value ) {
+    public static Object parse( Object value ) {
 
     	byte o[] = DatatypeConverter.parseBase64Binary( nvl(value) );
 
@@ -877,13 +877,13 @@ public class Strings {
 
 	/**
 	 * encode URL
-	 * @param url url to encode
+	 * @param uri uri to encode
 	 * @return encoded URL
 	 * @throws EncodingException	if an encoding error occurs.
 	 */
-    public static String encodeUrl( Object url ) throws EncodingException {
+    public static String encodeUrl( Object uri ) throws EncodingException {
     	try {
-			return URLEncoder.encode( nvl(url), "UTF-8" );
+			return URLEncoder.encode( nvl(uri), "UTF-8" );
     	} catch( UnsupportedEncodingException e ) {
         	throw new EncodingException( e );
         }
@@ -891,13 +891,13 @@ public class Strings {
 
 	/**
 	 * decode URL
-	 * @param url url to decode
+	 * @param uri uri to decode
 	 * @return decoded URL
 	 * @throws EncodingException	if an decoding error occurs.
 	 */
-    public static String decodeUrl( Object url ) throws EncodingException {
+    public static String decodeUrl( Object uri ) throws EncodingException {
     	try {
-    		return URLDecoder.decode( nvl( url ), "UTF-8" );
+    		return URLDecoder.decode( nvl( uri ), "UTF-8" );
     	} catch( UnsupportedEncodingException e ) {
         	throw new EncodingException( e );
         }
@@ -926,7 +926,7 @@ public class Strings {
 	}
 
 	/**
-	 * 문자열에서 소문자만 추출한다.
+	 * extracter lower characters from word
 	 *
 	 * @param string 작업할 대상 문자열
 	 * @return 소문자만 추출된 문자열
@@ -987,9 +987,9 @@ public class Strings {
 	 *
 	 * (DBMS의 Like 검색기능과 동일)
 	 *
-	 * {@link Strings#like}( "ABCDEFG", "%BCD%"   ) → true
-	 * {@link Strings#like}( "ABCDEFG", "%BCD_F%" ) → true
-	 * {@link Strings#like}( "AB_DEFG", "AB.DEFG" ) → false
+	 * {@link Strings#like}( "ABCDEFG", "%BCD%"   ) -> true
+	 * {@link Strings#like}( "ABCDEFG", "%BCD_F%" ) -> true
+	 * {@link Strings#like}( "AB_DEFG", "AB.DEFG" ) -> false
 	 *
 	 *  </pre>
 	 *
@@ -999,7 +999,7 @@ public class Strings {
 	 */
 	public static boolean like( Object value, String pattern ) {
 
-		pattern = removeRegexKeyword( pattern );
+		pattern = escapeRegexpKeyword( pattern );
 
 		StringBuilder newPattern = new StringBuilder();
 
@@ -1071,7 +1071,7 @@ public class Strings {
 	 * @param pattern 변환할 정규식 패턴문자열
 	 * @return  변환된 문자열
 	 */
-	public static String removeRegexKeyword(String pattern ) {
+	public static String escapeRegexpKeyword( String pattern ) {
 
 		pattern = nvl( pattern );
 
@@ -1256,12 +1256,12 @@ public class Strings {
 	}
 
 	/**
-	 * clear XSS in text
+	 * escape XSS(cross site script) pattern in text
 	 *
 	 * @param value target value
 	 * @return escaped string
 	 */
-	public static String clearXss( Object value ) {
+	public static String escapeXss( Object value ) {
 
 		if( isEmpty(value) ) return "";
 
@@ -1289,12 +1289,12 @@ public class Strings {
 	}
 
 	/**
-	 * unclear XSS in text
+	 * unescape XSS(cross site script) pattern in text
 	 *
 	 * @param value target value
 	 * @return unescaped string
 	 */
-	public static String unclearXss( Object value ) {
+	public static String unescapeXss( Object value ) {
 
 		if( isEmpty(value) ) return "";
 
