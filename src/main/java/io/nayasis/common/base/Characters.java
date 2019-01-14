@@ -47,56 +47,52 @@ public class Characters {
 		add( UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS );
 	}};
 
-	/** 초성 */
+	/** Hangul Chosung */
 	private static char[] HANGUL_1ST = new char[] { 'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
 	
-	/** 중성 */
+	/** Hangul Joongsung */
 	private static char[] HANGUL_2ND = new char[] { 'ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ' };
 	
-	/** 종성 */
+	/** Hangul Jongsung */
 	private static char[] HANGUL_3RD = new char[] { '\0','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };	
 
-	/**
-	 * Full-width 문자의 Console 출력크기
-	 */
-	private static int fullwidthCharacterWidth = 2;
+	/** console font width of Full-width character */
+	private static int fullwidth = 2;
 	
 	/**
-	 * Full-width 문자의 Console 출력공간 크기를 세팅한다.
+	 * set console font width of Full-width character
 	 * 
-	 * @param width 출력할 크기
+	 * @param width console font width to print
 	 */
-	public static void setCjkCharacterWidth( int width ) {
+	public static void fullwidth(int width ) {
 		if( width >= 1 )
-			fullwidthCharacterWidth = width;
+			fullwidth = width;
 	}
 
 	/**
-	 * Full-width 문자의 Console 출력공간 크기를 구한다.
+	 * get console font width of Full-width
 	 * 
-	 * @return Full-width 문자의 출력공간 크기
+	 * @return console font width to print
 	 */
-	public static int getFullwidthCharacterWidth() {
-		return fullwidthCharacterWidth;
+	public static int fullwidth() {
+		return fullwidth;
 	}
 	
 	/**
-	 * 한글문자의 초성/중성/종성을 분리한다.
+	 * resolve Hangul character to Chosung, Joongsung, Jonsung
 	 * 
      * <pre>
-     *
-     * CharacterUtil.disassembleKorean( '롱' ); → [ 'ㄹ','ㅗ','ㅇ'] 을 반환
-     * CharacterUtil.disassembleKorean( '수' ); → ['ㅅ','ㅜ','\0' ] 을 반환
-     * CharacterUtil.disassembleKorean( 'H'  ); → null 을 반환
-     *
+     * Characters.resolveKorean( '롱' ); -> [ 'ㄹ','ㅗ','ㅇ']
+     * Characters.resolveKorean( '수' ); -> ['ㅅ','ㅜ','\0' ]
+     * Characters.resolveKorean( 'H'  ); -> null
      * </pre>
 	 * 
-	 * @param ch 검사할 문자
-	 * @return 초성/중성/종성으로 분리된 배열 (분리할 수 없을 경우 null 반환)
+	 * @param ch character to resolve
+	 * @return resolved character array (null if it can not be resolved.)
 	 */
-	public static char[] disassembleKorean( char ch ) {
+	public static char[] resolveKorean(char ch ) {
 		
-		// 한글의 자음/모음을 분리할 수 없을 경우 null 반환
+		// if it can not be resolved
 		if( ch < 0xAC00 || ch > 0xD79F ) return null;
 		
 		ch -= 0xAC00;
@@ -116,22 +112,20 @@ public class Characters {
 	}
 	
 	/**
-	 * 한글문자의 종성을 가지고 있는지 여부를 확인한다.
+	 * check if character has Hangul Jonsung.
 	 * 
 	 * <pre>
-	 * 
-	 * CharacterUtil.hasHangulJongsung( 'H'  ) → false
-	 * CharacterUtil.hasHangulJongsung( '수' ) → false
-	 * CharacterUtil.hasHangulJongsung( '롱' ) → true
-	 * 
+	 * Characters.hasHangulJongsung( 'H'  ) -> false
+	 * Characters.hasHangulJongsung( '수' ) -> false
+	 * Characters.hasHangulJongsung( '롱' ) -> true
 	 * </pre>
 	 * 
-	 * @param ch 검사할 문자
-	 * @return 한글문자 종성 소유여부
+	 * @param ch character to check
+	 * @return true if character has Hangul Jonsung.
 	 */
 	public static boolean hasHangulJongsung( char ch ) {
 		
-		char[] result = disassembleKorean( ch );
+		char[] result = resolveKorean( ch );
 		
 		if( result == null ) return false;
 		
@@ -140,10 +134,10 @@ public class Characters {
 	}
 
 	/**
-	 * Font 크기가 Half-width 로 분류되는지 여부를 확인한다.
+	 * check if character is half-width
 	 * 
-	 * @param ch 검사할 문자
-	 * @return Half-width 분류여부
+	 * @param ch character to check
+	 * @return true if character is half-width
 	 * 
 	 * @see <a href="http://unicode.org/reports/tr11">http://unicode.org/reports/tr11</a>
 	 * @see <a href="http://unicode.org/charts/PDF/UFF00.pdf">http://unicode.org/charts/PDF/UFF00.pdf</a>
@@ -151,7 +145,7 @@ public class Characters {
 	 */
 	public static boolean isHalfWidth( char ch ) {
 
-		if( ch < 0x0020 ) return true;  // 특수문자
+		if( ch < 0x0020 ) return true;  // special character
 
 		if( 0x0020 <= ch && ch <= 0x007F ) return true;  // ASCII (Latin characters, symbols, punctuation,numbers)
 		
@@ -163,39 +157,18 @@ public class Characters {
 		// FFE8 ~ FFEE : Halfwidth symbol variants
 		if( 0xFFE8 <= ch && ch <= 0xFFEE ) return true;
 		
-//		if( 0x0020 <= ch && ch <= 0x007F ) return true;  // ASCII (Latin characters, symbols, punctuation,numbers)
-//		if( 0x1100 <= ch && ch <= 0x11FF ) return false; // Hangul Jamo (Korean)
-//		if( 0x3000 <= ch && ch <= 0x303F ) return false; // CJK punctuation
-//		if( 0x3040 <= ch && ch <= 0x309F ) return false; // Hiragana (Japanese)
-//		if( 0x30A0 <= ch && ch <= 0x30FF ) return false; // Katakana (Japanese)
-//		if( 0x3130 <= ch && ch <= 0x318F ) return false; // Hangul Compatibility (Korean for KS X1001 compatibility)
-//		if( 0xAC00 <= ch && ch <= 0xD7AC ) return false; // Hangul Syllables
-//		if( 0xF900 <= ch && ch <= 0xFaFF ) return false; // CJK Compatibility Ideographs Block
-//		if( 0xFF00 <= ch && ch <= 0xFFEF ) return false; // Latin characters and half-width Katakana and Hangul (Half-width and Full-width)
-		// FF01 ~ FF5E : Fullwidth ASCII variants
-		// FF5F ~ FF60 : Fullwidth brackets
-		// FF61 ~ FF64 : Halfwidth CJK punctuation
-		// FF65 ~ FF9F : Halfwidth Katakanana variants
-		// FFA0 ~ FFDC : Halfwidth Hangul variants
-		// FFE8 ~ FFEE : Halfwidth symbol variants
-//		if( 0x4E00 <= ch && ch <= 0x9FFF ) return false; // CJK unifed ideographs – Common and uncommon
-//		if( 0x3400 <= ch && ch <= 0x4DBF ) return false; // CJK unified ideographs Extension A – Rare
-//		if( 0x2000 <= ch && ch <= 0x2FFF ) return false; // CJK unified ideographs Extension B – Very rare
-
 		return false;
 		
 	}
 
 	/**
-	 * 유형(half-width or full-width)을 반영하여 문자의 길이를 구한다.
+	 * get font width to print
 	 * 
-	 * @param ch 검사할 문자
-	 * @return 문자 길이
+	 * @param ch character to check
+	 * @return font width to print
 	 */
-	public static int getLength( char ch ) {
-		
-		return isHalfWidth( ch ) ? 1 : fullwidthCharacterWidth;
-		
+	public static int getFontWidth( char ch ) {
+		return isHalfWidth( ch ) ? 1 : fullwidth;
 	}
 
 	/**

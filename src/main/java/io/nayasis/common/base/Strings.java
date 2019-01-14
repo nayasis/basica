@@ -28,7 +28,7 @@ public class Strings {
 	/**
 	 * 문자열의 길이를 구한다. <br>
 	 *
-	 * CJK 문자일 경우 1글자의 크기를 {@link Characters#setCjkCharacterWidth(int)} 로 세팅한 width 로 변환해 구한다.
+	 * CJK 문자일 경우 1글자의 크기를 {@link Characters#fullwidth(int)} 로 세팅한 width 로 변환해 구한다.
 	 *
 	 * @param value 검사할 문자열
 	 * @return 문자열의 길이
@@ -39,12 +39,12 @@ public class Strings {
 
 		String val = value.toString();
 
-		if( Characters.getFullwidthCharacterWidth() == 1 ) return val.length();
+		if( Characters.fullwidth() == 1 ) return val.length();
 
 		int result = 0;
 
 		for( int i = 0, iCnt = val.length(); i < iCnt; i++ ) {
-			result += Characters.getLength( val.charAt( i ) );
+			result += Characters.getFontWidth( val.charAt( i ) );
 		}
 
 		return result;
@@ -61,7 +61,7 @@ public class Strings {
 	 */
 	public static String lpadCJK( Object value, int length, char padChar ) {
 
-		int adjustLength = ( Characters.getFullwidthCharacterWidth() == 1 || value == null )	? length
+		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
 				: value.toString().length() + ( length - getCjkLength( value ) );
 
 		return lpad( value, adjustLength, padChar );
@@ -77,7 +77,7 @@ public class Strings {
      * @return String Padding 된 문자열
 	 */
 	public static String rpadCJK( Object value, int length, char padChar ) {
-		int adjustLength = ( Characters.getFullwidthCharacterWidth() == 1 || value == null )	? length
+		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
 				: value.toString().length() + ( length - getCjkLength( value ) );
 
 		return rpad( value, adjustLength, padChar );
