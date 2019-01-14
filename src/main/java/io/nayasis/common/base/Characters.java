@@ -1,10 +1,51 @@
 package io.nayasis.common.base;
 
+import java.lang.Character.UnicodeBlock;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * 문자 처리 유틸
+ * Character Utility
  * 
  */
 public class Characters {
+
+	private static Set<UnicodeBlock> CHINESE = new HashSet<UnicodeBlock>() {{
+		add( UnicodeBlock.CJK_COMPATIBILITY );
+		add( UnicodeBlock.CJK_COMPATIBILITY_FORMS );
+		add( UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS );
+		add( UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS_SUPPLEMENT );
+		add( UnicodeBlock.CJK_RADICALS_SUPPLEMENT );
+		add( UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION );
+		add( UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS );
+		add( UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A );
+		add( UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B );
+		add( UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_C );
+		add( UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_D );
+		add( UnicodeBlock.KANGXI_RADICALS );
+		add( UnicodeBlock.IDEOGRAPHIC_DESCRIPTION_CHARACTERS );
+	}};
+
+	private static Set<UnicodeBlock> KOREAN = new HashSet<UnicodeBlock>() {{
+		add( UnicodeBlock.HANGUL_COMPATIBILITY_JAMO );
+		add( UnicodeBlock.HANGUL_JAMO );
+		add( UnicodeBlock.HANGUL_JAMO_EXTENDED_A );
+		add( UnicodeBlock.HANGUL_JAMO_EXTENDED_B );
+		add( UnicodeBlock.HANGUL_SYLLABLES );
+	}};
+
+	private static Set<UnicodeBlock> JAPANESE = new HashSet<UnicodeBlock>() {{
+		add( UnicodeBlock.HIRAGANA );
+		add( UnicodeBlock.KATAKANA );
+		add( UnicodeBlock.KATAKANA_PHONETIC_EXTENSIONS );
+	}};
+
+	private static Set<UnicodeBlock> CJK = new HashSet<UnicodeBlock>() {{
+		addAll( CHINESE  );
+		addAll( KOREAN   );
+		addAll( JAPANESE );
+		add( UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS );
+	}};
 
 	/** 초성 */
 	private static char[] HANGUL_1ST = new char[] { 'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
@@ -156,111 +197,50 @@ public class Characters {
 		return isHalfWidth( ch ) ? 1 : fullwidthCharacterWidth;
 		
 	}
-	
-	/**
-	 * 문자가 중국어/일본어/한국어인지 여부를 확인한다.
-	 * 
-	 * 
-	 * @param ch 검사할 문자열
-	 * @return CJK 여부
-	 */
-	public static boolean isCJK( char ch ) {
-
-		if( 0x0020 <= ch && ch <= 0x007F ) return false; // ASCII (Latin characters, symbols, punctuation,numbers)
-
-		if( 0x1100 <= ch && ch <= 0x11FF ) return true;  // Hangul Jamo (Korean)
-		if( 0x3000 <= ch && ch <= 0x303F ) return true;  // CJK punctuation
-		if( 0x3040 <= ch && ch <= 0x309F ) return true;  // Hiragana (Japanese)
-		if( 0x30A0 <= ch && ch <= 0x30FF ) return true;  // Katakana (Japanese)
-		if( 0x3130 <= ch && ch <= 0x318F ) return true;  // Hangul Compatibility (Korean for KS X1001 compatibility)
-		if( 0xAC00 <= ch && ch <= 0xD7AC ) return true;  // Hangul Syllables
-		if( 0xF900 <= ch && ch <= 0xFaFF ) return true;  // CJK Compatibility Ideographs Block
-		if( 0x4E00 <= ch && ch <= 0x9FFF ) return true;  // CJK unifed ideographs – Common and uncommon
-		if( 0x3400 <= ch && ch <= 0x4DBF ) return true;  // CJK unified ideographs Extension A – Rare
-		if( 0x2000 <= ch && ch <= 0x2FFF ) return true;  // CJK unified ideographs Extension B – Very rare
-
-		// FF61 ~ FF64 : Halfwidth CJK punctuation
-		// FF65 ~ FF9F : Halfwidth Katakanana variants
-		// FFA0 ~ FFDC : Halfwidth Hangul variants
-		return 0xFF61 <= ch && ch <= 0xFFDC;
-
-	}
 
 	/**
-	 * 한글문자 여부를 구한다.
-	 * 
-	 * @param ch 검사할 문자
-	 * @return 한글 여부
+	 * check if character is korean
+	 *
+	 * @param ch character
+	 * @return true if character is korean
 	 */
 	public static boolean isKorean( char ch ) {
-
-		if( 0x1100 <= ch && ch <= 0x11FF ) return true;  // Hangul Jamo (Korean)
-		if( 0x3130 <= ch && ch <= 0x318F ) return true;  // Hangul Compatibility (Korean for KS X1001 compatibility)
-		if( 0xAC00 <= ch && ch <= 0xD7AC ) return true;  // Hangul Syllables
+		if( KOREAN.contains(UnicodeBlock.of(ch)) ) return true;
 		return 0xFFA0 <= ch && ch <= 0xFFDC;
 
 	}
 
 	/**
-	 * 일본문자 여부를 구한다.
-	 * 
-	 * @param ch 검사할 문자
-	 * @return 일본문자 여부
+	 * check if character is japanese
+	 *
+	 * @param ch character
+	 * @return true if character is japanese
 	 */
 	public static boolean isJapanese( char ch ) {
-		
-		if( 0x3040 <= ch && ch <= 0x309F ) return true;  // Hiragana (Japanese)
-		if( 0x30A0 <= ch && ch <= 0x30FF ) return true;  // Katakana (Japanese)
+		if( JAPANESE.contains(UnicodeBlock.of(ch)) ) return true;
 		return 0xFF65 <= ch && ch <= 0xFF9F;
 
 	}
 
 	/**
-	 * 중국문자 여부를 구한다.
+	 * check if character is chinese
 	 * 
-	 * @param ch 검사할 문자
-	 * @return 중국문자 여부
+	 * @param ch character
+	 * @return true if character is chinese
 	 */
 	public static boolean isChinese( char ch ) {
-
-		if( 0x3000 <= ch && ch <= 0x303F ) return true;  // CJK punctuation
-		if( 0xF900 <= ch && ch <= 0xFaFF ) return true;  // CJK Compatibility Ideographs Block
-		if( 0x4E00 <= ch && ch <= 0x9FFF ) return true;  // CJK unifed ideographs – Common and uncommon
-		if( 0x3400 <= ch && ch <= 0x4DBF ) return true;  // CJK unified ideographs Extension A – Rare
-		if( 0x2000 <= ch && ch <= 0x2FFF ) return true;  // CJK unified ideographs Extension B – Very rare
-
-		// FF61 ~ FF64 : Halfwidth CJK punctuation
-		// FF65 ~ FF9F : Halfwidth Katakanana variants
-		// FFA0 ~ FFDC : Halfwidth Hangul variants
-		if( 0xFF61 <= ch && ch <= 0xFFDC ) return true;
-		
-		if( 0x3040 <= ch && ch <= 0x309F ) return true;  // Hiragana (Japanese)
-		if( 0x30A0 <= ch && ch <= 0x30FF ) return true;  // Katakana (Japanese)
+		if( CHINESE.contains(UnicodeBlock.of(ch)) ) return true;
 		return 0xFF65 <= ch && ch <= 0xFF9F;
-
 	}
 
-//	public static boolean isCJK2( char ch ) {
-//
-//		UnicodeBlock unicodeBlock = Character.UnicodeBlock.of( ch );
-//
-//		return	unicodeBlock == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
-//           || unicodeBlock == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
-//	         || unicodeBlock == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
-//	         || unicodeBlock == Character.UnicodeBlock.CJK_COMPATIBILITY_FORMS
-//	         || unicodeBlock == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
-//	         || unicodeBlock == Character.UnicodeBlock.CJK_RADICALS_SUPPLEMENT
-//	         || unicodeBlock == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
-//	         || unicodeBlock == Character.UnicodeBlock.HIRAGANA
-//	         || unicodeBlock == Character.UnicodeBlock.KATAKANA
-//	         || unicodeBlock == Character.UnicodeBlock.HANGUL_COMPATIBILITY_JAMO
-//	         || unicodeBlock == Character.UnicodeBlock.HANGUL_JAMO
-//	         || unicodeBlock == Character.UnicodeBlock.HANGUL_JAMO_EXTENDED_A
-//	         || unicodeBlock == Character.UnicodeBlock.HANGUL_JAMO_EXTENDED_B
-//	         || unicodeBlock == Character.UnicodeBlock.HANGUL_SYLLABLES
-//	         || unicodeBlock == Character.UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS
-//	    ;
-//
-//	}
-	
+	/**
+	 * check if character is chinese or japanese or korean
+	 *
+	 * @param ch character
+	 * @return true if character is chinese or japanese or korean
+	 */
+	public static boolean isCJK( char ch ) {
+		return CJK.contains( UnicodeBlock.of(ch) );
+	}
+
 }
