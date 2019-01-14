@@ -64,7 +64,7 @@ public class Characters {
 	 * 
 	 * @param width console font width to print
 	 */
-	public static void fullwidth(int width ) {
+	public static void fullwidth( int width ) {
 		if( width >= 1 )
 			fullwidth = width;
 	}
@@ -90,7 +90,7 @@ public class Characters {
 	 * @param ch character to resolve
 	 * @return resolved character array (null if it can not be resolved.)
 	 */
-	public static char[] resolveKorean(char ch ) {
+	public static char[] resolveKorean( char ch ) {
 		
 		// if it can not be resolved
 		if( ch < 0xAC00 || ch > 0xD79F ) return null;
