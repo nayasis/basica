@@ -428,12 +428,11 @@ public class Strings {
     }
 
     /**
-	 *
 	 * convert text to camel case
 	 *
      * <pre>
      * String text = DataConverter.getCamel( "unicode_text" );
-     * System.out.println( text ); → "unicodeText""
+     * System.out.println( text ); -> "unicodeText""
      * </pre>
      * @param text   text to convert
      * @return camel cased text
@@ -643,11 +642,11 @@ public class Strings {
 	 * Split string around matches of the given <a href="../util/regex/Pattern.html#sum">regular expression</a>.
 	 *
 	 * @param value				string value
-	 * @param regexDelimeter	the delimiting regular expression
-	 * @param returnDelimeter	include delimeter in result
+	 * @param regexpDelimeter	the delimiting regular expression
+	 * @param includeDelimeter	include delimeter in result
 	 * @return	string array comupted by splitting around matches of the given regular expression
 	 */
-	public static List<String> split( Object value, String regexDelimeter, boolean returnDelimeter ) {
+	public static List<String> split( Object value, String regexpDelimeter, boolean includeDelimeter ) {
 
 		List<String> result = new ArrayList<>();
 
@@ -655,12 +654,12 @@ public class Strings {
 
 		String val = trim( value );
 
-		if( isEmpty(regexDelimeter) ) {
+		if( isEmpty(regexpDelimeter) ) {
 			result.add( val );
 			return result;
 		}
 
-		Pattern pattern = Pattern.compile( regexDelimeter );
+		Pattern pattern = Pattern.compile( regexpDelimeter );
 		Matcher matcher = pattern.matcher( val );
 
 		int caret = 0;
@@ -671,7 +670,7 @@ public class Strings {
 				result.add( val.substring( caret, matcher.start() ).trim() );
 			}
 
-			if( returnDelimeter ) {
+			if( includeDelimeter ) {
 				result.add( matcher.group() );
 			}
 
@@ -728,17 +727,6 @@ public class Strings {
 
     	return result;
 
-    }
-
-    /**
-     * 전화번호에 지역번호, 국번, 번호를 구분해 -를 붙여서 return 해주는 메소드
-     *
-     * @param phoneNumber phone number
-	 * @return phone number delimeted with '-'
-     */
-	public static String getPhoneNumber( Object phoneNumber ) {
-    	if( isEmpty(phoneNumber) ) return "";
-    	return nvl(phoneNumber).replaceAll( "\\D*(02|\\d{3})\\D*(\\d{3,4})\\D*(\\d{4})", "$1-$2-$3" );
     }
 
     /**
