@@ -239,4 +239,14 @@ public class StringsTest {
 
     }
 
+    @Test
+    public void merong() {
+
+        System.out.println( Math.round( 0 ) );
+        System.out.println( Math.round( 0.5 ) );
+        System.out.println( Math.round( 1 ) );
+        System.out.println( Math.round( 1.5 ) );
+
+    }
+
 }
