@@ -2,19 +2,19 @@ package io.nayasis.common.exception.unchecked;
 
 
 /**
- * Runtime Exception for ClassNotFound
+ * Runtime {@link #UncheckedClassNotFoundException}
  *
  * @author nayasis@gmail.com
  *
  */
-public class ClassNotExistException extends BaseRuntimeException {
+public class UncheckedClassNotFoundException extends BaseRuntimeException {
 
     private static final long serialVersionUID = 2358838095582158749L;
 
     /**
      * Constructor
      */
-    public ClassNotExistException() {
+    public UncheckedClassNotFoundException() {
         super();
     }
 
@@ -23,7 +23,7 @@ public class ClassNotExistException extends BaseRuntimeException {
      *
      * @param rootCause root cause
      */
-    public ClassNotExistException( Throwable rootCause ) {
+    public UncheckedClassNotFoundException( Throwable rootCause ) {
         super( rootCause );
     }
 
@@ -33,7 +33,7 @@ public class ClassNotExistException extends BaseRuntimeException {
      * @param format        error message format
      * @param messageParam  parameters binding with '{}' phrase
      */
-    public ClassNotExistException( String format, Object... messageParam ) {
+    public UncheckedClassNotFoundException( String format, Object... messageParam ) {
         super( format, messageParam );
     }
 
@@ -44,7 +44,7 @@ public class ClassNotExistException extends BaseRuntimeException {
      * @param format        error message format
      * @param messageParam  parameters binding with '{}' phrase
      */
-    public ClassNotExistException( Throwable rootCause, String format, Object... messageParam ) {
+    public UncheckedClassNotFoundException( Throwable rootCause, String format, Object... messageParam ) {
     	super( rootCause, format, messageParam );
     }
 

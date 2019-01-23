@@ -1,6 +1,6 @@
 package io.nayasis.common.base;
 
-import io.nayasis.common.exception.unchecked.ClassNotExistException;
+import io.nayasis.common.exception.unchecked.UncheckedClassNotFoundException;
 import io.nayasis.common.exception.unchecked.EncodingException;
 
 import javax.xml.bind.DatatypeConverter;
@@ -26,86 +26,111 @@ import java.util.zip.GZIPOutputStream;
 public class Strings {
 
 	/**
-	 * 문자열의 길이를 구한다. <br>
+	 * get display length applying character's font width. <br>
 	 *
-	 * CJK 문자일 경우 1글자의 크기를 {@link Characters#fullwidth(int)} 로 세팅한 width 로 변환해 구한다.
+	 * if character is CJK, font width can be 0.5 or 2. <br>
+	 * this method calculate total display length of string value.
 	 *
-	 * @param value 검사할 문자열
-	 * @return 문자열의 길이
+	 * Full-Width of CJK characters can be set by {@link Characters#fullwidth(double)}.
+	 *
+	 * @param value value
+	 * @return total display length
 	 */
-	public static int getCjkLength( Object value ) {
+	public static int getDisplayLength( Object value ) {
 
 		if( value == null ) return 0;
 
 		String val = value.toString();
+		if( ! Characters.isFontWidthModified() ) return val.length();
 
-		if( Characters.fullwidth() == 1 ) return val.length();
-
-		int result = 0;
-
+		double result = 0;
 		for( int i = 0, iCnt = val.length(); i < iCnt; i++ ) {
 			result += Characters.getFontWidth( val.charAt( i ) );
 		}
 
-		return result;
+		return (int) Math.round( result );
 
 	}
 
 	/**
-	 * CJK 문자크기 특성을 반영하여 lpad 처리된 문자열을 구한다.
+	 * get lpad value applying character's display font width
 	 *
-     * @param value    	조작할 문자열
-     * @param length	결과 문자열 길이
-     * @param padChar	PADDING 문자
-     * @return String Padding 된 문자열
+     * @param value    	source value
+     * @param length	padding length
+     * @param padChar	padding character
+     * @return padding string value
 	 */
-	public static String lpadCJK( Object value, int length, char padChar ) {
-
+	public static String displayLpad( Object value, int length, char padChar ) {
 		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
-				: value.toString().length() + ( length - getCjkLength( value ) );
-
+				: value.toString().length() + ( length - getDisplayLength( value ) );
 		return lpad( value, adjustLength, padChar );
-
 	}
 
 	/**
-	 * CJK 문자크기 특성을 반영하여 rpad 처리된 문자열을 구한다.
+	 * get rpad value applying character's display font width
 	 *
-     * @param value    	조작할 문자열
-     * @param length	결과 문자열 길이
-     * @param padChar	PADDING 문자
-     * @return String Padding 된 문자열
+	 * @param value    	source value
+	 * @param length	padding length
+	 * @param padChar	padding character
+	 * @return padding string value
 	 */
-	public static String rpadCJK( Object value, int length, char padChar ) {
+	public static String displayRpad( Object value, int length, char padChar ) {
 		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
-				: value.toString().length() + ( length - getCjkLength( value ) );
+				: value.toString().length() + ( length - getDisplayLength( value ) );
 
 		return rpad( value, adjustLength, padChar );
 	}
 
 	/**
-	 * 문자열이 비어있는지 여부를 확인한다.
+	 * check if string of value is empty.
 	 *
-	 * <pre>
-	 * 1. 문자열이 null 이면 true
-	 * 2. 문자열이 "" 이면 true
-	 * </pre>
-	 *
-	 * @param value 검사할 문자열
-	 * @return 비어있는지 여부
+	 * @param value value to check
+	 * @return true if string of value is empty.
 	 */
 	public static boolean isEmpty( Object value ) {
 		return value == null || value.toString().length() == 0;
 	}
 
+	/**
+	 * check if string of value is not empty.
+	 *
+	 * @param value value to check
+	 * @return true if string of value is not empty.
+	 */
+	public static boolean isNotEmpty( Object value ) {
+		return ! isEmpty( value );
+	}
+
+
+	/**
+	 * check if string of value is blank.
+	 *
+	 * @param value value to check
+	 * @return true if string of value is blank.
+	 */
 	public static boolean isBlank( Object value ) {
 		if( value == null ) return true;
 		String val = value.toString();
 		return val.length() == 0 || val.trim().length() == 0;
 	}
 
-	public static String trim( Object string ) {
-		return nvl( string ).trim();
+	/**
+	 * check if string of value is not blank.
+	 *
+	 * @param value value to check
+	 * @return true if string of value is not blank.
+	 */
+	public static boolean isNotBlank( Object value ) {
+		return ! isBlank( value );
+	}
+
+	/**
+	 * trim string of value.
+	 * @param value value
+	 * @return	trimmed string
+	 */
+	public static String trim( Object value ) {
+		return nvl( value ).trim();
 	}
 
 	/**
@@ -147,25 +172,6 @@ public class Strings {
 
 		return one.equals( other );
 
-	}
-
-	/**
-	 * 문자열이 비어있지 않은지 여부를 확인한다.
-	 *
-	 * <pre>
-	 * 1. 문자열이 null 이면 false
-	 * 2. 문자열이 "" 이면 false
-	 * </pre>
-	 *
-	 * @param value 검사할 문자열
-	 * @return 비어있지 않은지 여부
-	 */
-	public static boolean isNotEmpty( Object value ) {
-		return ! isEmpty( value );
-	}
-
-	public static boolean isNotBlank( Object value ) {
-		return ! isBlank( value );
 	}
 
 	/**
@@ -437,7 +443,7 @@ public class Strings {
      * @param text   text to convert
      * @return camel cased text
      */
-    public static String toCamel( String text ) {
+    public static String camel( String text ) {
 
     	if( isEmpty(text) ) return "";
 
@@ -462,13 +468,13 @@ public class Strings {
      * convert camel cased text to underscored text
 	 *
      * <pre>
-     * String text = Strings.toUncamel( "unicodeText" );
+     * String text = Strings.uncamel( "unicodeText" );
      * System.out.println( text ); → "unicode_text"
      * </pre>
      * @param text     text to convert
      * @return underscored text
      */
-    public static String toUncamel( String text ) {
+    public static String uncamel( String text ) {
 
         Pattern pattern = Pattern.compile( "([A-Z])" );
         Matcher matcher = pattern.matcher( text );
@@ -778,15 +784,15 @@ public class Strings {
 	 * Compress multiple space or enter to single space
 	 *
 	 * <pre>
-	 * {@link Strings#compressSpaceOrEnter}( "A     B" );   → "A B"
-	 * {@link Strings#compressSpaceOrEnter}( "A B" );       → "A B"
-	 * {@link Strings#compressSpaceOrEnter}( "A \n\n B" );  → "A B"
+	 * {@link Strings#compressBlank}( "A     B" );   → "A B"
+	 * {@link Strings#compressBlank}( "A B" );       → "A B"
+	 * {@link Strings#compressBlank}( "A \n\n B" );  → "A B"
 	 * </pre>
 	 *
 	 * @param value text value
 	 * @return text with space or enter compressed
 	 */
-	public static String compressSpaceOrEnter( Object value ) {
+	public static String compressBlank( Object value ) {
 		if( isEmpty(value) ) return "";
 		return value.toString().replaceAll( "[ \n\r]+", " " ).trim();
 	}
@@ -839,9 +845,9 @@ public class Strings {
      * @param value text to decode as object
      * @return decoded object
      * @throws UncheckedIOException if I/O exception occurs.
-     * @throws ClassNotExistException if class is not found in class loader.
+     * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
-    public static Object parse( Object value ) {
+    public static Object parse( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
 
     	byte o[] = DatatypeConverter.parseBase64Binary( nvl(value) );
 
@@ -856,7 +862,7 @@ public class Strings {
     	} catch (IOException e) {
     		throw new UncheckedIOException( e );
 		} catch ( ClassNotFoundException e) {
-			throw new ClassNotExistException( e );
+			throw new UncheckedClassNotFoundException( e );
 		}
 
         return  vo;
@@ -897,37 +903,15 @@ public class Strings {
 	 * @param string word
 	 * @return number characters
 	 */
-	public static String extractDigit( String string ) {
+	public static String toDigit( String string ) {
 		if( isEmpty( string ) ) return "";
 		return string.replaceAll( "[^0-9]", "" );
 	}
 
 	/**
-	 * extracter upper characters from word
+	 * zip text
 	 *
-	 * @param string word
-	 * @return upper characters
-	 */
-	public static String extractUpperCharacters( String string ) {
-		if( isEmpty( string ) ) return "";
-		return string.replaceAll( "[^A-Z]", "" );
-	}
-
-	/**
-	 * extracter lower characters from word
-	 *
-	 * @param string 작업할 대상 문자열
-	 * @return 소문자만 추출된 문자열
-	 */
-	public static String extractLowerCharacters( String string ) {
-		if( isEmpty( string ) ) return "";
-		return string.replaceAll( "[^a-z]", "" );
-	}
-
-	/**
-	 * compress text
-	 *
-	 * @param value text value
+	 * @param value text to zip
 	 * @return compressed text
 	 */
 	public static String zip( String value ) {
@@ -945,9 +929,9 @@ public class Strings {
 	}
 
 	/**
-	 *  decompress text
+	 *  unzip text
 	 *
-	 * @param value text value
+	 * @param value text to unzip
 	 * @return decompressed text
 	 */
 	public static String unzip( String value ) {

@@ -56,28 +56,52 @@ public class Characters {
 	/** Hangul Jongsung */
 	private static char[] HANGUL_3RD = new char[] { '\0','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };	
 
-	/** console font width of Full-width character */
-	private static int fullwidth = 2;
-	
+	/** font width of Full-width character */
+	private static double fullwidth = 1;
+
+	/** font width of Half-width character */
+	private static double halfwidth = 0.5;
+
 	/**
-	 * set console font width of Full-width character
+	 * set font width of Full-width character
 	 * 
 	 * @param width console font width to print
 	 */
-	public static void fullwidth( int width ) {
-		if( width >= 1 )
-			fullwidth = width;
+	public static void fullwidth( double width ) {
+		fullwidth = width;
 	}
 
 	/**
-	 * get console font width of Full-width
+	 * get font width of Full-width
 	 * 
 	 * @return console font width to print
 	 */
-	public static int fullwidth() {
+	public static double fullwidth() {
 		return fullwidth;
 	}
-	
+
+	/**
+	 * set font width of Half-width character
+	 *
+	 * @param width console font width to print
+	 */
+	public static void halfwidth( double width ) {
+		halfwidth = width;
+	}
+
+	/**
+	 * get font width of Half-width
+	 *
+	 * @return console font width to print
+	 */
+	public static double halfwidth() {
+		return halfwidth;
+	}
+
+	public static boolean isFontWidthModified() {
+		return fullwidth != 1.0 || halfwidth != 1.0;
+	}
+
 	/**
 	 * resolve Hangul character to Chosung, Joongsung, Jonsung
 	 * 
@@ -90,7 +114,7 @@ public class Characters {
 	 * @param ch character to resolve
 	 * @return resolved character array (null if it can not be resolved.)
 	 */
-	public static char[] resolveKorean( char ch ) {
+	public static char[] resolveKorean(char ch ) {
 		
 		// if it can not be resolved
 		if( ch < 0xAC00 || ch > 0xD79F ) return null;
@@ -167,8 +191,10 @@ public class Characters {
 	 * @param ch character to check
 	 * @return font width to print
 	 */
-	public static int getFontWidth( char ch ) {
-		return isHalfWidth( ch ) ? 1 : fullwidth;
+	public static double getFontWidth( char ch ) {
+		if( isHalfWidth( ch ) ) return halfwidth;
+		if( isCJK( ch ) ) return fullwidth;
+		return 1;
 	}
 
 	/**

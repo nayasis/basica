@@ -205,8 +205,8 @@ public class StringsTest {
     @Test
     public void camel() {
 
-        assertEquals( "lndPlus19Yn", Strings.toCamel( "lnd_plus19_yn" ) );
-        assertEquals( "lnd_plus19_yn", Strings.toUncamel( "lndPlus19Yn" ) );
+        assertEquals( "lndPlus19Yn", Strings.camel( "lnd_plus19_yn" ) );
+        assertEquals( "lnd_plus19_yn", Strings.uncamel( "lndPlus19Yn" ) );
 
     }
 
@@ -236,6 +236,16 @@ public class StringsTest {
         assertEquals( "*010_3115_502", Strings.mask( "\\****_****_***", word ) );
         assertEquals( "010_3115_502*", Strings.mask( "***_****_***\\*", word ) );
         assertEquals( "010_3115_502", Strings.mask( "***_****_***\\", word ) );
+
+    }
+
+    @Test
+    public void merong() {
+
+        System.out.println( Math.round( 0 ) );
+        System.out.println( Math.round( 0.5 ) );
+        System.out.println( Math.round( 1 ) );
+        System.out.println( Math.round( 1.5 ) );
 
     }
 
