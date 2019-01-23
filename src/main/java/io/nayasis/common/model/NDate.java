@@ -174,7 +174,7 @@ public class NDate implements Serializable {
         boolean isNullFormat = Validator.isEmpty( format );
 
         String pattern = getDefaultFormat( format, isNullFormat );
-        String value   = isNullFormat ? Strings.extractDigit( date ) : date;
+        String value   = isNullFormat ? Strings.toDigit( date ) : date;
 
         if( isNullFormat ) {
             int maxLength = Math.min( pattern.length(), value.length() );

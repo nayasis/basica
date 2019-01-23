@@ -1,14 +1,19 @@
 package io.nayasis.common.base;
 
 
+import io.nayasis.common.cache.implement.LruCache;
 import io.nayasis.common.exception.unchecked.UncheckedClassCastException;
+import io.nayasis.common.exception.unchecked.UncheckedIoException;
+import io.nayasis.common.file.Files;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
@@ -28,6 +33,10 @@ import java.util.jar.JarFile;
  * @author nayasis@gmail.com
  */
 public class Classes {
+
+	private static Logger log = LoggerFactory.getLogger( Classes.class );
+
+	private static LruCache<Class<?>,Set<Class<?>>> CACHE_CONTAINED_PARENT = new LruCache<>( 256 );
 
 	private static Objenesis factory = new ObjenesisStd();
 
@@ -99,6 +108,7 @@ public class Classes {
 	 * @throws ClassNotFoundException if class is not founded in class loader.
 	 */
 	public static Class<?> getClass( Type type ) throws ClassNotFoundException {
+
 		if( type == null ) return Object.class;
 
 		String typeInfo = type.toString();
@@ -110,6 +120,7 @@ public class Classes {
 		if( startIndex >= 0 ) typeClassName = typeClassName.substring( 0, startIndex );
 
 		return getClass( typeClassName );
+
 	}
 
 	/**
@@ -148,14 +159,32 @@ public class Classes {
 		return ( object == null ) ? null : object.getClass();
 	}
 
-	public static Class<?> getTopSuperClass( Class<?> klass ) {
-	    Class<?> superclass = klass.getSuperclass();
-	    if( superclass == null || superclass == Object.class ) return klass;
-	    return getTopSuperClass( superclass );
+	public static Set<Class<?>> findParents( Class<?> klass ) {
+
+		if( CACHE_CONTAINED_PARENT.contains( klass ) )
+			return CACHE_CONTAINED_PARENT.get( klass );
+
+		Set<Class<?>> parents = new LinkedHashSet<>();
+		findParents( klass, parents );
+		CACHE_CONTAINED_PARENT.put( klass, parents );
+
+		return parents;
+
 	}
 
-	public static Class<?> getTopSuperClass( Object object ) {
-	    return ( object == null ) ? null : getTopSuperClass( object.getClass() );
+	private static void findParents( Class<?> klass, Set<Class<?>> set ) {
+		Class<?> superclass = klass.getSuperclass();
+		if( superclass != null && superclass != Object.class && ! set.contains(superclass) ) {
+			set.add( superclass );
+			findParents( superclass, set );
+		}
+		Class<?>[] interfaces = klass.getInterfaces();
+		if( interfaces.length != 0 ) {
+			for( Class<?> i : interfaces ) {
+				set.add( i );
+				findParents( i, set );
+			}
+		}
 	}
 
 	public static <T> T createInstance( Class<T> klass ) throws UncheckedClassCastException {
@@ -177,36 +206,29 @@ public class Classes {
 	/**
 	 * Check if a class was extended or implemented by found class
 	 *
-	 * @param inspectClass  class to inspect
-	 * @param foundClass	class to be extended in inspect class
+	 * @param klass  		class to inspect
+	 * @param extendKlass	class to be extended in inspect class
 	 * @return true if inspect class is extended of implemented by found class
 	 */
-	public static boolean isExtendedBy( Class<?> inspectClass, Class<?> foundClass ) {
-
-		if( inspectClass == null || foundClass == null ) return false;
-		if( inspectClass == foundClass ) return true;
-		for( Class<?> klass : inspectClass.getInterfaces() ) {
-			if( klass == foundClass ) return true;
+	public static boolean isExtendedBy( Class<?> klass, Class<?>... extendKlass ) {
+		if( klass == null || extendKlass.length == 0 ) return false;
+		Set<Class<?>> parents = findParents( klass );
+		for( Class<?> target : extendKlass ) {
+			if( klass == target || Modifier.isFinal(target.getModifiers()) ) continue;
+			if( parents.contains( target ) ) return true;
 		}
-
-		Class<?> superclass = inspectClass.getSuperclass();
-		if( superclass != Object.class ) {
-			return isExtendedBy( superclass, foundClass );
-		}
-
 		return false;
-
 	}
 
 	/**
 	 * Check if an instnace was extended or implemented by found class
 	 *
-	 * @param inspectInstance  instance to inspect
-	 * @param foundClass	   class to be extended in inspect instance
+	 * @param instance  instance to inspect
+	 * @param extendKlass	   class to be extended in inspect instance
 	 * @return true if inspect instance is extended of implemented by found class
 	 */
-	public static boolean isExtendedBy( Object inspectInstance, Class<?> foundClass ) {
-		return inspectInstance != null && isExtendedBy( inspectInstance.getClass(), foundClass );
+	public static boolean isExtendedBy( Object instance, Class<?>... extendKlass ) {
+		return instance != null && isExtendedBy( instance.getClass(), extendKlass );
 	}
 
 	/**
@@ -280,18 +302,18 @@ public class Classes {
 			Set<PathMatcher> matchers = Files.toPathMacher( toJarPattern( pattern ) );
 			boolean addAll = ( matchers.size() == 0 );
 
-			if( NLogger.isTraceEnabled() ) {
-				NLogger.trace( ">> Jar pathMatchers" );
+			if( log.isTraceEnabled() ) {
+				log.trace( ">> Jar pathMatchers" );
 				for( String p : toJarPattern(pattern) ) {
-					NLogger.trace( p );
+					log.trace( p );
 				}
 			}
 
-			NLogger.trace( ">> entry in jar" );
+			log.trace( ">> entry in jar" );
 			for( JarEntry entry : Collections.list( jar.entries() ) ) {
-				if( NLogger.isTraceEnabled() ) {
+				if( log.isTraceEnabled() ) {
 					if( entry.getName().startsWith( "WEB-INF/classes" ) && entry.getName().endsWith( ".xml" )) {
-						NLogger.trace( entry.getName() );
+						log.trace( entry.getName() );
 					}
 				}
 				if( addAll ) {
@@ -309,26 +331,24 @@ public class Classes {
 
 		}
 
-		NLogger.trace( "Const.path.base : {}", Const.path.getBase() );
-		NLogger.trace( "Const.path.root : {}", Const.path.getRoot() );
-		NLogger.trace( "pattern         : {}", pattern );
-		NLogger.trace( "toFilePattern   : {}", toFilePattern(pattern) );
+		log.trace( "pattern         : {}", pattern );
+		log.trace( "toFilePattern   : {}", toFilePattern(pattern) );
 
-		List<Path> paths = Files.search( Const.path.getBase(), true, false, -1, toFilePattern( pattern ) );
+		List<Path> paths = Files.search( Files.rootPath(), true, false, -1, toFilePattern( pattern ) );
 
-		NLogger.trace( "paths count : {}\npaths : {}", paths.size(), paths );
+		log.trace( "paths count : {}\npaths : {}", paths.size(), paths );
 
 		for( Path path : paths ) {
 			String pathVal = Files.nomalizeSeparator( path.toString() );
-			resourceNamesInFileSystem.add( pathVal.replace( Const.path.getBase(), "" ).replaceFirst( "^/", "" ) );
+			resourceNamesInFileSystem.add( pathVal.replace( Files.rootPath(), "" ).replaceFirst( "^/", "" ) );
 		}
 
-		NLogger.trace( ">> resource in jar : {}", resourceNamesInJar );
-		NLogger.trace( ">> resource in file system : {}", resourceNamesInFileSystem );
+		log.trace( ">> resource in jar : {}", resourceNamesInJar );
+		log.trace( ">> resource in file system : {}", resourceNamesInFileSystem );
 
 		resourceNamesInJar.addAll( resourceNamesInFileSystem );
 
-		NLogger.trace( ">> all resource : {}", resourceNamesInJar );
+		log.trace( ">> all resource : {}", resourceNamesInJar );
 
 		return new ArrayList<>( resourceNamesInJar );
 
@@ -349,7 +369,7 @@ public class Classes {
 	private static String[] toFilePattern( String[] pattern ) {
 		String[] result = new String[ pattern.length ];
 		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
-			result[ i ] = ( Const.path.getBase() + "/" + pattern[ i ] )
+			result[ i ] = ( Files.rootPath() + "/" + pattern[ i ] )
 				.replaceAll( "//", "/" )
 				.replaceAll( "(/WEB-INF/classes)+", "/WEB-INF/classes" );
         }
@@ -373,7 +393,7 @@ public class Classes {
 				.replaceFirst( "file:", "" );
             return new JarFile( filePath );
         } catch( IOException | URISyntaxException e ) {
-            throw new UncheckedIOException( e );
+            throw new UncheckedIoException( e );
 		}
 	}
 

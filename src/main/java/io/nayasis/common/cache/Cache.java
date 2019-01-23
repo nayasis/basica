@@ -20,6 +20,8 @@ public interface Cache<K,V> {
 
 	void setFlushCycle( int seconds );
 
+	boolean contains( K key );
+
 	void put( K key, V value );
 
 	void putIfAbsent( K key, V value );

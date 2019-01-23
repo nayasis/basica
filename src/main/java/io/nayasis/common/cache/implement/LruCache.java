@@ -14,6 +14,14 @@ public class LruCache<K,V> implements Cache<K,V> {
 	private   int              flushCycle     = Integer.MAX_VALUE;
 	private   boolean          hasFlushCycle  = false;
 
+	public LruCache( int capacity ) {
+		setCapacity( capacity );
+	}
+
+	public LruCache() {
+		setCapacity( 128 );
+	}
+
 	@Override
 	public int size() {
 		return map.size();
@@ -62,12 +70,7 @@ public class LruCache<K,V> implements Cache<K,V> {
 
 	@Override
 	public V get( K key ) {
-		if( hasFlushCycle ) {
-			if( getWatcher(key).elapsedSeconds() >= flushCycle ) {
-				clear( key );
-				return null;
-			}
-		}
+		checkFlushTime( key );
 		return map.get( key );
 	}
 

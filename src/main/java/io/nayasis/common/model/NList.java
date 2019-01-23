@@ -10,26 +10,31 @@ package io.nayasis.common.model;
 //import org.nybatis.core.validation.Assertion;
 //import org.nybatis.core.validation.Validator;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.nayasis.common.base.Strings;
+import io.nayasis.common.base.Types;
 import io.nayasis.common.base.Validator;
+import io.nayasis.common.exception.unchecked.JsonMappingException;
+import io.nayasis.common.reflection.Reflector;
+import io.nayasis.common.reflection.serializer.simple.SimpleNListSerializer;
 
 import java.io.Serializable;
 import java.util.*;
-//import java.util.function.Consumer;
+import java.util.function.Consumer;
 
 /**
  * Multiple Data aggregated with NMap
  *
  * @author nayasis@gmail.com
  */
-//@JsonSerialize( using = SimpleNListSerializer.class )
+@JsonSerialize( using = SimpleNListSerializer.class )
 public class NList implements Serializable, Cloneable, Iterable<Map> {
 
-	private static final long serialVersionUID = -3169472792493027837L;
+    private static final long serialVersionUID = 7907985681932632424L;
 
-    protected Map<Object, Integer> header      = new LinkedHashMap<>();
-    protected Map<Object, String>  alias       = new LinkedHashMap<>();
-    protected List<Map>            dataBody    = new ArrayList<>();
+    protected Map<Object,Integer> header = new LinkedHashMap<>();
+    protected Map<Object,String>  alias  = new LinkedHashMap<>();
+    protected List<NMap>          body   = new ArrayList<>();
 
     /**
      * default constructor
@@ -53,7 +58,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      */
     public NList( NList nlist ) {
         if( nlist == null || nlist.size() == 0 ) return;
-    	dataBody.addAll( nlist.dataBody );
+    	body.addAll( nlist.body );
         header.putAll( nlist.header );
         alias.putAll( nlist.alias );
     }
@@ -188,8 +193,8 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
         Map<Object, Integer> currentHeader = new LinkedHashMap<>();
 
         // read last index from bottom
-        for( int i = dataBody.size() - 1; i >=0; i-- ) {
-            for( Object key : dataBody.get(i).keySet() ) {
+        for( int i = body.size() - 1; i >=0; i-- ) {
+            for( Object key : body.get(i).keySet() ) {
                 if( currentHeader.containsKey(key) ) continue;
                 currentHeader.put( key, i + 1 );
             }
@@ -232,10 +237,10 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
         if( totalSize == dataSize ) {
     		Map row = new LinkedHashMap();
     		row.put( key, value );
-    		dataBody.add( row );
+    		body.add( row );
 
         } else {
-    		dataBody.get( dataSize ).put( key, value );
+    		body.get( dataSize ).put( key, value );
         }
 
         header.put( key, ++dataSize );
@@ -308,7 +313,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
                 if( syncronizeHeaderData ) {
                     refreshKey();
                 }
-            } catch( JsonIOException e ) {
+            } catch( JsonMappingException e ) {
                 Map<String, Object> map = Reflector.toMapFrom( json );
                 _addRow( index, map, syncronizeHeaderData );
             }
@@ -322,13 +327,13 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
     private void _addRowFromNMap( Integer index, Map data, boolean syncronizeHeaderData ) {
 
         if( index == null ) {
-            dataBody.add( Validator.nvl(data, new LinkedHashMap()) );
+            body.add( Validator.nvl(data, new LinkedHashMap()) );
         } else {
-            dataBody.add( index, Validator.nvl(data, new LinkedHashMap()) );
+            body.add( index, Validator.nvl(data, new LinkedHashMap()) );
         }
 
         if( syncronizeHeaderData ) {
-            int size = dataBody.size();
+            int size = body.size();
             for( Object key : data.keySet() ) {
                 header.put( key, size );
             }
@@ -364,9 +369,9 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
         if( nlist == null ) return;
 
         if( index == null ) {
-            dataBody.addAll( nlist.dataBody );
+            body.addAll( nlist.body );
         } else {
-            dataBody.addAll( index, nlist.dataBody );
+            body.addAll( index, nlist.body );
         }
 
         if( ! syncronizeHeaderData ) return;
@@ -428,7 +433,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      * @return data size
      */
     public int size() {
-    	return dataBody.size();
+    	return body.size();
     }
 
     /**
@@ -444,7 +449,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
     	if( ! containsKey( key ) ) return result;
 
-    	for( Map row : dataBody ) {
+    	for( Map row : body ) {
     		result.add(row.get( key ) );
     	}
 
@@ -475,7 +480,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
         List<T> result = new ArrayList<T>();
 
-        for( Map row : dataBody ) {
+        for( Map row : body ) {
             try {
                 result.add( row.toBean( klass ) );
             } catch( Exception e ) {
@@ -498,7 +503,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      * @return Data List
      */
     public List<NMap> toList() {
-        return dataBody;
+        return body;
     }
 
     /**
@@ -512,7 +517,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
         for( Object key :  getRow(index).keySet() ) {
             subtractKeySize( key );
         }
-        dataBody.remove( index );
+        body.remove( index );
         return this;
     }
 
@@ -530,7 +535,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      */
     public NList removeKey( Object key ) {
         header.remove( key );
-        for( NMap row : dataBody ) {
+        for( NMap row : body ) {
         	row.remove( key );
         }
         return this;
@@ -545,7 +550,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      * @return self instance
      */
     public NList set( Object key, int rowIndex, Object value ) {
-        NMap data = dataBody.get( rowIndex );
+        NMap data = body.get( rowIndex );
         data.put( key, value );
         if( ! containsKey( key ) ) {
         	header.put( key, ++rowIndex );
@@ -581,7 +586,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
     private void setRowFromNMap( int rowIndex, NMap map, boolean syncronizeHeaderData ) {
 
-        dataBody.set( rowIndex, map );
+        body.set( rowIndex, map );
 
         if( syncronizeHeaderData ) {
             int size = rowIndex + 1;
@@ -600,7 +605,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      * @return map data
      */
     public NMap getRow( int rowIndex ) {
-        return dataBody.get( rowIndex );
+        return body.get( rowIndex );
     }
 
     /**
@@ -611,7 +616,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      * @return value
      */
     public Object get( Object key, int index ) {
-        NMap data = dataBody.get( index );
+        NMap data = body.get( index );
         return data == null ? null : data.get( key );
     }
 
@@ -640,7 +645,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
     }
 
     public boolean contains( NMap row ) {
-        return dataBody.contains( row );
+        return body.contains( row );
     }
 
     /**
@@ -688,7 +693,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
     	NList result = new NList();
 
-    	for( NMap row : dataBody ) {
+    	for( NMap row : body ) {
     		if( result.contains( row ) ) continue;
     		result.addRow( row );
     	}
@@ -705,7 +710,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
     public NList clear() {
     	header.clear();
     	alias.clear();
-        dataBody.clear();
+        body.clear();
         return this;
     }
 
@@ -715,7 +720,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      * @return self instance
      */
     public NList clearData() {
-        dataBody.clear();
+        body.clear();
         return this;
     }
 
@@ -804,7 +809,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      * @return self instance
      */
     public NList sort( Comparator<NMap> comparator ) {
-        Collections.sort( dataBody, comparator );
+        Collections.sort( body, comparator );
         return this;
     }
 

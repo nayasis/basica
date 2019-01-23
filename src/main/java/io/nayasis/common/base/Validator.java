@@ -109,7 +109,7 @@ public class Validator {
             return ( (Map) value ).isEmpty();
         } else if( value instanceof Collection ) {
             return ( (Collection) value ).isEmpty();
-        } else if( Types.isArrayOrList( value ) ) {
+        } else if( Types.isArray(value) ) {
             return Array.getLength( value ) == 0;
         } else if( value instanceof InputStream ) {
             try {
