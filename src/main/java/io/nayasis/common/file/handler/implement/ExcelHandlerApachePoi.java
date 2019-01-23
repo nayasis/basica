@@ -1,20 +1,17 @@
 package io.nayasis.common.file.handler.implement;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
+import io.nayasis.common.base.Strings;
+import io.nayasis.common.base.Types;
+import io.nayasis.common.exception.unchecked.UncheckedIOException;
+import io.nayasis.common.file.handler.ExcelHandler;
+import io.nayasis.common.model.NList;
+import io.nayasis.common.model.NMap;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.format.CellDateFormatter;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.nybatis.core.exception.unchecked.ExcelNoHeadException;
-import org.nybatis.core.exception.unchecked.UncheckedIOException;
-import org.nybatis.core.file.handler.ExcelHandler;
-import org.nybatis.core.model.NList;
-import org.nybatis.core.model.NMap;
-import org.nybatis.core.util.StringUtil;
-import org.nybatis.core.validation.Validator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,10 +19,13 @@ import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined.GREY_40_PERCENT;
+import static org.apache.poi.ss.usermodel.CellType.*;
+
 public class ExcelHandlerApachePoi extends ExcelHandler {
 
 	@Override
-	protected void writeNListTo( OutputStream outputStream, Map<String, NList> data, boolean isXlsx ) throws UncheckedIOException {
+	protected void writeNListTo(OutputStream outputStream, Map<String, NList> data, boolean isXlsx ) throws UncheckedIOException {
 
 		Workbook workbook = isXlsx ? new XSSFWorkbook() : new HSSFWorkbook();
 
@@ -35,7 +35,7 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 			}
 			workbook.write( outputStream );
 		} catch( IOException e ) {
-			throw new UncheckedIOException( e  );
+			throw new UncheckedIOException( e );
 		} finally {
 			try { workbook.close(); } catch( IOException e ) {}
 			try { if( outputStream != null ) outputStream.close(); } catch( IOException e ) {}
@@ -69,13 +69,13 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 				Object val = nrow.get( key );
 
 				if( val == null ) {
-					row.createCell( idxColumn++, HSSFCell.CELL_TYPE_BLANK );
-				} else if( Validator.isNumericClass( val ) ) {
-					row.createCell( idxColumn++, HSSFCell.CELL_TYPE_NUMERIC ).setCellValue( nrow.getDouble(key) );
-				} else if( Validator.isBooleanClass( val) ) {
-					row.createCell( idxColumn++, HSSFCell.CELL_TYPE_BOOLEAN ).setCellValue( (boolean) nrow.get( key ) );
+					row.createCell( idxColumn++, CellType.STRING );
+				} else if( Types.isNumeric( val ) ) {
+					row.createCell( idxColumn++, NUMERIC ).setCellValue( Types.toDouble(nrow.get(key)) );
+				} else if( Types.isBoolean( val) ) {
+					row.createCell( idxColumn++, BOOLEAN ).setCellValue( (boolean) nrow.get( key ) );
 				} else {
-					row.createCell( idxColumn++, HSSFCell.CELL_TYPE_STRING ).setCellValue( toExcelText(nrow.get(key)) );
+					row.createCell( idxColumn++, CellType.STRING ).setCellValue( toExcelText(nrow.get(key)) );
 				}
 
 			}
@@ -90,7 +90,7 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 		Font headerFont  = workbook.createFont();
 
 		headerFont.setBold( true );
-		headerStyle.setFillBackgroundColor( HSSFColor.GREY_40_PERCENT.index );
+		headerStyle.setFillBackgroundColor( GREY_40_PERCENT.getIndex() );
 		headerStyle.setFont( headerFont );
 		return headerStyle;
 
@@ -137,7 +137,7 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 			reader.read( workbook, result );
 		} catch( IOException e ) {
 			throw new UncheckedIOException( e, "error on reading excel data." );
-		} catch( InvalidFormatException | IllegalArgumentException e ) {
+		} catch( IllegalArgumentException e ) {
 			throw new UncheckedIOException( e, "invalid excel format." );
 		} finally {
 			if( workbook != null ) {
@@ -175,7 +175,7 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 				Cell cell = row.getCell( idxColumn );
 				if( cell == null ) continue;
 
-				String key = header.getString( idxColumn );
+				String key = Strings.nvl( header.get(idxColumn) );
 				data.put( key, getValue(cell, evaluator) );
 
 			}
@@ -191,21 +191,21 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 	private Object getValue( Cell cell, FormulaEvaluator evaluator ) {
 
 		switch( cell.getCellType() ) {
-			case Cell.CELL_TYPE_FORMULA :
-				if( StringUtil.isNotEmpty( cell ) ) {
+			case FORMULA :
+				if( Strings.isNotEmpty( cell ) ) {
 					switch( evaluator.evaluateFormulaCell(cell) ) {
-						case Cell.CELL_TYPE_NUMERIC :
+						case NUMERIC :
 							return getNumericCellValue( cell );
-						case Cell.CELL_TYPE_BOOLEAN :
+						case BOOLEAN :
 							return cell.getBooleanCellValue();
-						case Cell.CELL_TYPE_STRING  :
+						case STRING :
 							return cell.getStringCellValue();
 					}
 				}
 				return cell.getStringCellValue();
-			case Cell.CELL_TYPE_NUMERIC :
+			case NUMERIC :
 				return getNumericCellValue( cell );
-			case Cell.CELL_TYPE_BOOLEAN :
+			case BOOLEAN :
 				return cell.getBooleanCellValue();
 			default :
 				return cell.getStringCellValue();
@@ -223,7 +223,7 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
     	Row row = sheet.getRow( 0 );
 
 		if( row == null ) {
-			throw new ExcelNoHeadException( sheet.getSheetName() );
+			throw new IllegalArgumentException( String.format("No header in sheet(%s).", sheet.getSheetName()) );
 		}
 
     	for( int i = 0, iCnt = row.getPhysicalNumberOfCells(); i < iCnt; i++ ) {

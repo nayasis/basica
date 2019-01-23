@@ -1,5 +1,8 @@
 package io.nayasis.common.file.handler.implement;
 
+import io.nayasis.common.exception.unchecked.UncheckedIOException;
+import io.nayasis.common.file.handler.ExcelHandler;
+import io.nayasis.common.model.NList;
 import jxl.Cell;
 import jxl.Sheet;
 import jxl.Workbook;
@@ -8,9 +11,6 @@ import jxl.format.BorderLineStyle;
 import jxl.format.Colour;
 import jxl.read.biff.BiffException;
 import jxl.write.*;
-import org.nybatis.core.exception.unchecked.UncheckedIOException;
-import org.nybatis.core.file.handler.ExcelHandler;
-import org.nybatis.core.model.NList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,7 +107,7 @@ public class ExcelHandlerJxl extends ExcelHandler {
     }
 
     @Override
-    public Map<String, NList> readFrom( InputStream inputStream ) throws UncheckedIOException {
+    public Map<String, NList> readFrom(InputStream inputStream ) throws UncheckedIOException {
         return readFrom( inputStream, ( workbook, result ) -> {
             for( String sheetName : workbook.getSheetNames() ) {
                 result.put( sheetName, readFrom(workbook, sheetName) );
@@ -140,7 +140,7 @@ public class ExcelHandlerJxl extends ExcelHandler {
 
     }
 
-    private NList readFrom( Workbook workBook, String sheetName ) {
+    private NList readFrom(Workbook workBook, String sheetName) {
 
         NList result = new NList();
 
@@ -159,13 +159,11 @@ public class ExcelHandlerJxl extends ExcelHandler {
 
                 Cell cell = sheet.getCell( idxCol, idxRow );
 
-//                    NLogger.debug( "key : {}, val : {}, format : {}", columnName, cell.toString(), cell.getCellFormat() );
-
                 if( idxRow == 0 ) {
                     columnName = cell.getContents();
 
                 } else {
-                    result.add( columnName, cell.getContents() );
+                    result.add(columnName, cell.getContents() );
                 }
 
             }

@@ -1,6 +1,6 @@
 package io.nayasis.common.clone.checker;
 
-import org.nybatis.core.clone.annotation.Immutable;
+import io.nayasis.common.clone.annotation.Immutable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

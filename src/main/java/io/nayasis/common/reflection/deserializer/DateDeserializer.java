@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import org.nybatis.core.model.NDate;
+import io.nayasis.common.model.NDate;
 
 import java.io.IOException;
 import java.util.Date;

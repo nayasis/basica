@@ -104,7 +104,7 @@ public class StopWatch {
 		list.add( "%",    ""                                   );
 		list.add( "Task", "TOTAL"                              );
 
-		return list.toDebugString();
+		return list.toString( true, true );
 
 	}
 

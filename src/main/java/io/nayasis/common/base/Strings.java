@@ -134,28 +134,6 @@ public class Strings {
 	}
 
 	/**
-	 * check if they are equal (ignoring null difference)
-	 *
-	 * @param one		one to check difference
-	 * @param another	another one to check difference
-	 * @return true if equals
-	 */
-	public static boolean isEqual( Object one, Object another ) {
-		return nvl(one).equals( nvl(another) );
-	}
-
-	/**
-	 * check if they are equal (ignoring null difference)
-	 *
-	 * @param one		one to check difference
-	 * @param another	another one to check difference
-	 * @return true if not equals
-	 */
-	public static boolean isNotEqual( Object one, Object another ) {
-		return ! isEqual( one, another );
-	}
-
-	/**
 	 * Check a string is equals to other string.
 	 *
 	 * it is free from NullPointException.

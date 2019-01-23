@@ -7,12 +7,10 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapLikeType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import org.nybatis.core.exception.unchecked.JsonIOException;
-import org.nybatis.core.model.NMap;
-import org.nybatis.core.model.PrimitiveConverter;
-import org.nybatis.core.util.StringUtil;
-import org.nybatis.core.util.Types;
-import org.nybatis.core.validation.Validator;
+import io.nayasis.common.base.Types;
+import io.nayasis.common.base.Validator;
+import io.nayasis.common.exception.unchecked.JsonMappingException;
+import io.nayasis.common.model.NMap;
 
 import java.io.IOException;
 import java.util.*;
@@ -55,7 +53,7 @@ public class JsonConverter {
      * @param ignoreNull	whether or not to ignore null value
      * @return json text
      */
-    public String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull ) throws JsonIOException {
+    public String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull ) throws JsonMappingException {
         return toJson( fromBean, prettyPrint, sort, ignoreNull, null );
     }
 
@@ -69,7 +67,7 @@ public class JsonConverter {
      * @param view	        json view class
      * @return json text
      */
-    public String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull, Class view ) throws JsonIOException {
+    public String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull, Class view ) throws JsonMappingException {
 
         if( fromBean == null ) return null;
 
@@ -84,7 +82,7 @@ public class JsonConverter {
         try {
             return writer.writeValueAsString( fromBean );
         } catch( IOException e ) {
-            throw new JsonIOException( e );
+            throw new JsonMappingException( e );
         }
     }
 
@@ -108,7 +106,7 @@ public class JsonConverter {
      * @param prettyPrint	whether or not to make json text pretty
      * @return json text
      */
-    public String toJson( Object fromBean, boolean prettyPrint ) throws JsonIOException {
+    public String toJson( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
         return toJson( fromBean, prettyPrint, false, false, null );
     }
 
@@ -120,7 +118,7 @@ public class JsonConverter {
      * @param view	        json view class
      * @return json text
      */
-    public String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonIOException {
+    public String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonMappingException {
         return toJson( fromBean, prettyPrint, false, false, view );
     }
 
@@ -130,7 +128,7 @@ public class JsonConverter {
      * @param fromBean		instance to convert as json data
      * @return json text
      */
-    public String toJson( Object fromBean ) throws JsonIOException {
+    public String toJson( Object fromBean ) throws JsonMappingException {
         return toJson( fromBean, false );
     }
 
@@ -141,7 +139,7 @@ public class JsonConverter {
      * @param view	        json view class
      * @return json text
      */
-    public String toJson( Object fromBean, Class view ) throws JsonIOException {
+    public String toJson( Object fromBean, Class view ) throws JsonMappingException {
         return toJson( fromBean, false, view );
     }
 
@@ -152,7 +150,7 @@ public class JsonConverter {
      * @param prettyPrint	true if you want to see json text with indentation
      * @return json text
      */
-    public String toJsonWithoutNull( Object fromBean, boolean prettyPrint ) throws JsonIOException {
+    public String toJsonWithoutNull( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
         return toJson( fromBean, prettyPrint, false, true );
     }
 
@@ -162,7 +160,7 @@ public class JsonConverter {
      * @param fromBean	instance to convert as json data
      * @return json text
      */
-    public String toJsonWithoutNull( Object fromBean ) throws JsonIOException {
+    public String toJsonWithoutNull( Object fromBean ) throws JsonMappingException {
         return toJsonWithoutNull( fromBean, false );
     }
 
@@ -198,7 +196,7 @@ public class JsonConverter {
     private void flattenKeyRecursivly( String currentPath, Object json, Map result ) {
         if( json instanceof Map ) {
             Map<String, Object> map = (Map) json;
-            String prefix = StringUtil.isEmpty( currentPath ) ? "" : currentPath + ".";
+            String prefix = Validator.isEmpty( currentPath ) ? "" : currentPath + ".";
             for( String key : map.keySet() ) {
                 flattenKeyRecursivly( prefix + key, map.get( key ), result );
             }
@@ -265,7 +263,7 @@ public class JsonConverter {
 
         if( isKey ) {
             if( isArray ) {
-                int idx = new PrimitiveConverter( index ).toInt();
+                int idx = Validator.nvl( Types.toInt( index ), 0 );
                 setValueToListInJson( path, idx, value, result );
             } else {
                 result.put( path, value );
@@ -280,7 +278,7 @@ public class JsonConverter {
 
             if( isArray ) {
                 List list = (List) result.get( path );
-                int idx = new PrimitiveConverter( index ).toInt();
+                int idx = Validator.nvl( Types.toInt( index ), 0 );
                 if( list.size() <= idx || list.get(idx) == null ) {
                     setValueToListInJson( path, idx, new HashMap(), result );
                 }
@@ -313,7 +311,7 @@ public class JsonConverter {
 
     }
 
-    public JsonNode readTree( String json ) throws JsonIOException {
+    public JsonNode readTree( String json ) throws JsonMappingException {
 
 
         // TODO : read tree structure
@@ -330,16 +328,16 @@ public class JsonConverter {
         try {
             return objectMapper.readTree( json );
         } catch( IOException e ) {
-            throw new JsonIOException( e );
+            throw new JsonMappingException( e );
         }
     }
 
     private String getContent( String fromJsonString ) {
-        return StringUtil.isEmpty( fromJsonString ) ? "{}" : fromJsonString;
+        return Validator.isEmpty( fromJsonString ) ? "{}" : fromJsonString;
     }
 
     private String getCollectionLikeContent( String fromJsonString ) {
-        return StringUtil.isEmpty( fromJsonString ) ? "[]" : fromJsonString;
+        return Validator.isEmpty( fromJsonString ) ? "[]" : fromJsonString;
     }
 
     /**
@@ -364,15 +362,15 @@ public class JsonConverter {
      * @param <T>		return type
      * @return	bean filled by object's value
      */
-    public <T> T toBeanFrom( Object object, Class<T> toClass ) throws JsonIOException {
+    public <T> T toBeanFrom( Object object, Class<T> toClass ) throws JsonMappingException {
         if( Types.isString( object ) ) {
             String json = getContent( object.toString() );
             try {
                 return objectMapper.readValue( json, toClass );
             } catch( JsonParseException e ) {
-                throw new JsonIOException( "JsonParseException : {}\n\t- json string :\n{}\n\t- target class : {}", e.getMessage(), json, toClass );
+                throw new JsonMappingException( "JsonParseException : {}\n\t- json string :\n{}\n\t- target class : {}", e.getMessage(), json, toClass );
             } catch( IOException e ) {
-                throw new JsonIOException( e );
+                throw new JsonMappingException( e );
             }
         } else {
             return objectMapper.convertValue( object, toClass );
@@ -392,15 +390,15 @@ public class JsonConverter {
      * @param <T>		return type
      * @return	bean filled by object's value
      */
-    public <T> T toBeanFrom( Object object, TypeReference<T> typeReference ) throws JsonIOException {
+    public <T> T toBeanFrom( Object object, TypeReference<T> typeReference ) throws JsonMappingException {
         if( Types.isString(object) ) {
             String json = getContent( object.toString() );
             try {
                 return objectMapper.readValue( json, typeReference );
             } catch( JsonParseException e ) {
-                throw new JsonIOException( "JsonParseException : {}\n\t- json string :\n{}", e.getMessage(), json );
+                throw new JsonMappingException( "JsonParseException : {}\n\t- json string :\n{}", e.getMessage(), json );
             } catch( IOException e ) {
-                throw new JsonIOException( e );
+                throw new JsonMappingException( e );
             }
         } else {
             return objectMapper.convertValue( object, typeReference );
@@ -414,9 +412,9 @@ public class JsonConverter {
      * @param typeClass   	list's generic type
      * @param <T> generic type
      * @return list
-     * @throws JsonIOException  when json parsing error raised
+     * @throws JsonMappingException  when json parsing error raised
      */
-    public <T> List<T> toListFrom( Object json, Class<T> typeClass ) throws JsonIOException {
+    public <T> List<T> toListFrom( Object json, Class<T> typeClass ) throws JsonMappingException {
         return (List<T>) toCollectionFrom( json, List.class, typeClass );
     }
 
@@ -428,9 +426,9 @@ public class JsonConverter {
      * @param typeClass         data type
      * @param <T>               return class type
      * @return  collection
-     * @throws JsonIOException  when json parsing error raised
+     * @throws JsonMappingException  when json parsing error raised
      */
-    public <T> Collection<T> toCollectionFrom( Object object, Class<? extends Collection> collectionClass, Class<T> typeClass ) throws JsonIOException {
+    public <T> Collection<T> toCollectionFrom( Object object, Class<? extends Collection> collectionClass, Class<T> typeClass ) throws JsonMappingException {
 
         CollectionType type = getTypeFactory().constructCollectionType( collectionClass, typeClass );
 
@@ -439,9 +437,9 @@ public class JsonConverter {
             try {
                 return objectMapper.readValue( json, type );
             } catch( JsonParseException e ) {
-                throw new JsonIOException( "JsonParseException : {}\n\t-source :\n{}\n", e.getMessage(), json );
+                throw new JsonMappingException( "JsonParseException : {}\n\t-source :\n{}\n", e.getMessage(), json );
             } catch( IOException e ) {
-                throw new JsonIOException( e );
+                throw new JsonMappingException( e );
             }
         } else {
             return objectMapper.convertValue( object, type );
@@ -459,9 +457,9 @@ public class JsonConverter {
      * @param <K>           key type of return Map
      * @param <V>           value type of return Map
      * @return converted map
-     * @throws JsonIOException  when json parsing error raised
+     * @throws JsonMappingException  when json parsing error raised
      */
-    public <K,V> Map<K,V> toMapFrom( Object object, Class<? extends Map> mapClass, Class<K> keyType, Class<V> valueType ) throws JsonIOException {
+    public <K,V> Map<K,V> toMapFrom( Object object, Class<? extends Map> mapClass, Class<K> keyType, Class<V> valueType ) throws JsonMappingException {
 
         if( object == null ) return new HashMap<>();
 
@@ -472,9 +470,9 @@ public class JsonConverter {
             try {
                 return objectMapper.readValue( json, type );
             } catch( JsonParseException e ) {
-                throw new JsonIOException( e, "JsonParseException : {}\n\t-source :\n{}\n", e.getMessage(), json );
+                throw new JsonMappingException( e, "JsonParseException : {}\n\t-source :\n{}\n", e.getMessage(), json );
             } catch( IOException e ) {
-                throw new JsonIOException( e );
+                throw new JsonMappingException( e );
             }
         } else {
             return objectMapper.convertValue( object, type );
@@ -487,7 +485,7 @@ public class JsonConverter {
      * @param object	json text (type can be String, StringBuffer, StringBuilder), Map or bean to convert
      * @return	Map filled by object's value
      */
-    public Map<String, Object> toMapFrom( Object object ) throws JsonIOException {
+    public Map<String, Object> toMapFrom( Object object ) throws JsonMappingException {
         return toMapFrom( object, LinkedHashMap.class, String.class, Object.class );
     }
 
@@ -496,7 +494,7 @@ public class JsonConverter {
      * @param object	json text (type can be String, StringBuffer, StringBuilder), Map or bean to convert
      * @return	NMap filled by object's value
      */
-    public NMap toNMapFrom( Object object ) throws JsonIOException {
+    public NMap toNMapFrom(Object object ) throws JsonMappingException {
         return new NMap( toMapFrom( object ) );
     }
 

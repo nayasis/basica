@@ -1,7 +1,5 @@
 package io.nayasis.common.file.handler;
 
-import org.nybatis.core.file.FileUtil;
-
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -31,7 +29,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      */
     public FileFinder( boolean includeFile, boolean includeDir, String... pattern ) {
 
-        this.matchers     = FileUtil.toPathMacher( pattern );
+        this.matchers     = io.nayasis.common.file.Files.toPathMacher( pattern );
         this.checkPattern = ( matchers.size() != 0 );
         this.includeFile  = includeFile;
         this.includeDir   = includeDir;

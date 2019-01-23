@@ -1,10 +1,8 @@
 package io.nayasis.common.reflection.mapper;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.nybatis.core.reflection.deserializer.SimpleDateDeserializer;
-import org.nybatis.core.reflection.inspector.ExcelReadAnnotationInspector;
-import org.nybatis.core.reflection.inspector.ExcelWriteAnnotationInspector;
-import org.nybatis.core.reflection.serializer.simple.SimpleDateSerializer;
+import io.nayasis.common.reflection.deserializer.SimpleDateDeserializer;
+import io.nayasis.common.reflection.serializer.simple.SimpleDateSerializer;
 
 import java.util.Date;
 
@@ -14,7 +12,6 @@ public class JsonExcelMapper extends JsonMapper {
 	public JsonExcelMapper() {
 		super();
 		setCustomDeserializer();
-		setCustomAnnotationIntrospectors();
 	}
 
 	@Override
@@ -27,13 +24,6 @@ public class JsonExcelMapper extends JsonMapper {
 
 		registerModule( module );
 
-	}
-
-	private void setCustomAnnotationIntrospectors() {
-		setAnnotationIntrospectors(
-				new ExcelReadAnnotationInspector(),
-				new ExcelWriteAnnotationInspector()
-		);
 	}
 
 }

@@ -1,6 +1,6 @@
 package io.nayasis.common.reflection.core;
 
-import org.nybatis.core.util.ClassUtil;
+import io.nayasis.common.base.Classes;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class UnmodifiableChecker {
         Class<? extends Map> klass = map.getClass();
 
         if( ! cache.containsKey(klass) ) {
-            Map instance = ClassUtil.createInstance( klass );
+            Map instance = Classes.createInstance( klass );
             try {
                 instance.put( "1", "1" );
                 cache.putIfAbsent( klass, Boolean.FALSE );
@@ -43,7 +43,7 @@ public class UnmodifiableChecker {
         Class<? extends Collection> klass = collection.getClass();
 
         if( ! cache.containsKey(klass) ) {
-            Collection instance = ClassUtil.createInstance( klass );
+            Collection instance = Classes.createInstance( klass );
             try {
                 instance.add( "1" );
                 cache.putIfAbsent( klass, Boolean.FALSE );

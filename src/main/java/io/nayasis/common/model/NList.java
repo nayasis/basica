@@ -1,15 +1,5 @@
 package io.nayasis.common.model;
 
-//import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-//import org.nybatis.core.exception.unchecked.JsonIOException;
-//import org.nybatis.core.log.NLogger;
-//import org.nybatis.core.reflection.Reflector;
-//import org.nybatis.core.reflection.serializer.simple.SimpleNListSerializer;
-//import org.nybatis.core.util.Strings;
-//import org.nybatis.core.util.Types;
-//import org.nybatis.core.validation.Assertion;
-//import org.nybatis.core.validation.Validator;
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.nayasis.common.base.Strings;
 import io.nayasis.common.base.Types;
@@ -28,7 +18,7 @@ import java.util.function.Consumer;
  * @author nayasis@gmail.com
  */
 @JsonSerialize( using = SimpleNListSerializer.class )
-public class NList implements Serializable, Cloneable, Iterable<Map> {
+public class NList implements Serializable, Cloneable, Iterable<NMap> {
 
     private static final long serialVersionUID = 7907985681932632424L;
 
@@ -235,7 +225,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
     	int totalSize = size();
 
         if( totalSize == dataSize ) {
-    		Map row = new LinkedHashMap();
+    		NMap row = new NMap();
     		row.put( key, value );
     		body.add( row );
 
@@ -288,8 +278,8 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
         if( value == null ) return;
 
-        if( value instanceof Map ) {
-            _addRowFromNMap( index, (Map) value, syncronizeHeaderData );
+        if( value instanceof NMap ) {
+            _addRowFromNMap( index, (NMap) value, syncronizeHeaderData );
 
         } else if( value instanceof Map ) {
             _addRowFromNMap( index, new NMap( value ), syncronizeHeaderData );
@@ -324,12 +314,12 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
     }
 
-    private void _addRowFromNMap( Integer index, Map data, boolean syncronizeHeaderData ) {
+    private void _addRowFromNMap( Integer index, NMap data, boolean syncronizeHeaderData ) {
 
         if( index == null ) {
-            body.add( Validator.nvl(data, new LinkedHashMap()) );
+            body.add( Validator.nvl(data, new NMap()) );
         } else {
-            body.add( index, Validator.nvl(data, new LinkedHashMap()) );
+            body.add( index, Validator.nvl(data, new NMap()) );
         }
 
         if( syncronizeHeaderData ) {
@@ -480,13 +470,11 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
         List<T> result = new ArrayList<T>();
 
-        for( Map row : body ) {
+        for( NMap row : body ) {
             try {
                 result.add( row.toBean( klass ) );
             } catch( Exception e ) {
-                if( ignoreCastingException ) {
-                    NLogger.trace( e );
-                } else {
+                if( ! ignoreCastingException ) {
                     throw e;
                 }
             }
@@ -572,7 +560,7 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
 
     private NList _setRow( int rowIndex, Object value, boolean syncronizeHeaderData ) {
 
-        if( value == null || Types.isArrayOrList(value) ) return this;
+        if( value == null || Types.isCollection(value) || Types.isArray(value) ) return this;
 
         if( value instanceof NMap ) {
             setRowFromNMap( rowIndex, (NMap) value, syncronizeHeaderData );
@@ -620,26 +608,6 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
         return data == null ? null : data.get( key );
     }
 
-    public String getString( Object key, int index ) {
-    	return getRow( index ).getString(key);
-    }
-
-    public int getInt( Object key, int index ) {
-    	return getRow( index ).getInt( key );
-    }
-
-    public long getLong( Object key, int index ) {
-    	return getRow( index ).getLong( key );
-    }
-
-    public float getFloat( Object key, int index ) {
-    	return getRow( index ).getFloat( key );
-    }
-
-    public double getDouble( Object key, int index ) {
-    	return getRow( index ).getDouble( key );
-    }
-
     public boolean containsKey( Object key ) {
     	return header.containsKey( key );
     }
@@ -673,7 +641,8 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
      */
     public Object getKey( int keyIndex ) {
 
-        Assertion.isTrue( 0 <= keyIndex &&  keyIndex <= keySize(), new IndexOutOfBoundsException( String.format( "Index[%d] is out of bounds from 0 to %d", keyIndex, keySize() ) ) );
+        if( 0 > keyIndex || keyIndex >= keySize() )
+            throw new IndexOutOfBoundsException( String.format( "Index[%d] is out of bounds from 0 to %d", keyIndex, keySize() ) );
 
         Iterator<Object> iterator = header.keySet().iterator();
 
@@ -774,22 +743,13 @@ public class NList implements Serializable, Cloneable, Iterable<Map> {
     }
 
     /**
-     * print all row data
-     *
-     * @return grid data
-     */
-    public String toDebugString() {
-        return toDebugString( true, true );
-    }
-
-    /**
      * Print data
      *
      * @param printHeader if true, print header.
      * @param printAllRow if true, print all row.
      * @return debug string
      */
-    public String toDebugString( boolean printHeader, boolean printAllRow ) {
+    public String toString( boolean printHeader, boolean printAllRow ) {
         return new NListPrinter(this).toString(printHeader, printAllRow);
     }
 

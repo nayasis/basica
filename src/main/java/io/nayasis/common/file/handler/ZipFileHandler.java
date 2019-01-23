@@ -5,8 +5,7 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.nybatis.core.exception.unchecked.UncheckedIOException;
-import org.nybatis.core.file.FileUtil;
+import io.nayasis.common.file.Files;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -83,7 +82,7 @@ public class ZipFileHandler {
 
             basePath = fileOrDirectoryToCompress.getPath();
 
-            for( Path path : FileUtil.search( fileOrDirectoryToCompress.getPath(), true, false, -1, "**.*" ) ) {
+            for( Path path : Files.search( fileOrDirectoryToCompress.getPath(), true, false, -1, "**.*" ) ) {
                 fileList.add( path.toFile() );
             }
 
@@ -103,7 +102,7 @@ public class ZipFileHandler {
 
             for( File file : fileList ) {
 
-                String name = FileUtil.toRelativePath( basePath, file.getPath() );
+                String name = Files.toRelativePath( basePath, file.getPath() );
 
                 ArchiveEntry entry = zos.createArchiveEntry( file, name );
 

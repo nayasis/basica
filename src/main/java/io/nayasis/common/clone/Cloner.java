@@ -6,9 +6,11 @@ import io.nayasis.common.clone.checker.ImmutableChecker;
 import io.nayasis.common.clone.fastcloner.FastCloners;
 import io.nayasis.common.clone.fastcloner.interfaces.DeepCloner;
 import io.nayasis.common.exception.unchecked.CloningException;
+import io.nayasis.common.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.reflection.core.CoreReflector;
 import sun.plugin.dom.exception.InvalidAccessException;
 
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -26,8 +28,8 @@ public class Cloner {
 
     private ImmutableChecker immutableChecker = new   ImmutableChecker();
     private IgnorableChecker ignorableChecker = new   IgnorableChecker();
-    private FastCloners fastCloners      = new   FastCloners();
-    private CoreReflector reflector        = null;
+    private FastCloners      fastCloners      = new   FastCloners();
+    private CoreReflector    reflector        = null;
 
     public Cloner(){
         this.reflector = new CoreReflector();
@@ -39,13 +41,47 @@ public class Cloner {
 
     public <T> T deepClone( T object ) throws CloningException {
         if( object == null ) return null;
-        Map valueReference = new IdentityHashMap<>();
-        try {
-            return cloneObject( object, valueReference );
-        } catch( InvalidAccessException e ) {
-            throw new CloningException( "error on cloning object : {}", object, e );
+        if( object instanceof Serializable ) {
+            Object cloned = serializableClone(object);
+            return cloned == null ? null : (T) cloned;
+        } else {
+            Map valueReference = new IdentityHashMap<>();
+            try {
+                return cloneObject( object, valueReference );
+            } catch( InvalidAccessException e ) {
+                throw new CloningException( "error on cloning object : {}", object, e );
+            }
         }
     }
+
+    private Object serializableClone( Object obj ) {
+
+        ObjectOutputStream oos  = null;
+        ObjectInputStream  ois   = null;
+        Object             copy;
+
+        try {
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream( bos );
+            oos.writeObject( obj );
+            oos.flush();
+
+            ois = new ObjectInputStream( new ByteArrayInputStream( bos.toByteArray() ) );
+
+            copy = ois.readObject();
+
+        } catch ( IOException | ClassNotFoundException e ) {
+            throw new UncheckedIOException( e );
+        } finally {
+            try { ois.close();  } catch (Exception e) {}
+            try { oos.close(); } catch (Exception e) {}
+        }
+
+        return copy;
+
+    }
+
 
     public <T> T shallowClone( T object ) throws CloningException {
         if( object == null ) return null;

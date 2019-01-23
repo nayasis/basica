@@ -99,7 +99,7 @@ public class NMap extends LinkedHashMap {
             result.add( "val", val );
         }
 
-        return result.toDebugString( showHeader, true );
+        return result.toString( showHeader, true );
 
     }
 

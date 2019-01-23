@@ -1,6 +1,6 @@
 package io.nayasis.common.clone.checker;
 
-import org.nybatis.core.clone.annotation.Ignorable;
+import io.nayasis.common.clone.annotation.Ignorable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

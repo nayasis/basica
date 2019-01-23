@@ -1,10 +1,15 @@
 package io.nayasis.common.file.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import io.nayasis.common.base.Types;
 import io.nayasis.common.base.Validator;
+import io.nayasis.common.exception.unchecked.JsonMappingException;
 import io.nayasis.common.exception.unchecked.ParseException;
 import io.nayasis.common.file.Files;
 import io.nayasis.common.model.NList;
+import io.nayasis.common.model.NMap;
+import io.nayasis.common.reflection.mapper.JsonMapper;
 
 import java.io.*;
 import java.util.*;
@@ -17,6 +22,8 @@ import java.util.*;
 public abstract class ExcelHandler {
 
 	private static final String DEFAULT_SHEET_NAME = "Sheet1";
+
+	private static JsonMapper excelMapper  = new JsonMapper();
 
 	/**
 	 * Write excel data to output stream
@@ -336,7 +343,7 @@ public abstract class ExcelHandler {
 	}
 
 
-	protected NList toExcelNListFromBean( List<?> fromList ) throws JsonIOException {
+	protected NList toExcelNListFromBean( List<?> fromList ) throws JsonMappingException {
 
 		NList result = new NList();
 
@@ -347,7 +354,7 @@ public abstract class ExcelHandler {
 					result.addRow( writer.writeValueAsString(bean) );
 				}
 			} catch( JsonProcessingException e ) {
-				throw new JsonIOException( e );
+				throw new JsonMappingException( e );
 			}
 		}
 
@@ -355,7 +362,7 @@ public abstract class ExcelHandler {
 
 	}
 
-	protected <T> List<T> toBeanFromExcelNList( NList fromList, Class<T> toClass ) throws JsonIOException {
+	protected <T> List<T> toBeanFromExcelNList( NList fromList, Class<T> toClass ) throws JsonMappingException {
 
 		List<T> list = new ArrayList<>();
 

@@ -71,6 +71,11 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.9.8</version>
     </dependency>
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.24.0-GA</version>
+    </dependency>
 
     <!-- for ZIP -->
     <dependency>
@@ -82,7 +87,7 @@
     <!-- for Excel -->
     <dependency>
       <groupId>org.apache.poi</groupId>
-      <artifactId>poi</artifactId>
+      <artifactId>poi-ooxml</artifactId>
       <version>4.0.1</version>
       <optional>true</optional>
     </dependency>

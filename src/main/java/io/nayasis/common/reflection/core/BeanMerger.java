@@ -1,10 +1,10 @@
 package io.nayasis.common.reflection.core;
 
-import org.nybatis.core.clone.Cloner;
-import org.nybatis.core.exception.unchecked.InvalidArgumentException;
-import org.nybatis.core.reflection.Reflector;
-import org.nybatis.core.util.ClassUtil;
-import org.nybatis.core.validation.Validator;
+import com.sun.javaws.exceptions.InvalidArgumentException;
+import io.nayasis.common.base.Validator;
+import io.nayasis.common.base.Classes;
+import io.nayasis.common.clone.Cloner;
+import io.nayasis.common.reflection.Reflector;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -40,18 +40,18 @@ public class BeanMerger {
      * @param <T> source's generic type
      * @return merged bean
      */
-    public <T> T merge( Object source, T target, boolean skipEmpty ) {
+    public <T> T merge( Object source, T target, boolean skipEmpty ) throws IllegalArgumentException {
 
         if( Validator.isEmpty(source) ) return target;
         if( target == null ) {
-            throw new InvalidArgumentException( "can not merge from source({}) to null.", source.getClass() );
+            throw new IllegalArgumentException( String.format("can not merge from source(%s) to null.", source.getClass()) );
         }
 
         Class sourceClass = source.getClass();
         Class targetClass = target.getClass();
 
         if( isArrayOrCollection(source) ^ isArrayOrCollection(target) ) {
-            throw new InvalidArgumentException( "can not merge array to non-array (source:{}, target:{})", sourceClass, targetClass );
+            throw new IllegalArgumentException( String.format("can not merge array to non-array (source:%s, target:%s)", sourceClass, targetClass) );
         }
 
         if( isMap(source) && isMap(target) ) {
@@ -168,7 +168,7 @@ public class BeanMerger {
         Iterator sourceIterator = source.iterator();
         Iterator targetIterator = target.iterator();
 
-        Collection result = ClassUtil.createInstance( target.getClass() );
+        Collection result = Classes.createInstance( target.getClass() );
 
         while( sourceIterator.hasNext() || targetIterator.hasNext() ) {
 
@@ -261,7 +261,7 @@ public class BeanMerger {
     }
 
     private boolean isAssignable( Class sourceClass, Class targetClass ) {
-        return ClassUtil.isExtendedBy(targetClass, sourceClass) || ClassUtil.isExtendedBy(sourceClass, targetClass);
+        return Classes.isExtendedBy(targetClass, sourceClass) || Classes.isExtendedBy(sourceClass, targetClass);
     }
 
 

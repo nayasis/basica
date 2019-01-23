@@ -2,6 +2,7 @@ package io.nayasis.common.reflection;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.nayasis.common.base.Classes;
+import io.nayasis.common.clone.Cloner;
 import io.nayasis.common.exception.unchecked.JsonMappingException;
 import io.nayasis.common.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.common.model.NList;
@@ -11,7 +12,6 @@ import io.nayasis.common.reflection.core.JsonConverter;
 import io.nayasis.common.reflection.mapper.Invocator;
 import io.nayasis.common.reflection.mapper.JsonMapper;
 import io.nayasis.common.reflection.mapper.MethodInvocator;
-import org.nybatis.core.clone.Cloner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;

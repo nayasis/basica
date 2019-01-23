@@ -1,7 +1,7 @@
 package io.nayasis.common.reflection.core;
 
-import org.nybatis.core.exception.unchecked.InvalidAccessException;
-import org.nybatis.core.validation.Validator;
+import io.nayasis.common.base.Validator;
+import io.nayasis.common.exception.unchecked.UncheckedIllegalAccessException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -44,7 +44,7 @@ public class CoreReflector {
                 field.set( bean, value );
             }
         } catch( IllegalAccessException e ) {
-            throw new InvalidAccessException( e );
+            throw new UncheckedIllegalAccessException( e );
         }
 
     }
@@ -61,7 +61,7 @@ public class CoreReflector {
             }
             return val == null ? null : (T) val;
         } catch( IllegalAccessException e ) {
-            throw new InvalidAccessException( e );
+            throw new UncheckedIllegalAccessException( e );
         }
 
     }

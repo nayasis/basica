@@ -3,7 +3,7 @@ package io.nayasis.common.reflection.serializer.simple;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import org.nybatis.core.model.NDate;
+import io.nayasis.common.model.NDate;
 
 import java.io.IOException;
 import java.util.Date;

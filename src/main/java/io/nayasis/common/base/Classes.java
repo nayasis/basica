@@ -3,7 +3,7 @@ package io.nayasis.common.base;
 
 import io.nayasis.common.cache.implement.LruCache;
 import io.nayasis.common.exception.unchecked.UncheckedClassCastException;
-import io.nayasis.common.exception.unchecked.UncheckedIoException;
+import io.nayasis.common.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.file.Files;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
@@ -393,7 +393,7 @@ public class Classes {
 				.replaceFirst( "file:", "" );
             return new JarFile( filePath );
         } catch( IOException | URISyntaxException e ) {
-            throw new UncheckedIoException( e );
+            throw new UncheckedIOException( e );
 		}
 	}
 

@@ -1,8 +1,9 @@
 package io.nayasis.common.reflection.core;
 
+import javassist.*;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
-import org.objectweb.asm.Type;
+import jdk.internal.org.objectweb.asm.Type;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -52,7 +53,7 @@ public class ParameterNameReader {
     private List<String> getNamesFromBytecode( Method method ) {
         ClassPool classPool = ClassPool.getDefault();
         try {
-            CtClass  klass          = classPool.get( method.getDeclaringClass().getName() );
+            CtClass klass          = classPool.get( method.getDeclaringClass().getName() );
             CtMethod declaredMethod = klass.getDeclaredMethod( method.getName() );
             return extractParameterNames( declaredMethod.getMethodInfo() );
         } catch( NotFoundException e ) {
