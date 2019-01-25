@@ -1,5 +1,6 @@
 package io.nayasis.common.base;
 
+import io.nayasis.common.model.NMap;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,10 +15,22 @@ import static org.junit.Assert.assertEquals;
 public class StringsTest {
 
     @Test
+    public void format() {
+
+        NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
+
+        assertEquals( "PRE 2 POST", Strings.format( "PRE {age} POST", parameter ) );
+        assertEquals( "PRE {age} POST", Strings.format( "PRE \\{age} POST", parameter ) );
+        assertEquals( "abc PRE 2 POST", Strings.format( "{name} PRE {age} POST", parameter ) );
+        assertEquals( "abc PRE   2 POST", Strings.format( "{name} PRE {age:%3d} POST", parameter ) );
+
+    }
+
+    @Test
     public void changeHangulJosa() {
 
-        assertEquals( "카드를 등록합니다."       , Strings.format( "{}를 등록합니다." , "카드"      ) );
         assertEquals( "카드템플릿을 등록합니다." , Strings.format( "{}를 등록합니다." , "카드템플릿") );
+        assertEquals( "카드를 등록합니다."       , Strings.format( "{}를 등록합니다." , "카드"      ) );
         assertEquals( "카드는 등록됩니다."       , Strings.format( "{}는 등록됩니다." , "카드"      ) );
         assertEquals( "카드템플릿은 등록됩니다." , Strings.format( "{}는 등록됩니다." , "카드템플릿") );
         assertEquals( "카드가 등록됩니다."       , Strings.format( "{}가 등록됩니다." , "카드"      ) );
@@ -239,14 +252,4 @@ public class StringsTest {
 
     }
 
-    @Test
-    public void merong() {
-
-        System.out.println( Math.round( 0 ) );
-        System.out.println( Math.round( 0.5 ) );
-        System.out.println( Math.round( 1 ) );
-        System.out.println( Math.round( 1.5 ) );
-
-    }
-
-}
+ }

@@ -47,14 +47,17 @@ public class Characters {
 		add( UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS );
 	}};
 
+	public static char NULL_CHAR = '\0';
+
 	/** Hangul Chosung */
 	private static char[] HANGUL_1ST = new char[] { 'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
-	
+
 	/** Hangul Joongsung */
 	private static char[] HANGUL_2ND = new char[] { 'ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ' };
-	
+
 	/** Hangul Jongsung */
-	private static char[] HANGUL_3RD = new char[] { '\0','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };	
+	private static char[] HANGUL_3RD = new char[] { NULL_CHAR,'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
+
 
 	/** font width of Full-width character */
 	private static double fullwidth = 1;
@@ -153,7 +156,7 @@ public class Characters {
 		
 		if( result == null ) return false;
 		
-		return result[2] != '\0';
+		return result[2] != NULL_CHAR;
 		
 	}
 
