@@ -7,6 +7,12 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Simple LRU Cache
+ *
+ * @param <K>
+ * @param <V>
+ */
 public class LruCache<K,V> implements Cache<K,V> {
 
 	protected Map<K,V>         map            = null;
