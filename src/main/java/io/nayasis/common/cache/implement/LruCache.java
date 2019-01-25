@@ -51,6 +51,18 @@ public class LruCache<K,V> implements Cache<K,V> {
 	}
 
 	@Override
+	public boolean contains( K key ) {
+		checkFlushTime( key );
+		return map.containsKey( key );
+	}
+
+	private void checkFlushTime( K key ) {
+		if( ! hasFlushCycle ) return;
+		if( getWatcher(key).elapsedSeconds() >= flushCycle )
+			clear( key );
+	}
+
+	@Override
 	public void put( K key, V value ) {
 		map.put( key, value );
 		resetAccessTime( key );
