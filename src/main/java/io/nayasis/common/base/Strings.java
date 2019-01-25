@@ -1,7 +1,8 @@
 package io.nayasis.common.base;
 
-import io.nayasis.common.exception.unchecked.UncheckedClassNotFoundException;
+import io.nayasis.common.base.format.Formatter;
 import io.nayasis.common.exception.unchecked.EncodingException;
+import io.nayasis.common.exception.unchecked.UncheckedClassNotFoundException;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -11,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -24,6 +24,10 @@ import java.util.zip.GZIPOutputStream;
  * @author nayasis@gmail.com
  */
 public class Strings {
+
+	private static final Pattern   PATTERN_CAMEL   = Pattern.compile( "(_[a-zA-Z])" );
+	private static final Pattern   PATTERN_UNCAMEL = Pattern.compile( "([A-Z])" );
+	private static final Formatter formatter       = new Formatter();
 
 	/**
 	 * get display length applying character's font width. <br>
@@ -143,193 +147,71 @@ public class Strings {
 	 * @return true if each are equal.
 	 */
 	public static boolean equals( String one, String other ) {
-
 		if( one == null && other == null ) return true;
 		if( one == null && other != null ) return false;
 		if( one != null && other == null ) return false;
-
 		return one.equals( other );
-
 	}
 
 	/**
-	 * Bind parameter at mark '#{...}' in text<br>
+	 * return formatted string binding parameters.<br><br>
 	 *
-	 * <pre>
-	 * NMap parameter = new NMap( "{'name':'abc', 'age':'2'}" );
+	 * <p>Format</p>
+	 * <table>
+	 *   <thead>
+	 *      <th>Markup</th>
+	 *      <th>Description</th>
+	 *      <th>Example</th>
+	 *   </thead>
+	 *   <tbody>
+	 *     <tr>
+	 *       <th>{}</th><td>index based</td>
+	 *       <td><pre>
+	 *         Strings.format("{}st, {}nd", 1, 2) -> "1st, 2nd"
+	 *       </pre></td>
+	 *     </tr>
+	 *     <tr>
+	 *       <th>{key}</th><td>parameter based</td>
+	 *       <td><pre>
+	 *         NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
+	 *         Strings.format( "PRE {name} POST {age}", parameter ) -> "PRE abc POST 2"
+	 *       </pre></td>
+	 *     </tr>
+	 *     <tr>
+	 *       <th>{key:format}</th><td>parameter based with format</td>
+	 *       <td><pre>
+	 *         NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
+	 *         Strings.format( "PRE {name} POST {age:%3d}", parameter ) -> "PRE abc POST __2"
+	 *       </pre></td>
+	 *     </tr>
+	 *     <tr>
+	 *       <th>{:format}</th><td>index based with format</td>
+	 *       <td><pre>
+	 *         Strings.format("{}st, {:%3d}nd", 1, 2) -> "1st, __2nd"
+	 *       </pre></td>
+	 *     </tr>
+	 *   </tbody>
+	 * </table>
 	 *
-	 * Strings.bindParam( "1", parameter )               → 1
-	 * Strings.bindParam( "#{name}", parameter )         → abc
-	 * Strings.bindParam( "PRE #{age} POST", parameter ) → PRE 2 POST
-	 * </pre>
-	 *
-	 * @param value value text. if value has '#{..}', it is replaced by value of parameter.
-	 *                 key of value is inner text of '#{..}' pattern.
-	 * @param parameter parameter contains key and value
-	 * @return parameter binded string
-	 */
-	public static String bindParam( Object value, Map parameter ) {
-
-		Pattern pattern = Pattern.compile( "#\\{(.+?)\\}" );
-
-		Matcher matcher = pattern.matcher( nvl(value) );
-
-		StringBuffer sb = new StringBuffer();
-
-		while( matcher.find() ) {
-
-			String key = matcher.group().replaceAll( "#\\{(.+?)\\}", "$1" );
-			String val = nvl( parameter.get( key ) );
-
-			matcher.appendReplacement( sb, val );
-		}
-
-		matcher.appendTail( sb );
-
-		return sb.toString();
-
-	}
-
-	/**
-	 * 문자열을 주어진 포맷에 맞춰 출력한다.
-	 *
-	 * 포맷은 '{}' 문자를 치환가능문자로 사용한다.
-	 *
-	 * <pre>
-	 * {@link Strings#format}( "{}는 사람입니다.", "정화종" ); → "정화종은 사람입니다."
-	 * {@link Strings#format}( "{}는 사람입니다.", "ABC"    ); → "ABC는 사람입니다."
-	 * {@link Strings#format}( "{}는 사람입니다." );           → "는 사람입니다."
-	 * {@link Strings#format}( "사람입니다." );               → "사람입니다."
-	 * </pre>
-	 *
-	 * @param format 문자열 포맷
-	 * @param param  '{}' 문자를 치환할 파라미터
-	 * @return 포맷에 맞는 문자열
+	 * @param format format string
+	 * @param param  binding parameter
+	 * @return formatted string
 	 */
 	public static String format( Object format, Object... param ) {
-
-		if( isEmpty( format ) ) return "";
-
-		if( ! (format instanceof CharSequence) ) {
-			return format.toString();
-		}
-
-		String string = nvl( format );
-
-		int paramSize   = param.length;
-		int paramCursor = 0;
-
-		StringBuilder result = new StringBuilder();
-
-		int lastIndex  = string.length() - 1;
-
-		boolean checkLastIndex = false;
-
-		for( int i = 0; i < lastIndex; i++ ) {
-
-			char currCh = string.charAt( i );
-			char nextCh = string.charAt( i + 1 );
-
-			if( currCh == '{' && nextCh == '}' ) {
-
-				i++;
-
-				if( paramSize == 0 || paramCursor == paramSize ) continue;
-
-				String paramToAppend = ( param[ paramCursor ] == null ) ? "null" : param[ paramCursor ].toString();
-
-				paramCursor++;
-
-				result.append( paramToAppend );
-
-				if( i < lastIndex ) {
-
-					nextCh = string.charAt( i + 1 );
-
-					if( hasHangulJosa( paramToAppend, nextCh ) ) {
-
-						i++;
-
-						switch( nextCh ) {
-
-							case '은' : case '는' :
-								result.append( hasHangulJongsung( paramToAppend ) ? '은' : '는' );
-								break;
-							case '이' : case '가' :
-								result.append( hasHangulJongsung( paramToAppend ) ? '이' : '가' );
-								break;
-							case '을' : case '를' :
-								result.append( hasHangulJongsung( paramToAppend ) ? '을' : '를' );
-								break;
-
-						}
-
-					}
-
-				} else if( i == lastIndex ) {
-					checkLastIndex = true;
-				}
-
-			} else {
-				result.append( currCh );
-			}
-
-		}
-
-		if( ! checkLastIndex ) {
-			result.append( string.charAt(lastIndex) );
-		}
-
-		return result.toString();
-
+		return formatter.format( format, param );
 	}
 
     /**
-     * 문자열의 마지막 글자가 한글 받침을 가지고 있는지 여부를 확인한다.
+     * return left padded string.
      *
      * <pre>
-     * {@link Strings}{@link #hasHangulJongsung(String)}
-     *
+     * {@link Strings#lpad}("AAAAAA", 'Z', 10) ) -> "ZZZZAAAAAA"
      * </pre>
      *
-     * @param string
-     * @return
-     */
-    private static boolean hasHangulJongsung( String string ) {
-    	return isNotEmpty( string ) && Characters.hasHangulJongsung( string.charAt( string.length() - 1 ) );
-    }
-
-    private static boolean hasHangulJosa( String string, char c ) {
-
-		if( isEmpty(string) ) return false;
-
-    	if( ! Characters.isKorean( string.charAt( string.length() - 1 ) ) ) return false;
-
-    	switch( c ) {
-    		case '은' : case '는' : case '이' : case '가' : case '을' : case '를' :
-    			return true;
-    	}
-
-    	return false;
-
-    }
-
-    /**
-     *
-     * 입력한 문자열 앞뒤에  특정문자를 Left Padding한 문자열을 반환한다.
-     *
-     * <pre>
-     *
-     * [사용 예제]
-     *
-     * {@link Strings#lpad}("AAAAAA", 'Z', 10) ) → ZZZZAAAAAA
-     *
-     * </pre>
-     *
-     * @param value    	조작할 문자열
-     * @param length	결과 문자열 길이
-     * @param padChar	PADDING 문자
-     * @return String Padding 된 문자열
+     * @param value    	original value
+     * @param length	padding length
+     * @param padChar	padding character
+     * @return left padded string
      */
     public static String lpad( Object value, int length, char padChar ) {
 
@@ -344,9 +226,7 @@ public class Strings {
         }
 
         for( int i = 0, iCnt = Math.min(length, textCharCnt); i < iCnt; i++ ) {
-
             result[ index + i ] = text.charAt( i );
-
         }
 
         return new String( result );
@@ -355,20 +235,16 @@ public class Strings {
 
     /**
      *
-     * 입력한 문자열 앞뒤에  특정문자를 Right Pading한 문자열을 반환한다.
+     * return right padded string.
      *
      * <pre>
-     *
-     * [사용 예제]
-     *
-     * {@link Strings#rpad}("AAAAAA", 'Z', 10) ) → AAAAAAZZZZ
-     *
+     * {@link Strings#rpad}("AAAAAA", 'Z', 10) ) -> "AAAAAAZZZZ"
      * </pre>
      *
-     * @param value    	조작할 문자열
-     * @param length	결과 문자열 길이
-     * @param padChar	PADDING 문자
-     * @return String Padding 된 문자열
+	 * @param value    	original value
+	 * @param length	padding length
+	 * @param padChar	padding character
+     * @return right padded string
      */
     public static String rpad( Object value, int length, char padChar ) {
 
@@ -391,24 +267,24 @@ public class Strings {
 
 
     /**
-     * 입력값이 null일 경우 공백문자로 치환받는다.
+     * return empty string if input value is null.
      *
-     * @param val 입력값
-     * @return NVL 문자열
+     * @param val value to check
+     * @return empty string if val is null, itself if val is not null.
      */
     public static String nvl( Object val ) {
     	return ( val == null ) ? "" : val.toString();
     }
 
     /**
-     * 입력값이 null일 경우, 지정한 문자로 치환받는다.
+     * return replace value if value is null.
      *
-     * @param val 입력값
-     * @param nvlValue 지정한 문자
-     * @return NVL 문자열
+     * @param value 		value to check
+     * @param replaceValue	substitutive value
+     * @return itself if value is not null, replace value if value is not null
      */
-    public static String nvl( Object val, Object nvlValue ) {
-    	return ( val == null ) ? nvl( nvlValue ) : val.toString();
+    public static String nvl( Object value, Object replaceValue ) {
+    	return ( value == null ) ? nvl( replaceValue ) : value.toString();
     }
 
     /**
@@ -426,8 +302,7 @@ public class Strings {
     	if( isEmpty(text) ) return "";
 
     	text = text.toLowerCase();
-        Pattern pattern = Pattern.compile( "(_[a-zA-Z0-9])" );
-        Matcher matcher = pattern.matcher( text );
+        Matcher matcher = PATTERN_CAMEL.matcher( text );
         StringBuffer sb = new StringBuffer();
 
         while( matcher.find() ) {
@@ -454,8 +329,7 @@ public class Strings {
      */
     public static String uncamel( String text ) {
 
-        Pattern pattern = Pattern.compile( "([A-Z])" );
-        Matcher matcher = pattern.matcher( text );
+        Matcher matcher = PATTERN_UNCAMEL.matcher( text );
         StringBuffer sb = new StringBuffer();
 
         while( matcher.find() ) {
@@ -470,14 +344,10 @@ public class Strings {
     }
 
     /**
-     * <pre>
-     * 문자열을 escape 한다.
-     *
-     * json 구조 등이 깨지지 않게 하는데 사용된다.
-     * </pre>
-     *
+	 * escape string preserving json structure in text.
+	 *
      * @param value text
-     * @return 특수문자가 제거된 텍스트
+     * @return escaped string
      */
     public static String escape( Object value ) {
 
@@ -581,29 +451,28 @@ public class Strings {
     }
 
     /**
-     * 리스트 객체를 문자열로 만든다.
+     * Join collection's element to single string.
      *
      * <pre>
-     * List&lt;String&gt; list = Arrays.asList( "a", "b", null, "c" );
-     *
-     * Strings.join( list, "," );
-     *
-     * → a,b,c
+     * List&lt;String&gt; collection = Arrays.asList( "a", "b", null, "c" );
+     * Strings.join( collection, "," );
+     * -> "a,b,c"
      * </pre>
      *
-     * @param list 리스트 객체
-     * @param concator 엘리먼트 사이를 연결시킬 구분 문자열
+     * @param collection 	collection to join
+     * @param concator 		concatenation delimiter
      * @return joined text
      */
-    public static String join( Collection<?> list, String concator ) {
+    public static String join( Collection<?> collection, String concator ) {
 
-    	if( list == null || list.size() == 0 ) return "";
+    	if( collection == null || collection.size() == 0 ) return "";
 
     	StringBuilder sb    = new StringBuilder();
-    	int           index = list.size();
+    	int           index = collection.size();
 
-    	for( Object e : list ) {
-    		index--; if( e == null ) continue;
+    	for( Object e : collection ) {
+    		index--;
+    		if( e == null ) continue;
     		sb.append( e.toString() );
     		if( index > 0 ) sb.append( concator );
     	}
@@ -649,17 +518,13 @@ public class Strings {
 		int caret = 0;
 
 		while( matcher.find() ) {
-
 			if( caret != matcher.start() ) {
 				result.add( val.substring( caret, matcher.start() ).trim() );
 			}
-
 			if( includeDelimeter ) {
 				result.add( matcher.group() );
 			}
-
 			caret = matcher.end();
-
 		}
 
 		if( caret != val.length() ) {
@@ -743,11 +608,11 @@ public class Strings {
      * Compress multiple space to single space
      *
      * <pre>
-     * {@link Strings#compressSpace}( "A     B" ); → "A B"
-     * {@link Strings#compressSpace}( "A    B" );  → "A B"
-     * {@link Strings#compressSpace}( "A   B" );   → "A B"
-     * {@link Strings#compressSpace}( "A  B" );    → "A B"
-     * {@link Strings#compressSpace}( "A B" );     → "A B"
+     * {@link Strings#compressSpace}( "A     B" ); -> "A B"
+     * {@link Strings#compressSpace}( "A    B" );  -> "A B"
+     * {@link Strings#compressSpace}( "A   B" );   -> "A B"
+     * {@link Strings#compressSpace}( "A  B" );    -> "A B"
+     * {@link Strings#compressSpace}( "A B" );     -> "A B"
      * </pre>
      *
      * @param value text value
@@ -762,9 +627,9 @@ public class Strings {
 	 * Compress multiple space or enter to single space
 	 *
 	 * <pre>
-	 * {@link Strings#compressBlank}( "A     B" );   → "A B"
-	 * {@link Strings#compressBlank}( "A B" );       → "A B"
-	 * {@link Strings#compressBlank}( "A \n\n B" );  → "A B"
+	 * {@link Strings#compressBlank}( "A     B" );   -> "A B"
+	 * {@link Strings#compressBlank}( "A B" );       -> "A B"
+	 * {@link Strings#compressBlank}( "A \n\n B" );  -> "A B"
 	 * </pre>
 	 *
 	 * @param value text value
@@ -825,7 +690,7 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
-    public static Object parse( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
+    public static Object decode( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
 
     	byte o[] = DatatypeConverter.parseBase64Binary( nvl(value) );
 
