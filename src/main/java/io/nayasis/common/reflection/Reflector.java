@@ -10,7 +10,7 @@ import io.nayasis.common.reflection.core.BeanMerger;
 import io.nayasis.common.reflection.core.CoreReflector;
 import io.nayasis.common.reflection.core.JsonConverter;
 import io.nayasis.common.reflection.mapper.Invocator;
-import io.nayasis.common.reflection.mapper.JsonMapper;
+import io.nayasis.common.reflection.mapper.NObjectMapper;
 import io.nayasis.common.reflection.mapper.MethodInvocator;
 
 import java.lang.reflect.Field;
@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class Reflector {
 
-	public final static JsonConverter jsonConverter = new JsonConverter( new JsonMapper() );
+	public final static JsonConverter jsonConverter = new JsonConverter( new NObjectMapper() );
 
 	/**
 	 * Creates and returnes a copy of object

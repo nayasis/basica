@@ -12,9 +12,9 @@ import io.nayasis.common.reflection.deserializer.DateDeserializer;
 import java.util.Date;
 
 
-public class JsonMapper extends ObjectMapper {
+public class NObjectMapper extends ObjectMapper {
 
-	public JsonMapper() {
+	public NObjectMapper() {
 		init();
 		setDefaultFilter();
 		setCustomDeserializer();
@@ -34,7 +34,6 @@ public class JsonMapper extends ObjectMapper {
 	protected void setCustomDeserializer() {
 
 		SimpleModule module = new SimpleModule( "NObjectMapper" );
-		module.setSerializerModifier( new SerializerModifier() );
 		module.addDeserializer( Date.class, new DateDeserializer() );
 
 		registerModule( module );

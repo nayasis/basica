@@ -26,8 +26,6 @@ public class CoreReflector {
     private final ConcurrentHashMap<Class,Set<Method>>      cacheMethod      = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Class,Set<Constructor>> cacheConstructor = new ConcurrentHashMap<>();
 
-    private ParameterNameReader parameterNameReader = new ParameterNameReader();
-
     public CoreReflector() {}
 
     public void setField( Object bean, Field field, Object value ) {
@@ -212,14 +210,6 @@ public class CoreReflector {
 
         return cacheConstructor.get( klass );
 
-    }
-
-    public List<String> getParameterNames( Method method ) {
-        return parameterNameReader.read( method );
-    }
-
-    public List<String> getParameterNames( Constructor constructor ) {
-        return parameterNameReader.read( constructor );
     }
 
 }

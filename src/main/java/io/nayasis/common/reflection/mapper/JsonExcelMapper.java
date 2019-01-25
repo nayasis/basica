@@ -7,7 +7,7 @@ import io.nayasis.common.reflection.serializer.simple.SimpleDateSerializer;
 import java.util.Date;
 
 
-public class JsonExcelMapper extends JsonMapper {
+public class JsonExcelMapper extends NObjectMapper {
 
 	public JsonExcelMapper() {
 		super();

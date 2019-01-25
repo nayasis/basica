@@ -8,7 +8,6 @@ import io.nayasis.common.clone.fastcloner.interfaces.DeepCloner;
 import io.nayasis.common.exception.unchecked.CloningException;
 import io.nayasis.common.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.reflection.core.CoreReflector;
-import sun.plugin.dom.exception.InvalidAccessException;
 
 import java.io.*;
 import java.lang.reflect.Array;
@@ -48,7 +47,7 @@ public class Cloner {
             Map valueReference = new IdentityHashMap<>();
             try {
                 return cloneObject( object, valueReference );
-            } catch( InvalidAccessException e ) {
+            } catch( Exception e ) {
                 throw new CloningException( "error on cloning object : {}", object, e );
             }
         }
@@ -87,12 +86,12 @@ public class Cloner {
         if( object == null ) return null;
         try {
             return cloneObject( object, null );
-        } catch( InvalidAccessException e ) {
+        } catch( Exception e ) {
             throw new CloningException( "error on cloning object : {}", object, e );
         }
     }
 
-    public <T> T cloneObject( T object, Map valueReference ) throws InvalidAccessException {
+    public <T> T cloneObject( T object, Map valueReference ) {
 
         if( object == null || object instanceof Cloner ) return null;
         if( object instanceof Enum ) return object;
@@ -116,7 +115,7 @@ public class Cloner {
 
     }
 
-    private <T> T cloneBean( T bean, Map valueReference ) throws InvalidAccessException {
+    private <T> T cloneBean( T bean, Map valueReference ) {
 
         if( bean == null ) return null;
 

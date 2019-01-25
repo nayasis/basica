@@ -9,7 +9,7 @@ import io.nayasis.common.exception.unchecked.ParseException;
 import io.nayasis.common.file.Files;
 import io.nayasis.common.model.NList;
 import io.nayasis.common.model.NMap;
-import io.nayasis.common.reflection.mapper.JsonMapper;
+import io.nayasis.common.reflection.mapper.NObjectMapper;
 
 import java.io.*;
 import java.util.*;
@@ -23,7 +23,7 @@ public abstract class ExcelHandler {
 
 	private static final String DEFAULT_SHEET_NAME = "Sheet1";
 
-	private static JsonMapper excelMapper  = new JsonMapper();
+	private static NObjectMapper excelMapper  = new NObjectMapper();
 
 	/**
 	 * Write excel data to output stream
