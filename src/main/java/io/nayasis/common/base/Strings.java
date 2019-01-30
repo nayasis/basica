@@ -644,7 +644,7 @@ public class Strings {
 	 * Compress multiple enter to single enter
 	 *
 	 * <pre>
-	 * {@link Strings#compressEnter}( "A\n\n\nB" );   → "A\nB"
+	 * {@link Strings#compressEnter}( "A\n\n\nB" );  -> "A\nB"
 	 * </pre>
 	 *
 	 * @param value text value
@@ -796,25 +796,21 @@ public class Strings {
 	}
 
 	/**
+	 * compare string by LIKE method similar with DBMS.
+	 *
 	 * <pre>
-	 *
-	 * 문자열을 LIKE 로 비교한다.
-	 *
-	 * (DBMS의 Like 검색기능과 동일)
-	 *
 	 * {@link Strings#like}( "ABCDEFG", "%BCD%"   ) -> true
 	 * {@link Strings#like}( "ABCDEFG", "%BCD_F%" ) -> true
 	 * {@link Strings#like}( "AB_DEFG", "AB.DEFG" ) -> false
+	 * </pre>
 	 *
-	 *  </pre>
-	 *
-	 * @param value   비교할 문자열
-	 * @param pattern 비교할 LIKE 패턴 ( "_" : 임의 문자 1개, "%" : 임의 문자열, "\\_" : "_" 문자, "\\%" : "%" 문자 )
-	 * @return 비교결과
+	 * @param value   string to compare
+	 * @param pattern LIKE pattern ( "_" : single character, "%" : unknown string, "\\_" : '_' character, "\\%" : '%' character )
+	 * @return true if value matches with LIKE pattern.
 	 */
 	public static boolean like( Object value, String pattern ) {
 
-		pattern = escapeRegexpKeyword( pattern );
+		pattern = escapeRegexKeyword( pattern );
 
 		StringBuilder newPattern = new StringBuilder();
 
@@ -860,46 +856,38 @@ public class Strings {
 	}
 
 	/**
+	 * compare string by <b>NOT LIKE</b> method similar with DBMS.
+	 *
 	 * <pre>
-	 *
-	 * 문자열 패턴이 LIKE 형식이 아닌지 비교한다.
-	 *
-	 * (DBMS의 Like 검색기능과 동일)
-	 *
-	 * {@link Strings#notLike}( "ABCDEFG", "%BCD%"   ) → false
-	 * {@link Strings#notLike}( "ABCDEFG", "%BCD_F%" ) → false
-	 * {@link Strings#notLike}( "AB_DEFG", "AB.DEFG" ) → true
+	 * {@link Strings#notLike}( "ABCDEFG", "%BCD%"   ) -> false
+	 * {@link Strings#notLike}( "ABCDEFG", "%BCD_F%" ) -> false
+	 * {@link Strings#notLike}( "AB_DEFG", "AB.DEFG" ) -> true
 	 *
 	 *  </pre>
 	 *
-	 * @param value   비교할 문자열
-	 * @param pattern 비교할 LIKE 패턴 ( "_" : 임의 문자 1개, "%" : 임의 문자열, "\\_" : "_" 문자, "\\%" : "%" 문자 )
-	 * @return 비교결과
+	 * @param value   string to compare
+	 * @param pattern LIKE pattern ( "_" : single character, "%" : unknown string, "\\_" : '_' character, "\\%" : '%' character )
+	 * @return true if value does not match with LIKE pattern.
 	 */
 	public static boolean notLike( Object value , String pattern ) {
 		return ! like( value, pattern );
 	}
 
 	/**
-	 * 정규식 예약문자 <font style="color:blue">([](){}.*+?$^|#\)</font> 앞에 <font style="color:red">\</font> 문자를 붙여준다.
+	 * add <font style="color:red">\</font> character before Regular Expression Keywords <font style="color:blue">([](){}.*+?$^|#\)</font>.
 	 *
-	 * @param pattern 변환할 정규식 패턴문자열
-	 * @return  변환된 문자열
+	 * @param pattern regular expression
+	 * @return  escaped pattern
 	 */
-	public static String escapeRegexpKeyword( String pattern ) {
-
-		pattern = nvl( pattern );
+	public static String escapeRegexKeyword( String pattern ) {
 
 		StringBuilder newPattern = new StringBuilder();
 
-		for( char c : pattern.toCharArray() ) {
-
+		for( char c : nvl( pattern ).toCharArray() ) {
 			if( "[](){}.*+?$^|#\\".indexOf( c ) != -1 ) {
 				newPattern.append( '\\' );
 			}
-
 			newPattern.append( c );
-
 		}
 
 		return newPattern.toString();
@@ -1051,23 +1039,6 @@ public class Strings {
 	 */
 	public static boolean toBoolean( Object value ) {
 		return "Y".equals( toYn( value ) );
-	}
-
-	/**
-	 * check String value has CJK (Chinese, Japanese, Korean) character
-	 * @param value valut to check
-	 * @return true if value has CJK character.
-	 */
-	public static boolean hasCJKCharacter( Object value ) {
-
-		if( isEmpty(value) ) return false;
-
-		for( char ch : value.toString().toCharArray() ) {
-			if( Characters.isCJK(ch) ) return true;
-		}
-
-		return false;
-
 	}
 
 	/**
