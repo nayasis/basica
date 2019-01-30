@@ -1,6 +1,7 @@
 package io.nayasis.common.reflection.core;
 
 import io.nayasis.common.base.Classes;
+import io.nayasis.common.base.Types;
 import io.nayasis.common.base.Validator;
 import io.nayasis.common.clone.Cloner;
 import io.nayasis.common.reflection.Reflector;
@@ -15,8 +16,6 @@ import java.util.*;
  * @since 2017-03-30
  */
 public class BeanMerger {
-
-    private UnmodifiableChecker unmodifiableChecker = new UnmodifiableChecker();
 
     /**
      * Merge bean contents.<br><br>
@@ -49,15 +48,15 @@ public class BeanMerger {
         Class sourceClass = source.getClass();
         Class targetClass = target.getClass();
 
-        if( isArrayOrCollection(source) ^ isArrayOrCollection(target) ) {
+        if( Types.isArrayOrCollection(source) ^ Types.isArrayOrCollection(target) ) {
             throw new IllegalArgumentException( String.format("can not merge array to non-array (source:%s, target:%s)", sourceClass, targetClass) );
         }
 
-        if( isMap(source) && isMap(target) ) {
+        if( Types.isMap(source) && Types.isMap(target) ) {
             return (T) merge( toMap(source), toModifiableMap(target), skipEmpty );
-        } else if( isCollection(source) && isCollection(target) ) {
-            return (T) merge( toCollection(source), toModifiableCollection(target), skipEmpty );
-        } else if( isArrayOrCollection(source) && isArrayOrCollection(target) ) {
+        } else if( Types.isCollection(source) && Types.isCollection(target) ) {
+            return (T) merge( Types.toCollection(source), toModifiableCollection(target), skipEmpty );
+        } else if( Types.isArrayOrCollection(source) && Types.isArrayOrCollection(target) ) {
             return (T) mergeArray( source, target, skipEmpty );
         }
 
@@ -112,15 +111,15 @@ public class BeanMerger {
             if( ! target.containsKey(key) || targetVal == null ) {
                 target.put( key, sourceVal );
 
-            } else if( isMap(sourceVal) && isMap(targetVal) ) {
+            } else if( Types.isMap(sourceVal) && Types.isMap(targetVal) ) {
                 Map merged = merge( (Map) sourceVal, (Map) targetVal, skipEmpty );
                 target.put( key, merged );
 
-            } else if( isCollection(sourceVal) && isCollection(targetVal) ) {
+            } else if( Types.isCollection(sourceVal) && Types.isCollection(targetVal) ) {
                 Collection merged = merge( (Collection) sourceVal, (Collection) targetVal, skipEmpty );
                 target.put( key, merged );
 
-            } else if( isArrayOrCollection(sourceVal) && isArrayOrCollection(targetVal) ) {
+            } else if( Types.isArrayOrCollection(sourceVal) && Types.isArrayOrCollection(targetVal) ) {
                 Object merged = mergeArray( sourceVal, targetVal, skipEmpty );
                 target.put( key, merged );
 
@@ -199,13 +198,13 @@ public class BeanMerger {
 
             if( targetVal == null ) {
                 result.add( sourceVal );
-            } else if( isMap(sourceVal) && isMap(targetVal) ) {
+            } else if( Types.isMap(sourceVal) && Types.isMap(targetVal) ) {
                 Map merged = merge( toMap(sourceVal), toModifiableMap(targetVal), skipEmpty );
                 result.add( merged );
-            } else if( isCollection(sourceVal) && isCollection(targetVal) ) {
-                Collection merged = merge( toCollection(sourceVal), toModifiableCollection(targetVal), skipEmpty );
+            } else if( Types.isCollection(sourceVal) && Types.isCollection(targetVal) ) {
+                Collection merged = merge( Types.toCollection(sourceVal), toModifiableCollection(targetVal), skipEmpty );
                 result.add( merged );
-            } else if( isArrayOrCollection(sourceVal) && isArrayOrCollection(targetVal) ) {
+            } else if( Types.isArrayOrCollection(sourceVal) && Types.isArrayOrCollection(targetVal) ) {
                 Object merged = mergeArray( sourceVal, targetVal, skipEmpty );
                 result.add( merged );
             } else {
@@ -219,8 +218,8 @@ public class BeanMerger {
     }
 
     private Object mergeArray( Object source, Object target, boolean skipEmpty ) {
-        Collection merged = merge( toCollection(source), toModifiableCollection(target), skipEmpty );
-        if( isArray(target) ) {
+        Collection merged = merge( Types.toCollection(source), toModifiableCollection(target), skipEmpty );
+        if( Types.isArray(target) ) {
             Object array = Array.newInstance( target.getClass().getComponentType(), merged.size() );
             Iterator iterator = merged.iterator();
             int i = 0;
@@ -243,43 +242,9 @@ public class BeanMerger {
         return false;
     }
 
-    private boolean isMap( Object value ) {
-        return value != null && value instanceof Map;
-    }
-
-    private boolean isArrayOrCollection( Object value ) {
-        return isCollection( value ) || isArray( value );
-    }
-
-    private boolean isCollection( Object value ) {
-        return value != null && value instanceof Collection;
-    }
-
-    private boolean isArray( Object value ) {
-        return value != null && value.getClass().isArray();
-    }
-
-    private boolean isAssignable( Class sourceClass, Class targetClass ) {
-        return Classes.isExtendedBy(targetClass, sourceClass) || Classes.isExtendedBy(sourceClass, targetClass);
-    }
-
-
-    private Collection toCollection( Object value ) {
-        if( isCollection(value) ) return (Collection) value;
-        if( isArray(value) ) {
-            List converted = new ArrayList();
-            int length = Array.getLength( value );
-            for( int i = 0; i < length; i++ ) {
-                converted.add( Array.get( value, i ) );
-            }
-            return converted;
-        }
-        return new ArrayList();
-    }
-
     private Collection toModifiableCollection( Object value ) {
-        Collection collection = toCollection( value );
-        if( unmodifiableChecker.isUnmodifiable(collection) ) {
+        Collection collection = Types.toCollection( value );
+        if( UnmodifiableChecker.isUnmodifiable(collection) ) {
             String json = Reflector.toJson( value );
             return Reflector.toListFromJson( json );
         } else {
@@ -288,13 +253,13 @@ public class BeanMerger {
     }
 
     private Map toMap( Object value ) {
-        if( isMap(value) ) return (Map) value;
+        if( Types.isMap(value) ) return (Map) value;
         return Reflector.toMapFrom( value );
     }
 
     private Map toModifiableMap( Object value ) {
         Map map = toMap( value );
-        if( unmodifiableChecker.isUnmodifiable( map ) ) {
+        if( UnmodifiableChecker.isUnmodifiable( map ) ) {
             Map converted = new LinkedHashMap();
             for( Object key : map.keySet() ) {
                 converted.put( key, map.get( key ) );

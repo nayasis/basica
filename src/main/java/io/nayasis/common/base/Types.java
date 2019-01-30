@@ -50,16 +50,8 @@ public class Types {
         return klass == null || klass == Object.class;
     }
 
-    private static boolean isNotEmpty( Class klass ) {
-        return ! isEmpty( klass );
-    }
-
     private static boolean isEmpty( Object instance ) {
         return instance == null || isEmpty( instance.getClass() );
-    }
-
-    private static boolean isNotEmpty( Object instance ) {
-        return ! isEmpty( instance );
     }
 
     private static boolean checkParents( Class<?> klass, Class<?>... checkTargets ) {
@@ -83,32 +75,16 @@ public class Types {
         return checkParents( klass, Map.class, Dictionary.class );
     }
 
-    public static boolean isNotMap( Class klass ) {
-        return ! isMap( klass );
-    }
-
     public static boolean isMap( Object instance ) {
-        return isNotEmpty(instance) && isMap( instance.getClass() );
-    }
-
-    public static boolean isNotMap( Object instance ) {
-        return ! isNotMap( instance );
+        return ! isEmpty(instance) && isMap( instance.getClass() );
     }
 
     public static boolean isCollection( Class klass ) {
         return checkParents( klass, AbstractCollection.class, NList.class );
     }
 
-    public static boolean isNotCollection( Class klass ) {
-        return ! isNotCollection( klass );
-    }
-
     public static boolean isCollection( Object instance ) {
-        return isNotEmpty(instance) && isCollection( instance.getClass() );
-    }
-
-    public static boolean isNotCollection( Object instance ) {
-        return ! isCollection( instance );
+        return ! isEmpty(instance) && isCollection( instance.getClass() );
     }
 
     public static boolean isArray( Class klass ) {
@@ -119,28 +95,20 @@ public class Types {
         return instance != null && isArray( instance.getClass() );
     }
 
-    public static boolean isNotArray( Class klass ) {
-        return ! isArray( klass );
+    public static boolean isArrayOrCollection( Class klass ) {
+        return isArray( klass ) || isCollection( klass );
     }
 
-    public static boolean isNotArray( Object instance ) {
-        return ! isArray( instance );
+    public static boolean isArrayOrCollection( Object instance ) {
+        return isArray( instance ) || isCollection( instance );
     }
 
     public static boolean isBoolean( Object instance ) {
         return instance != null && isBoolean( instance.getClass() );
     }
 
-    public static boolean isNotBoolean( Object instance ) {
-        return ! isBoolean( instance );
-    }
-
     public static boolean isBoolean( Class klass ) {
         return checkEqual( klass, Boolean.class, boolean.class );
-    }
-
-    public static boolean isNotBoolean( Class klass ) {
-        return ! isBoolean( klass );
     }
 
     public static boolean isInt( Class klass ) {
@@ -232,10 +200,6 @@ public class Types {
         return instance != null && isString( instance.getClass() );
     }
 
-    public static boolean isNotString( Object value ) {
-        return ! isString( value );
-    }
-
     public static boolean isNumeric( Class klass ) {
         return isInt( klass ) || isLong( klass ) || isShort( klass ) || isByte(klass) || isFloat( klass ) || isDouble( klass ) || isBigDecimal( klass ) || isBigInteger( klass );
     }
@@ -246,10 +210,6 @@ public class Types {
 
     public static boolean isPrimitive( Class klass ) {
         return PRIMITIVE.contains( klass );
-    }
-
-    public static boolean isNotPrimitive( Class klass ) {
-        return ! isPrimitive( klass );
     }
 
     public static boolean isPrimitive( Object instance ) {
@@ -269,14 +229,35 @@ public class Types {
 
         } else {
 
-            if( instance instanceof List ) {
-                result = new ArrayList<>( (List) instance );
-            } else if( instance instanceof Set ) {
-                result = new ArrayList<>( (Set) instance );
+            if( instance instanceof Collection ) {
+                result = new ArrayList<>( (Collection) instance );
             } else if( instance instanceof NList ) {
                 result = ((NList) instance).toList();
-            } else if( instance.getClass().isArray() ) {
+            } else if( isArray(instance) ) {
                 result = Arrays.asList( (Object[]) instance );
+            }
+
+        }
+
+        return result;
+
+    }
+
+    public static Collection toCollection( Object value ) {
+
+        Collection result = null;
+
+        if( value == null ) {
+            result = new ArrayList();
+
+        } else {
+
+            if( value instanceof Collection ) {
+                result = (Collection) value;
+            } else if( value instanceof NList ) {
+                result = ((NList) value).toList();
+            } else if( isArray(value) ) {
+                result = Arrays.asList( (Object[]) value );
             }
 
         }

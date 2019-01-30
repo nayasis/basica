@@ -1,10 +1,12 @@
 package io.nayasis.common.reflection.core;
 
 import io.nayasis.common.base.Classes;
+import io.nayasis.common.cache.implement.LruCache;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Unmodifiable checker for Map or Collection
@@ -14,61 +16,46 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UnmodifiableChecker {
 
-    private ConcurrentHashMap<Class, Boolean> cache = new ConcurrentHashMap<>();
+    private static LruCache<Class,Boolean> CACHE = new LruCache<>( 64 );
 
-    public boolean isUnmodifiable( Map map ) {
+    public static boolean isUnmodifiable( Map map ) {
 
         if( map == null ) return true;
 
         Class<? extends Map> klass = map.getClass();
 
-        if( ! cache.containsKey(klass) ) {
+        if( ! CACHE.contains(klass) ) {
             Map instance = Classes.createInstance( klass );
             try {
-                instance.put( "1", "1" );
-                cache.putIfAbsent( klass, Boolean.FALSE );
+                instance.putAll( new HashMap() );
+                CACHE.putIfAbsent( klass, Boolean.FALSE );
             } catch( Exception e ) {
-                cache.putIfAbsent( klass, Boolean.TRUE );
+                CACHE.putIfAbsent( klass, Boolean.TRUE );
             }
         }
 
-        return cache.get( klass );
+        return CACHE.get( klass );
 
     }
 
-    public boolean isUnmodifiable( Collection collection ) {
+    public static boolean isUnmodifiable( Collection collection ) {
 
         if( collection == null ) return true;
 
         Class<? extends Collection> klass = collection.getClass();
 
-        if( ! cache.containsKey(klass) ) {
+        if( ! CACHE.contains(klass) ) {
             Collection instance = Classes.createInstance( klass );
             try {
-                instance.add( "1" );
-                cache.putIfAbsent( klass, Boolean.FALSE );
+                instance.addAll( Collections.emptyList() );
+                CACHE.putIfAbsent( klass, Boolean.FALSE );
             } catch( Exception e ) {
-                cache.putIfAbsent( klass, Boolean.TRUE );
+                CACHE.putIfAbsent( klass, Boolean.TRUE );
             }
         }
 
-        return cache.get( klass );
+        return CACHE.get( klass );
 
     }
-
-    public boolean isUnmodifiable( Object value ) {
-
-        if( value == null ) return true;
-
-        if( value instanceof Map ) {
-            return isUnmodifiable( (Map) value );
-        } else if( value instanceof Collection ) {
-            return isUnmodifiable( (Collection) value );
-        } else {
-            return false;
-        }
-
-    }
-
 
 }
