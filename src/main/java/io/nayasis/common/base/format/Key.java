@@ -2,6 +2,8 @@ package io.nayasis.common.base.format;
 
 import io.nayasis.common.base.Strings;
 
+import static io.nayasis.common.base.format.Formatter.FORMAT_INDEX;
+
 public class Key {
 
     private String name   = "";
@@ -18,7 +20,7 @@ public class Key {
         }
 
         if( Strings.isEmpty(name) ) {
-            name = String.format( "_{{%d}}", index );
+            name = String.format( FORMAT_INDEX, index );
         }
 
     }

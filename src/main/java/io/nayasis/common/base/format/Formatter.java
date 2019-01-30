@@ -16,6 +16,7 @@ public class Formatter {
     public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(|.+?[^\\\\])\\}",    2, "\\\\(\\{|\\})",     "$1" );
     public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{(|.+?[^\\\\])\\}",   2, "\\\\(#|\\{|\\})",   "$1" );
     public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{(|.+?[^\\\\])\\}", 2, "\\\\(\\$|\\{|\\})", "$1" );
+    public static final String         FORMAT_INDEX   = "_{{%d}}";
 
     /**
      * return formatted string binding parameters
@@ -115,7 +116,7 @@ public class Formatter {
             params = new HashMap();
             int index = 0;
             for( Object param : parameter ) {
-                params.put( String.format("_{{%d}}", index), param );
+                params.put( String.format(FORMAT_INDEX, index), param );
             }
         }
 
