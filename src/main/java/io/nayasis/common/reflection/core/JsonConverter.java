@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.nayasis.common.base.Types;
 import io.nayasis.common.base.Validator;
 import io.nayasis.common.exception.unchecked.JsonMappingException;
-import io.nayasis.common.model.NMap;
 
 import java.io.IOException;
 import java.util.*;
@@ -100,7 +99,7 @@ public class JsonConverter {
     }
 
     /**
-     * Get json text
+     * get json text
      *
      * @param fromBean		instance to convert as json data
      * @param prettyPrint	whether or not to make json text pretty
@@ -111,7 +110,7 @@ public class JsonConverter {
     }
 
     /**
-     * Get json text
+     * get json text
      *
      * @param fromBean		instance to convert as json data
      * @param prettyPrint	whether or not to make json text pretty
@@ -241,14 +240,14 @@ public class JsonConverter {
         Map<String, Object> objectMap = toMapFrom( object );
 
         for( String key : objectMap.keySet() ) {
-            unflattenKeyRecursivly( key, objectMap.get( key ), map );
+            unflattenKeyRecursively( key, objectMap.get( key ), map );
         }
 
         return map;
 
     }
 
-    private void unflattenKeyRecursivly( String jsonPath, Object value, Map result ) {
+    private void unflattenKeyRecursively( String jsonPath, Object value, Map result ) {
 
         String path  = jsonPath.replaceFirst( "\\[.*\\]", "" ).replaceFirst( "\\..*?$", "" );
         String index = jsonPath.replaceFirst(  "^(" + path + ")\\[(.*?)\\](.*?)$", "$2" );
@@ -288,7 +287,7 @@ public class JsonConverter {
             }
 
             String recursivePath = jsonPath.replaceFirst( currentPath.replaceAll( "\\[", "\\\\[" ) + ".", "" );
-            unflattenKeyRecursivly( recursivePath, value, newVal );
+            unflattenKeyRecursively( recursivePath, value, newVal );
 
         }
 
@@ -421,19 +420,19 @@ public class JsonConverter {
     /**
      * convert json to collection
      *
-     * @param object            json text or collection object
-     * @param collectionClass   collection type
-     * @param typeClass         data type
+     * @param source            json text or collection to be convert
+     * @param returnType        return type
+     * @param genericType       collection's generic type
      * @param <T>               return class type
      * @return  collection
      * @throws JsonMappingException  when json parsing error raised
      */
-    public <T> Collection<T> toCollectionFrom( Object object, Class<? extends Collection> collectionClass, Class<T> typeClass ) throws JsonMappingException {
+    public <T> Collection<T> toCollectionFrom( Object source, Class<? extends Collection> returnType, Class<T> genericType ) throws JsonMappingException {
 
-        CollectionType type = getTypeFactory().constructCollectionType( collectionClass, typeClass );
+        CollectionType type = getTypeFactory().constructCollectionType( returnType, genericType );
 
-        if( Types.isString(object) ) {
-            String json = getCollectionLikeContent( object.toString() );
+        if( Types.isString(source) ) {
+            String json = getCollectionLikeContent( source.toString() );
             try {
                 return objectMapper.readValue( json, type );
             } catch( JsonParseException e ) {
@@ -442,16 +441,16 @@ public class JsonConverter {
                 throw new JsonMappingException( e );
             }
         } else {
-            return objectMapper.convertValue( object, type );
+            return objectMapper.convertValue( source, type );
         }
 
     }
 
     /**
-     * convert as Map from object
+     * convert as Map from source
      *
-     * @param object        json text, Map or bean to convert
-     * @param mapClass      return map type
+     * @param source        json text, Map or bean to be convert
+     * @param returnType    return map type
      * @param keyType       key's type
      * @param valueType     value's type
      * @param <K>           key type of return Map
@@ -459,14 +458,14 @@ public class JsonConverter {
      * @return converted map
      * @throws JsonMappingException  when json parsing error raised
      */
-    public <K,V> Map<K,V> toMapFrom( Object object, Class<? extends Map> mapClass, Class<K> keyType, Class<V> valueType ) throws JsonMappingException {
+    public <K,V> Map<K,V> toMapFrom( Object source, Class<? extends Map> returnType, Class<K> keyType, Class<V> valueType ) throws JsonMappingException {
 
-        if( object == null ) return new HashMap<>();
+        if( source == null ) return new HashMap<>();
 
-        MapLikeType type = getTypeFactory().constructMapLikeType( mapClass, keyType, valueType );
+        MapLikeType type = getTypeFactory().constructMapLikeType( returnType, keyType, valueType );
 
-        if( Types.isString(object) ) {
-            String json = getContent( object.toString() );
+        if( Types.isString(source) ) {
+            String json = getContent( source.toString() );
             try {
                 return objectMapper.readValue( json, type );
             } catch( JsonParseException e ) {
@@ -475,7 +474,7 @@ public class JsonConverter {
                 throw new JsonMappingException( e );
             }
         } else {
-            return objectMapper.convertValue( object, type );
+            return objectMapper.convertValue( source, type );
         }
 
     }
@@ -489,25 +488,9 @@ public class JsonConverter {
         return toMapFrom( object, LinkedHashMap.class, String.class, Object.class );
     }
 
-    /**
-     * Convert as NMap from object
-     * @param object	json text (type can be String, StringBuffer, StringBuilder), Map or bean to convert
-     * @return	NMap filled by object's value
-     */
-    public NMap toNMapFrom(Object object ) throws JsonMappingException {
-        return new NMap( toMapFrom( object ) );
-    }
-
-    public static boolean isJsonDate( Object value ) {
-        if( Types.isNotString(value) ) return false;
-        String val = value.toString();
-        return Validator.isMatched( val, "\\d{4}-(0[0-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]\\.\\d{3}[+-]([0-1][0-9]|2[0-4])[0-5][0-9]" );
-    }
-
     private TypeFactory getTypeFactory() {
         return objectMapper.getTypeFactory();
     }
-
 
 }
 
