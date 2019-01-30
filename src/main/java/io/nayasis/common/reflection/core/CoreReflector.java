@@ -1,17 +1,18 @@
 package io.nayasis.common.reflection.core;
 
+import io.nayasis.common.base.Classes;
+import io.nayasis.common.base.Strings;
 import io.nayasis.common.base.Validator;
+import io.nayasis.common.cache.implement.LruCache;
 import io.nayasis.common.exception.unchecked.UncheckedIllegalAccessException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -22,60 +23,76 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CoreReflector {
 
-    private final ConcurrentHashMap<Class,Set<Field>>       cacheField       = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Class,Set<Method>>      cacheMethod      = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Class,Set<Constructor>> cacheConstructor = new ConcurrentHashMap<>();
+    private static final LruCache<Class,Set<Field>>       CACHE_FIELD       = new LruCache<>(256 );
+    private static final LruCache<Class,Set<Method>>      CACHE_METHOD      = new LruCache<>(256 );
+    private static final LruCache<Class,Set<Constructor>> CACHE_CONSTRUCTOR = new LruCache<>(256 );
 
-    public CoreReflector() {}
-
-    public void setField( Object bean, Field field, Object value ) {
-
-        if( field == null ) return;
-        setAccessible( field );
-
-        if( isExclusive(field) ) return;
-
-        try {
+    /**
+     * set value to target instance's field.
+     *
+     * @param target    target instance
+     * @param field     target field
+     * @param value     value to modify
+     */
+    public static void setValue( Object target, Field field, Object value ) {
+        execute( target, field, () -> {
+            if( field.isSynthetic()    ) return;
+            if( field.isEnumConstant() ) return;
             if( Modifier.isStatic(field.getModifiers()) ){
                 field.set( null, value );
             } else {
-                field.set( bean, value );
+                field.set( target, value );
             }
-        } catch( IllegalAccessException e ) {
-            throw new UncheckedIllegalAccessException( e );
-        }
-
+        });
     }
 
-    public <T> T getFieldValue( Object bean, Field field ) {
-        if( bean == null || field == null ) return null;
-        setAccessible( field );
-        Object val;
-        try {
+    /**
+     * get value from target instance's field
+     *
+     * @param target    target instance
+     * @param field     target field
+     * @param <T>
+     * @return  field's value
+     */
+    public static <T> T getValue( Object target, Field field ) {
+
+        final Object[] val = new Object[ 1 ];
+
+        execute( target, field, () -> {
             if( Modifier.isStatic(field.getModifiers()) ){
-                val = field.get( null );
+                val[0] = field.get( null );
             } else {
-                val = field.get( bean );
+                val[0] = field.get( target );
             }
-            return val == null ? null : (T) val;
+        });
+
+        return val[0] == null ? null : (T) val[0];
+
+    }
+
+    private static void execute( Object target, Field field, Runner runner ) {
+
+        if( target == null || field == null ) return;
+
+        boolean inaccessible = ! field.isAccessible();
+
+        if( inaccessible )
+            field.setAccessible( true );
+
+        try {
+            runner.run();
         } catch( IllegalAccessException e ) {
             throw new UncheckedIllegalAccessException( e );
+        } finally {
+            if( inaccessible ) {
+                field.setAccessible( false );
+            }
         }
 
     }
 
-    public <T> T getFieldValue( Object bean, String fieldNameRegexpPattern ) {
-        if( bean == null || Validator.isEmpty( fieldNameRegexpPattern ) ) return null;
-        Set<Field> fields = getFields( bean, fieldNameRegexpPattern );
-        if( fields.size() == 0 ) return null;
-        List<Field> list = new ArrayList<>( fields );
-        return getFieldValue( bean, list.get(0) );
-    }
-
-    private void setAccessible( Field field ) {
-        if( ! field.isAccessible() ) {
-            field.setAccessible( true );
-        }
+    private interface Runner {
+        void run() throws IllegalAccessException;
     }
 
     /**
@@ -84,131 +101,121 @@ public class CoreReflector {
      * @param object    object to extract fields
      * @return fields
      */
-    public  Set<Field> getFields( Object object ) {
-        if( object == null ) return new LinkedHashSet<>();
+    public static Set<Field> getFields( Object object ) {
+        if( object == null ) return new HashSet<>();
         return getFields( object.getClass() );
     }
 
-    public Set<Field> getFields( Class klass ) {
+    public static Set<Field> getFields( Class klass ) {
 
-        if( klass == null ) return new LinkedHashSet<>();
+        if( klass == null ) return new HashSet<>();
 
-        if( ! cacheField.containsKey(klass) ) {
+        if( CACHE_FIELD.contains(klass) )
+            return CACHE_FIELD.get( klass );
 
-            Set<Field> fields = new LinkedHashSet<>();
+        Set<Field> fields = new HashSet<>();
 
-            Class<?> superClass = klass.getSuperclass();
-            if( superClass != null && superClass != Object.class ) {
-                fields.addAll( getFields( superClass ) );
-            }
+        Classes.findParents( klass ).forEach( parent -> {
+           fields.addAll( getFields( parent ) );
+        });
 
-            for( Field field : klass.getDeclaredFields() ) {
-                if( field.isSynthetic() ) continue; // if field is generated by compiler, skip it.
-                fields.add( field );
-            }
-
-            cacheField.putIfAbsent( klass, fields );
-
+        for( Field field : klass.getDeclaredFields() ) {
+            if( field.isSynthetic() ) continue; // if field is generated by compiler, skip it.
+            fields.add( field );
         }
 
-        return cacheField.get( klass );
+        CACHE_FIELD.putIfAbsent( klass, fields );
+
+        return fields;
 
     }
 
-    public Set<Field> getFields( Object object, String fieldNameRegexpPattern ) {
-        if( object == null ) return new LinkedHashSet<>();
-        return getFields( object.getClass(), fieldNameRegexpPattern );
+    public static Set<Field> getFields( Object target, String regex ) {
+        if( target == null ) return new HashSet<>();
+        return getFields( target.getClass(), regex );
     }
 
-    public Set<Field> getFields( Class klass, String fieldNameRegexpPattern ) {
-        if( Validator.isEmpty(fieldNameRegexpPattern) ) return new LinkedHashSet<>();
-        Set<Field> result = new LinkedHashSet<>();
+    public static Set<Field> getFields( Class klass, String regex ) {
+        if( Strings.isEmpty(regex) ) return new HashSet<>();
+        Set<Field> result = new HashSet<>();
         for( Field field : getFields(klass) ) {
-            if( field.getName().matches(fieldNameRegexpPattern) ) {
+            if( field.getName().matches(regex) ) {
                 result.add( field );
             }
         }
         return result;
     }
 
-    private boolean isExclusive( Field field ) {
-        if( field.isSynthetic() ) return true; // if field is generated by compiler, skip it.
-        if( field.isEnumConstant() ) return true;
-        return false;
-    }
-
-    public  Set<Method> getMethods( Object object ) {
-        if( object == null ) return new LinkedHashSet<>();
+    public static Set<Method> getMethods( Object object ) {
+        if( object == null ) return new HashSet<>();
         return getMethods( object.getClass() );
     }
 
-    public Set<Method> getMethods( Class klass ) {
+    public static Set<Method> getMethods( Class klass ) {
 
-        if( klass == null ) return new LinkedHashSet<>();
+        if( klass == null ) return new HashSet<>();
 
-        if( ! cacheMethod.containsKey(klass) ) {
+        if( CACHE_METHOD.contains(klass) )
+            return CACHE_METHOD.get( klass );
 
-            Set<Method> methods = new LinkedHashSet<>();
+        Set<Method> methods = new HashSet<>();
 
-            Class<?> superClass = klass.getSuperclass();
-            if( superClass != null && superClass != Object.class ) {
-                methods.addAll( getMethods( superClass ) );
-            }
+        Classes.findParents( klass ).forEach( parent -> {
+            methods.addAll( getMethods( parent ) );
+        });
 
-            for( Method method : klass.getDeclaredMethods() ) {
-                if( method.isSynthetic() ) continue; // if method is generated by compiler, skip it.
-                if( Modifier.isInterface(method.getModifiers()) ) continue;
-                if( Modifier.isAbstract(method.getModifiers()) ) continue;
-                methods.add( method );
-            }
-
-            cacheMethod.putIfAbsent( klass, methods );
-
+        for( Method method : klass.getDeclaredMethods() ) {
+            if( method.isSynthetic() ) continue; // if method is generated by compiler, skip it.
+            if( Modifier.isInterface(method.getModifiers()) ) continue;
+            if( Modifier.isAbstract(method.getModifiers()) ) continue;
+            methods.add( method );
         }
 
-        return cacheMethod.get( klass );
+        CACHE_METHOD.putIfAbsent( klass, methods );
+
+        return methods;
 
     }
 
-    public Set<Method> getMethods( Object object, String methodNameRegexpPattern ) {
-        if( object == null ) return new LinkedHashSet<>();
-        return getMethods( object.getClass(), methodNameRegexpPattern );
+    public static Set<Method> getMethods( Object target, String regex ) {
+        if( target == null ) return new HashSet<>();
+        return getMethods( target.getClass(), regex );
     }
 
-    public Set<Method> getMethods( Class klass, String methodNameRegexpPattern ) {
-        if( Validator.isEmpty(methodNameRegexpPattern) ) return new LinkedHashSet<>();
+    public static Set<Method> getMethods( Class klass, String regex ) {
+        if( Validator.isEmpty(regex) ) return new HashSet<>();
         Set<Method> result = new LinkedHashSet<>();
         for( Method method : getMethods(klass) ) {
-            if( method.getName().matches(methodNameRegexpPattern) ) {
+            if( method.getName().matches(regex) ) {
                 result.add( method );
             }
         }
         return result;
     }
 
-    public  Set<Constructor> getContructors( Object object ) {
-        if( object == null ) return new LinkedHashSet<>();
-        return getContructors( object.getClass() );
+    public static Set<Constructor> getContructors( Object target ) {
+        if( target == null ) return new HashSet<>();
+        return getContructors( target.getClass() );
     }
 
-    public Set<Constructor> getContructors( Class klass ) {
+    public static Set<Constructor> getContructors( Class klass ) {
 
-        if( klass == null ) return new LinkedHashSet<>();
+        if( klass == null ) return new HashSet<>();
 
-        if( ! cacheConstructor.containsKey(klass) ) {
+        if( CACHE_CONSTRUCTOR.contains(klass) )
+            return CACHE_CONSTRUCTOR.get( klass );
 
-            Set<Constructor> constructors = new LinkedHashSet<>();
+        Set<Constructor> constructors = new HashSet<>();
 
-            for( Constructor constructor : klass.getDeclaredConstructors() ) {
-                if( constructor.isSynthetic() ) continue; // if constructor is generated by compiler, skip it.
-                constructors.add( constructor );
-            }
-
-            cacheConstructor.putIfAbsent( klass, constructors );
-
+        for( Constructor constructor : klass.getDeclaredConstructors() ) {
+            // if constructor is generated by compiler, skip it.
+            if( constructor.isSynthetic() ) continue;
+            constructors.add( constructor );
         }
 
-        return cacheConstructor.get( klass );
+        CACHE_CONSTRUCTOR.putIfAbsent( klass, constructors );
+
+        return constructors;
 
     }
 

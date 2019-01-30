@@ -131,16 +131,16 @@ public class Cloner {
             if( isExclusive(field) ) continue;
             if( ignorableChecker.isIgnorable(field) ) continue;
 
-            Object originalValue = reflector.getFieldValue( bean, field );
+            Object originalValue = reflector.getValue( bean, field );
 
             if( field.isSynthetic() || immutableChecker.isImmutable(field) || immutableChecker.isImmutable(originalValue) ) {
-                reflector.setField( newBean, field, originalValue );
+                reflector.setValue( newBean, field, originalValue );
             } else {
                 if( valueReference == null ) {
-                    reflector.setField( newBean, field, originalValue );
+                    reflector.setValue( newBean, field, originalValue );
                 } else {
                     Object copiedValue = cloneObject( originalValue, valueReference );
-                    reflector.setField( newBean, field, copiedValue );
+                    reflector.setValue( newBean, field, copiedValue );
                 }
             }
         }
@@ -175,8 +175,8 @@ public class Cloner {
         for( Field field : sourceFields ) {
             if( isExclusive(field) ) continue;
             if( ! targetFields.contains(field) ) continue;
-            Object value = reflector.getFieldValue( source, field );
-            reflector.setField( target, field, value );
+            Object value = reflector.getValue( source, field );
+            reflector.setValue( target, field, value );
         }
 
     }
