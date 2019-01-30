@@ -144,6 +144,25 @@ public class Types {
         return instance != null && isIntLike( instance.getClass() );
     }
 
+    public static boolean isInt( String value ) {
+        try {
+            return new BigDecimal( value ).remainder( BigDecimal.ONE )
+                .compareTo( BigDecimal.ZERO ) == 0;
+        } catch( Exception e ) {
+            return false;
+        }
+    }
+
+    public static boolean isPositiveInt( String value ) {
+        try {
+            BigDecimal number = new BigDecimal( value );
+            if( number.compareTo( BigDecimal.ZERO ) <= 0 ) return false;
+            return number.remainder( BigDecimal.ONE ).compareTo( BigDecimal.ZERO ) == 0;
+        } catch( Exception e ) {
+            return false;
+        }
+    }
+
     public static boolean isLong( Class klass ) {
         return checkEqual( klass, Long.class, long.class );
     }
@@ -206,6 +225,15 @@ public class Types {
 
     public static boolean isNumeric( Object instance ) {
         return instance != null && isNumeric( instance.getClass() );
+    }
+
+    public static boolean isNumeric( String value ) {
+        try {
+            new BigDecimal( value );
+            return true;
+        } catch( Exception e ) {
+            return false;
+        }
     }
 
     public static boolean isPrimitive( Class klass ) {

@@ -69,8 +69,8 @@ public class Validator {
      * @param value check value
      * @return true if value is null or empty or consists with only spaces.
      */
-    public static boolean isBlank( String value ) {
-    	return value == null || value.length() == 0 || value.trim().length() == 0;
+    public static boolean isBlank( Object value ) {
+    	return Strings.isBlank( value );
     }
 
     /**
@@ -136,26 +136,6 @@ public class Validator {
      */
     public static boolean isNotEmpty( Object value ) {
         return ! isEmpty( value );
-    }
-
-    /**
-     * check if value is String or StringBuffer or StringBuilder
-     *
-     * @param value check value
-     * @return  true if value is included in [ String, StringBuffer, StringBuilder ]
-     */
-    public static boolean isString( Object value ) {
-        return Types.isString( value );
-    }
-
-    /**
-     * check if value is not String nor StringBuffer nor StringBuilder
-     *
-     * @param value check value
-     * @return  true if value is not included in [ String, StringBuffer, StringBuilder ]
-     */
-    public static boolean isNotString( Object value ) {
-        return ! Types.isString( value );
     }
 
     /**
@@ -348,171 +328,26 @@ public class Validator {
     }
 
     /**
-     * 문자열이 정수로만 구성되어 있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean isFixedNumber( String value ) {
-        return isMatched( value, "^[-0-9]+$" );
-    }
-
-    /**
-     * 문자열이 양의 정수로 구성되어있는지 여부를 확인한다.
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean isPositiveFixedNumber( String value ) {
-        if( ! isFixedNumber( value ) ) return false;
-        return Long.parseLong( value ) >= 0;
-    }
-
-    /**
-     * 수치자료인지 여부를 확인한다. (소수점을 포함하는 경우에도 체크 가능)
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean isNumeric( String value ) {
-        try {
-            Double.parseDouble( value );
-            return true;
-        } catch( Exception e ) {
-            return false;
-        }
-    }
-
-    /**
-     * check value's class is Numeric class <br>
-     *   - int, Integer, long, Long, short, Short, float, Float, double, Double, byte, Byte, BigDecimal, BigInteger
-     *
-     * @param value object to check.
-     * @return true if value's class is Numeric class
-     */
-    public static boolean isNumericClass( Object value ) {
-    	return value != null && isNumericClass( value.getClass() );
-    }
-
-    /**
-     * check class is Numeric class <br>
-     *   - int, Integer, long, Long, short, Short, float, Float, double, Double, byte, Byte, BigDecimal, BigInteger
-     *
-     * @param klass class to check.
-     * @return true if it is Numeric class
-     */
-    public static boolean isNumericClass( Class<?> klass ) {
-    	if( klass == null ) return false;
-    	return (
-			klass == int.class        ||
-			klass == Integer.class    ||
-			klass == long.class       ||
-			klass == Long.class       ||
-			klass == short.class      ||
-			klass == Short.class      ||
-			klass == float.class      ||
-			klass == Float.class      ||
-			klass == double.class     ||
-			klass == Double.class     ||
-			klass == byte.class       ||
-			klass == Byte.class       ||
-			klass == BigDecimal.class ||
-			klass == BigInteger.class
-    	);
-    }
-
-    /**
-     * object 의 class 가 Boolean 타입인지 여부를 확인한다.
-     *
-     * @param object 확인할 Instance
-     * @return Boolean 타입 여부
-     */
-    public static boolean isBooleanClass( Object object ) {
-    	if( object == null ) return false;
-        Class klass = object.getClass();
-    	return ( klass == boolean.class || klass == Boolean.class );
-    }
-
-    /**
-     * 문자열이 숫자를 가지고 있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean hasNumber( String value ) {
-        return ! isMatched( value, "^[^0-9]+$" );
-    }
-
-    /**
-     * 문자열에 한글을 가지고 있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean hasKorean( String value ) {
-        return ! isMatched( value, "^[^ㄱ-ㅎㅏ-ㅣ가-힣]+$" );
-    }
-
-    /**
-     * 문자열이 한글로만 구성되어있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean isKorean( String value ) {
-        return isMatched( value, "^[ㄱ-ㅎㅏ-ㅣ가-힣]+$" );
-    }
-
-    /**
-     * 문자열이 영문자로만 구성되어있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean isEnglish( String value ) {
-        return isMatched( value, "^[a-zA-Z]+$" );
-    }
-
-    /**
-     * 문자열에 영문자를 가지고 있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean hasEnglish( String value ) {
-        return ! isMatched( value, "^[^a-zA-Z]+$" );
-    }
-
-    /**
-     * 문자열이 한글과 숫자로만 구성되어 있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean isNumberOrKorean( String value ) {
-        return isMatched( value, "^[0-9ㄱ-ㅎㅏ-ㅣ가-힣]+$" );
-    }
-
-    /**
-     * 문자열이 한글과 영문자로만 구성되어 있는지 여부를 확인한다.
-     *
-     * @param value 검사할 문자열
-     * @return 검사결과
-     */
-    public static boolean isNumberOrEnglish( String value ) {
-        return isMatched( value, "^[0-9a-zA-Z]+$" );
-    }
-
-    /**
-     * check whether value's pattern is email or not
+     * check if value is Fixed number (numeric integer).
      *
      * @param value check value
-     * @return true if value's pattern is email
+     * @return true if value is Fixed number (numeric integer).
      */
-    public static boolean isEmail( String value ) {
-        return isMatched( value, "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$" );
+    public static boolean isInt( String value ) {
+        return Types.isInt( value );
     }
 
     /**
+     * check if value is positive Fixed number (numeric integer).
+     *
+     * @param value check value
+     * @return true if value is positive Fixed number (numeric integer).
+     */
+    public static boolean isPositiveInt( String value ) {
+        return Types.isPositiveInt( value );
+    }
+
+     /**
      * Let you replace null (or empty)  with another value.
      *
      * if value is null or empty, examine replaceValue.
