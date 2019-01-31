@@ -1,2 +1,2 @@
-# basica
+# Basica
 basic utility components
