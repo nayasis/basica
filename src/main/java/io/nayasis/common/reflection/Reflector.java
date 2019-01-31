@@ -1,18 +1,20 @@
 package io.nayasis.common.reflection;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.rits.cloning.Cloner;
 import io.nayasis.common.base.Classes;
-import io.nayasis.common.clone.Cloner;
 import io.nayasis.common.exception.unchecked.JsonMappingException;
 import io.nayasis.common.exception.unchecked.UncheckedClassCastException;
+import io.nayasis.common.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.model.NList;
 import io.nayasis.common.reflection.core.BeanMerger;
 import io.nayasis.common.reflection.core.CoreReflector;
 import io.nayasis.common.reflection.core.JsonConverter;
 import io.nayasis.common.reflection.mapper.Invocator;
-import io.nayasis.common.reflection.mapper.NObjectMapper;
 import io.nayasis.common.reflection.mapper.MethodInvocator;
+import io.nayasis.common.reflection.mapper.NObjectMapper;
 
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -27,7 +29,8 @@ import java.util.Map;
  */
 public class Reflector {
 
-	public final static JsonConverter jsonConverter = new JsonConverter( new NObjectMapper() );
+	private static JsonConverter jsonConverter = new JsonConverter( new NObjectMapper() );
+	private static Cloner        cloner        = new Cloner();
 
 	/**
 	 * Creates and returnes a copy of object
@@ -52,10 +55,41 @@ public class Reflector {
 	@SuppressWarnings( "unchecked" )
 	public static <T> T clone( T object, boolean deepClone ) {
 		if( deepClone ) {
-			return new Cloner().deepClone( object );
+			if( object instanceof Serializable ) {
+				return cloneSerializable( object );
+			} else {
+				return cloner.deepClone( object );
+			}
 		} else {
-			return new Cloner().shallowClone( object );
+			return cloner.shallowClone( object );
 		}
+	}
+
+	private static <T> T cloneSerializable( T obj ) {
+
+		if( obj == null ) return null;
+
+		ObjectOutputStream oos  = null;
+		ObjectInputStream  ois  = null;
+
+		try {
+
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			oos = new ObjectOutputStream( bos );
+			oos.writeObject( obj );
+			oos.flush();
+
+			ois = new ObjectInputStream( new ByteArrayInputStream( bos.toByteArray() ) );
+
+			return (T) ois.readObject();
+
+		} catch ( IOException | ClassNotFoundException e ) {
+			throw new UncheckedIOException( e );
+		} finally {
+			try { ois.close(); } catch (Exception e) {}
+			try { oos.close(); } catch (Exception e) {}
+		}
+
 	}
 
 	/**
@@ -66,11 +100,13 @@ public class Reflector {
 	 */
     public static void copy( Object source, Object target ) {
 		if( source == null || target == null ) return;
-		if( Classes.isExtendedBy(target.getClass(),source.getClass()) || Classes.isExtendedBy(source.getClass(),target.getClass()) ) {
-    		new Cloner().copy( source, target );
+		Class<?> targetClass = target.getClass();
+		Class<?> sourceClass = source.getClass();
+		if( Classes.isExtendedBy(targetClass, sourceClass) || Classes.isExtendedBy(sourceClass, targetClass) ) {
+    		cloner.copyPropertiesOfInheritedClass( source, target );
 		} else {
-			Object newTarget = toBeanFrom( source, target.getClass() );
-			new Cloner().copy( newTarget, target );
+			Object typeCastedSource = toBeanFrom( source, targetClass );
+			cloner.copyPropertiesOfInheritedClass( typeCastedSource, target );
 		}
     }
 
@@ -106,9 +142,8 @@ public class Reflector {
 	 * @return report of fields' value
 	 */
     public static String toString( Object bean ) {
-		CoreReflector coreReflector = new CoreReflector();
     	NList result = new NList();
-        for( Field field : coreReflector.getFields(bean) ) {
+        for( Field field : CoreReflector.getFields(bean) ) {
         	if( ! field.isAccessible() ) field.setAccessible( true );
 			String typeName = field.getType().getName();
         	result.add( "field", field.getName() );
