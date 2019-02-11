@@ -334,13 +334,13 @@ public class Classes {
 		log.trace( "pattern         : {}", pattern );
 		log.trace( "toFilePattern   : {}", toFilePattern(pattern) );
 
-		List<Path> paths = Files.search( Files.rootPath(), true, false, -1, toFilePattern( pattern ) );
+		List<Path> paths = Files.search( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
 
 		log.trace( "paths count : {}\npaths : {}", paths.size(), paths );
 
 		for( Path path : paths ) {
 			String pathVal = Files.nomalizeSeparator( path.toString() );
-			resourceNamesInFileSystem.add( pathVal.replace( Files.rootPath(), "" ).replaceFirst( "^/", "" ) );
+			resourceNamesInFileSystem.add( pathVal.replace( Files.getRootPath(), "" ).replaceFirst( "^/", "" ) );
 		}
 
 		log.trace( ">> resource in jar : {}", resourceNamesInJar );
@@ -369,7 +369,7 @@ public class Classes {
 	private static String[] toFilePattern( String[] pattern ) {
 		String[] result = new String[ pattern.length ];
 		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
-			result[ i ] = ( Files.rootPath() + "/" + pattern[ i ] )
+			result[ i ] = ( Files.getRootPath() + "/" + pattern[ i ] )
 				.replaceAll( "//", "/" )
 				.replaceAll( "(/WEB-INF/classes)+", "/WEB-INF/classes" );
         }
