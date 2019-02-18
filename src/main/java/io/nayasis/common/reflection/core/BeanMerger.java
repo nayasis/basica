@@ -246,7 +246,7 @@ public class BeanMerger {
         Collection collection = Types.toCollection( value );
         if( UnmodifiableChecker.isUnmodifiable(collection) ) {
             String json = Reflector.toJson( value );
-            return Reflector.toListFromJson( json );
+            return Reflector.toListFrom( json );
         } else {
             return collection;
         }

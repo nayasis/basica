@@ -2,12 +2,11 @@ package io.nayasis.common.base;
 
 import io.nayasis.common.exception.unchecked.ParseException;
 import io.nayasis.common.model.NDate;
+import io.nayasis.common.reflection.Reflector;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -367,6 +366,16 @@ public class Validator {
             if( isNotNull( val ) ) return val;
         }
         return null;
+    }
+
+    /**
+     * check text is valid json type
+     *
+     * @param text	text to check format
+     * @return valid or not
+     */
+    public static boolean isJson( String text ) {
+        return Reflector.isJson( text );
     }
 
 }

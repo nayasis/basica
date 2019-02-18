@@ -18,7 +18,7 @@ public class SimpleDateDeserializer extends JsonDeserializer<Date> {
 			return new Date( value );
 		} catch( JsonParseException e ) {
 			String value = jp.getValueAsString();
-			return new NDate( value, NDate.DEFAULT_OUTPUT_FORMAT ).toDate();
+			return new NDate( value, NDate.DEFAULT_FORMAT).toDate();
 		}
     }
 

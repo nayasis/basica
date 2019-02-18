@@ -29,11 +29,12 @@ import java.util.Map;
  */
 public class Reflector {
 
-	private static JsonConverter jsonConverter = new JsonConverter( new NObjectMapper() );
-	private static Cloner        cloner        = new Cloner();
+	private static JsonConverter jsonConverter         = new JsonConverter( new NObjectMapper() );
+	private static JsonConverter sortableJsonConverter = new JsonConverter( new NObjectMapper(true) );
+	private static Cloner        cloner                = new Cloner();
 
 	/**
-	 * Creates and returnes a copy of object
+	 * creates and returns a copy of object
 	 *
 	 * @param object object to clone
 	 * @param <T> object's generic type
@@ -45,7 +46,7 @@ public class Reflector {
     }
 
 	/**
-	 * Creates and returnes a copy of object
+	 * creates and returns a copy of object
 	 *
 	 * @param object 	object to clone
 	 * @param deepClone if true, clone all elements in object's Map or Collection
@@ -56,16 +57,17 @@ public class Reflector {
 	public static <T> T clone( T object, boolean deepClone ) {
 		if( deepClone ) {
 			if( object instanceof Serializable ) {
-				return cloneSerializable( object );
-			} else {
-				return cloner.deepClone( object );
+				try {
+					return cloneSerializable( object );
+				} finally {}
 			}
+			return cloner.deepClone( object );
 		} else {
 			return cloner.shallowClone( object );
 		}
 	}
 
-	private static <T> T cloneSerializable( T obj ) {
+	private static <T> T cloneSerializable( T obj ) throws UncheckedIOException {
 
 		if( obj == null ) return null;
 
@@ -170,11 +172,10 @@ public class Reflector {
 	 * @param fromBean		instance to convert as json data
 	 * @param prettyPrint	whether or not to make json text pretty
 	 * @param sort			whether or not to sort key of json
-	 * @param ignoreNull	whether or not to ignore null value
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull ) throws JsonMappingException {
-		return jsonConverter.toJson( fromBean, prettyPrint, sort, ignoreNull, null );
+	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort ) throws JsonMappingException {
+		return toJson( fromBean, prettyPrint, sort, null );
 	}
 
 	/**
@@ -183,12 +184,12 @@ public class Reflector {
 	 * @param fromBean		instance to convert as json data
 	 * @param prettyPrint	whether or not to make json text pretty
 	 * @param sort			whether or not to sort key of json
-	 * @param ignoreNull	whether or not to ignore null value
 	 * @param view	        json view class
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull, Class view ) throws JsonMappingException {
-		return jsonConverter.toJson( fromBean, prettyPrint, sort, ignoreNull, view );
+	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort, Class view ) throws JsonMappingException {
+		JsonConverter converter = sort ? jsonConverter : sortableJsonConverter;
+		return converter.toJson( fromBean, prettyPrint, view );
 	}
 
 	/**
@@ -199,7 +200,7 @@ public class Reflector {
 	 * @return json text
 	 */
 	public static String toJson( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
-		return toJson( fromBean, prettyPrint, false, false );
+		return toJson( fromBean, prettyPrint, false );
 	}
 
 	/**
@@ -211,7 +212,7 @@ public class Reflector {
 	 * @return json text
 	 */
 	public static String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonMappingException {
-		return toJson( fromBean, prettyPrint, false, false, view );
+		return toJson( fromBean, prettyPrint, false, view );
 	}
 
 	/**
@@ -236,27 +237,6 @@ public class Reflector {
 	}
 
 	/**
-	 * get json text without null value
-	 *
-	 * @param fromBean		instance to convert as json
-	 * @param prettyPrint	true if you want to see json text with indentation
-	 * @return json text
-	 */
-	public static String toNullIgnoredJson( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
-		return toJson( fromBean, prettyPrint, false, true );
-	}
-
-	/**
-	 * get json text without null value
-	 *
-	 * @param fromBean	instance to convert as json data
-	 * @return json text
-	 */
-	public static String toNullIgnoredJson( Object fromBean ) throws JsonMappingException {
-		return toNullIgnoredJson( fromBean, false );
-	}
-
-	/**
 	 * Get map with flatten key
 	 *
 	 * <pre>
@@ -278,8 +258,8 @@ public class Reflector {
 	 * @param object	json string, Map or bean
 	 * @return map with flattern key
 	 */
-	public static Map<String, Object> toMapWithFlattenKey( Object object ) throws JsonMappingException {
-		return jsonConverter.toMapWithFlattenKey( object );
+	public static Map<String, Object> toFlattenMap( Object object ) throws JsonMappingException {
+		return jsonConverter.toFlattenMap( object );
 	}
 
 	/**
@@ -304,8 +284,8 @@ public class Reflector {
 	 * @param object	json string, Map or bean
 	 * @return map with flattern key
 	 */
-	public static Map<String, Object> toMapWithUnflattenKey( Object object ) throws JsonMappingException {
-		return jsonConverter.toMapWithUnflattenKey( object );
+	public static Map<String, Object> toUnflatternMap( Object object ) throws JsonMappingException {
+		return jsonConverter.toUnflattenMap( object );
 	}
 
 	/**
@@ -314,8 +294,8 @@ public class Reflector {
 	 * @param json	json text
 	 * @return valid or not
 	 */
-	public static boolean isValidJson( String json ) {
-		return jsonConverter.isValidJson( json );
+	public static boolean isJson(String json ) {
+		return jsonConverter.isJson( json );
 	}
 
 	/**
@@ -349,23 +329,23 @@ public class Reflector {
 	/**
 	 * convert json to list
 	 *
-	 * @param json			json text
-	 * @param typeClass   	list's generic type
+	 * @param json			json text or collection
+	 * @param genericType   list's generic type
 	 * @param <T> generic type
      * @return list
      */
-	public static <T> List<T> toListFromJson( String json, Class<T> typeClass ) throws JsonMappingException {
-		return jsonConverter.toListFrom( json, typeClass );
+	public static <T> List<T> toListFrom( Object json, Class<T> genericType ) throws JsonMappingException {
+		return jsonConverter.toListFrom( json, genericType );
 	}
 
 	/**
 	 * Convert as List
 	 *
-	 * @param json json text
+	 * @param json json text or collection
 	 * @return List
 	 */
-	public static List toListFromJson( String json ) throws JsonMappingException {
-		return toListFromJson( json, Object.class );
+	public static List toListFrom( Object json ) throws JsonMappingException {
+		return toListFrom( json, Object.class );
 	}
 
 	/**

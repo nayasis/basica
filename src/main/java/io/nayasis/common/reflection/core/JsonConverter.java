@@ -14,9 +14,6 @@ import io.nayasis.common.exception.unchecked.JsonMappingException;
 import java.io.IOException;
 import java.util.*;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS;
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
 /**
  * Json Converter
  *
@@ -48,53 +45,22 @@ public class JsonConverter {
      *
      * @param fromBean		instance to convert as json data
      * @param prettyPrint	whether or not to make json text pretty
-     * @param sort			whether or not to sort key of json
-     * @param ignoreNull	whether or not to ignore null value
-     * @return json text
-     */
-    public String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull ) throws JsonMappingException {
-        return toJson( fromBean, prettyPrint, sort, ignoreNull, null );
-    }
-
-    /**
-     * Get json text
-     *
-     * @param fromBean		instance to convert as json data
-     * @param prettyPrint	whether or not to make json text pretty
-     * @param sort			whether or not to sort key of json
-     * @param ignoreNull	whether or not to ignore null value
      * @param view	        json view class
      * @return json text
      */
-    public String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull, Class view ) throws JsonMappingException {
+    public String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonMappingException {
 
         if( fromBean == null ) return null;
 
         ObjectWriter writer = prettyPrint ? objectMapper.writerWithDefaultPrettyPrinter() : objectMapper.writer();
-        config( writer, SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, sort );
-        config( writer, ignoreNull ? NON_NULL : ALWAYS );
 
-        if( view != null ) {
+        if( view != null )
             writer = writer.withView( view );
-        }
 
         try {
             return writer.writeValueAsString( fromBean );
         } catch( IOException e ) {
             throw new JsonMappingException( e );
-        }
-    }
-
-    private void config( ObjectWriter writer, JsonInclude.Include include ) {
-        writer.getConfig().withPropertyInclusion( DEFAULT_INCLUSION.withValueInclusion( include ) );
-    }
-
-    private void config( ObjectWriter writer, SerializationFeature feature, boolean state ) {
-        SerializationConfig config = writer.getConfig();
-        if( state ) {
-            config.with( feature );
-        } else {
-            config.without( feature );
         }
     }
 
@@ -106,19 +72,7 @@ public class JsonConverter {
      * @return json text
      */
     public String toJson( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
-        return toJson( fromBean, prettyPrint, false, false, null );
-    }
-
-    /**
-     * get json text
-     *
-     * @param fromBean		instance to convert as json data
-     * @param prettyPrint	whether or not to make json text pretty
-     * @param view	        json view class
-     * @return json text
-     */
-    public String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonMappingException {
-        return toJson( fromBean, prettyPrint, false, false, view );
+        return toJson( fromBean, prettyPrint, null );
     }
 
     /**
@@ -143,27 +97,6 @@ public class JsonConverter {
     }
 
     /**
-     * get json text without null value
-     *
-     * @param fromBean		instance to convert as json
-     * @param prettyPrint	true if you want to see json text with indentation
-     * @return json text
-     */
-    public String toJsonWithoutNull( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
-        return toJson( fromBean, prettyPrint, false, true );
-    }
-
-    /**
-     * get json text without null value
-     *
-     * @param fromBean	instance to convert as json data
-     * @return json text
-     */
-    public String toJsonWithoutNull( Object fromBean ) throws JsonMappingException {
-        return toJsonWithoutNull( fromBean, false );
-    }
-
-    /**
      * Get map with flatten key
      *
      * <pre>
@@ -185,24 +118,24 @@ public class JsonConverter {
      * @param object	json string, Map or bean
      * @return map with flattern key
      */
-    public Map<String, Object> toMapWithFlattenKey( Object object ) {
+    public Map<String, Object> toFlattenMap( Object object ) {
         Map<String, Object> map = new HashMap<>();
         if( Validator.isNull(object) ) return map;
-        flattenKeyRecursivly( "", toMapFrom( object ), map );
+        makeKeyFlatten( "", toMapFrom( object ), map );
         return map;
     }
 
-    private void flattenKeyRecursivly( String currentPath, Object json, Map result ) {
+    private void makeKeyFlatten( String currentPath, Object json, Map result ) {
         if( json instanceof Map ) {
             Map<String, Object> map = (Map) json;
             String prefix = Validator.isEmpty( currentPath ) ? "" : currentPath + ".";
             for( String key : map.keySet() ) {
-                flattenKeyRecursivly( prefix + key, map.get( key ), result );
+                makeKeyFlatten( prefix + key, map.get( key ), result );
             }
         } else if( json instanceof List ) {
             List list = (List) json;
             for( int i = 0, iCnt = list.size(); i < iCnt; i++ ) {
-                flattenKeyRecursivly( String.format( "%s[%d]", currentPath, i ), list.get( i ), result );
+                makeKeyFlatten( String.format( "%s[%d]", currentPath, i ), list.get( i ), result );
             }
         } else {
             result.put( currentPath, json );
@@ -231,7 +164,7 @@ public class JsonConverter {
      * @param object	json string, Map or bean
      * @return map with flattern key
      */
-    public Map<String, Object> toMapWithUnflattenKey( Object object ) {
+    public Map<String, Object> toUnflattenMap( Object object ) {
 
         Map<String, Object> map = new HashMap<>();
 
@@ -240,14 +173,14 @@ public class JsonConverter {
         Map<String, Object> objectMap = toMapFrom( object );
 
         for( String key : objectMap.keySet() ) {
-            unflattenKeyRecursively( key, objectMap.get( key ), map );
+            makeKeyUnflatten( key, objectMap.get( key ), map );
         }
 
         return map;
 
     }
 
-    private void unflattenKeyRecursively( String jsonPath, Object value, Map result ) {
+    private void makeKeyUnflatten( String jsonPath, Object value, Map result ) {
 
         String path  = jsonPath.replaceFirst( "\\[.*\\]", "" ).replaceFirst( "\\..*?$", "" );
         String index = jsonPath.replaceFirst(  "^(" + path + ")\\[(.*?)\\](.*?)$", "$2" );
@@ -287,18 +220,16 @@ public class JsonConverter {
             }
 
             String recursivePath = jsonPath.replaceFirst( currentPath.replaceAll( "\\[", "\\\\[" ) + ".", "" );
-            unflattenKeyRecursively( recursivePath, value, newVal );
+            makeKeyUnflatten( recursivePath, value, newVal );
 
         }
 
     }
 
     private void setValueToListInJson( String key, int idx, Object value, Map json ) {
-
         if( ! json.containsKey( key ) ) {
             json.put( key, new ArrayList<>() );
         }
-
         List list = (List) json.get( key );
         int listSize = list.size();
         if( idx >= listSize ) {
@@ -307,7 +238,6 @@ public class JsonConverter {
             }
         }
         list.set( idx, value );
-
     }
 
     public JsonNode readTree( String json ) throws JsonMappingException {
@@ -345,7 +275,7 @@ public class JsonConverter {
      * @param json	json text
      * @return valid or not
      */
-    public boolean isValidJson( String json ) {
+    public boolean isJson(String json ) {
         try {
             objectMapper.readTree( json );
             return true;

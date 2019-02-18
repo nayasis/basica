@@ -12,7 +12,7 @@ public class SimpleDateSerializer extends JsonSerializer<Date> {
 
     @Override
     public void serialize( final Date value, final JsonGenerator generator, final SerializerProvider provider) throws IOException {
-        provider.defaultSerializeValue( new NDate(value).toString(NDate.DEFAULT_OUTPUT_FORMAT ), generator );
+        provider.defaultSerializeValue( new NDate(value).toString(NDate.DEFAULT_FORMAT), generator );
     }
 
 }

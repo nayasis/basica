@@ -8,17 +8,17 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 파일을 검색하는 Visitor 클래스
+ * File Visitor
  *
- * @author nayasis
+ * @author nayasis@gmail.com
  */
 public class FileFinder extends SimpleFileVisitor<Path> {
 
-    private boolean           checkPattern = true;
-    private boolean           includeDir   = true;
-    private boolean           includeFile  = true;
-    private Set<PathMatcher>  matchers     = new HashSet<>();
-    private List<Path>        result       = new ArrayList<>();
+    private boolean           checkPattern;
+    private boolean           includeDir;
+    private boolean           includeFile;
+    private Set<PathMatcher>  matchers;
+    private List<Path>        result = new ArrayList<>();
 
     /**
      * 기본 생성자
@@ -47,7 +47,6 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      * @param file  검사할 파일명
      */
     private void find( Path file ) {
-//        NLogger.debug( "check file : {}", file );
         if( checkPattern ) {
             for( PathMatcher matcher : matchers ) {
         		if( matcher.matches( file ) ) {
@@ -61,13 +60,10 @@ public class FileFinder extends SimpleFileVisitor<Path> {
     }
 
     private void add( Path path ) {
-
     	boolean isDir = Files.isDirectory( path );
-
     	if( (includeFile && ! isDir) || (includeDir && isDir) ) {
     		result.add( path );
     	}
-
     }
 
     /**
@@ -75,7 +71,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      *
      * @return 검색결과
      */
-    public List<Path> getFindResult() {
+    public List<Path> getFoundPaths() {
         return result;
     }
 
@@ -86,7 +82,6 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      */
     @Override
     public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs ) {
-//        NLogger.debug( "visitDir : {}", dir );
         if( includeDir ) find( dir );
         return FileVisitResult.CONTINUE;
     }
@@ -97,7 +92,6 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      */
     @Override
     public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) {
-//        NLogger.debug( "visitFile : {}", file );
         if( includeFile ) find( file );
         return FileVisitResult.CONTINUE;
     }

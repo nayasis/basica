@@ -298,7 +298,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
             String json = value.toString();
 
             try {
-                List list = Reflector.toListFromJson( json );
+                List list = Reflector.toListFrom( json );
                 _addRows( index, list, false );
                 if( syncronizeHeaderData ) {
                     refreshKey();

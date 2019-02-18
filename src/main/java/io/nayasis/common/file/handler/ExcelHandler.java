@@ -102,7 +102,7 @@ public abstract class ExcelHandler {
 	protected abstract void writeNListTo( OutputStream outputStream, Map<String, NList> data, boolean isXlsx ) throws UncheckedIOException;
 
 	private boolean isXlsx( File file ) {
-		return "xlsx".equalsIgnoreCase( Files.extention(file) );
+		return "xlsx".equalsIgnoreCase( Files.getExtension(file) );
 	}
 
 	/**

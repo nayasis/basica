@@ -339,7 +339,7 @@ public class Classes {
 		log.trace( "paths count : {}\npaths : {}", paths.size(), paths );
 
 		for( Path path : paths ) {
-			String pathVal = Files.nomalizeSeparator( path.toString() );
+			String pathVal = Files.normalizeSeparator( path.toString() );
 			resourceNamesInFileSystem.add( pathVal.replace( Files.getRootPath(), "" ).replaceFirst( "^/", "" ) );
 		}
 
@@ -387,7 +387,7 @@ public class Classes {
 	private static JarFile getJarFile( URL url ) {
 		try {
 			String filePath = new File( url.toURI().getSchemeSpecificPart() ).getPath();
-			filePath = Files.nomalizeSeparator( filePath )
+			filePath = Files.normalizeSeparator( filePath )
 				.replaceFirst( "\\/WEB-INF\\/classes(!)?(\\/)?", "" )
 				.replaceFirst( "!$", "" )
 				.replaceFirst( "file:", "" );

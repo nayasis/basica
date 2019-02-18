@@ -17,7 +17,7 @@ public class NDateDeserializer extends JsonDeserializer<NDate> {
 			return new NDate( value );
 		} catch( JsonParseException e ) {
 			String value = jp.getValueAsString();
-			return new NDate( value, NDate.ISO_8601_24H_FULL_FORMAT );
+			return new NDate( value, NDate.ISO_8601_FORMAT);
 		}
     }
 

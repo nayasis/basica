@@ -1,10 +1,12 @@
 package io.nayasis.common.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.nayasis.common.base.Strings;
 import io.nayasis.common.base.Validator;
 import io.nayasis.common.exception.unchecked.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nayasis.common.reflection.deserializer.NDateDeserializer;
+import io.nayasis.common.reflection.serializer.simple.SimpleNDateSerializer;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -16,21 +18,20 @@ import java.util.*;
  *
  * @author nayasis@gmail.com
  */
-//@JsonSerialize( using = SimpleNDateSerializer.class )
-//@JsonDeserialize( using = NDateDeserializer.class )
+@JsonSerialize( using = SimpleNDateSerializer.class )
+@JsonDeserialize( using = NDateDeserializer.class )
 public class NDate implements Serializable {
 
-    private static Logger log = LoggerFactory.getLogger( NDate.class );
-
-	public static final NDate MIN_DATE = new NDate( "0000-01-01" );
-	public static final NDate MAX_DATE = new NDate( "9999-12-31 23:59:59.999" );
+	public static final NDate MIN_DATE = new NDate("0000-01-01");
+	public static final NDate MAX_DATE = new NDate("9999-12-31 23:59:59.999");
 
     private Calendar currentTime = Calendar.getInstance();
 
-    public static final String DEFAULT_OUTPUT_FORMAT = "YYYY-MM-DD HH:MI:SS";
-    public static final String DEFAULT_INPUT_FORMAT  = "yyyyMMddHHmmssSSS";
+    private static final String DEFAULT_INPUT_FORMAT  = "yyyyMMddHHmmssSSS";
 
-    public static final String ISO_8601_24H_FULL_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String DEFAULT_FORMAT  = "YYYY-MM-DD HH:MI:SS";
+    public static final String FULL_FORMAT     = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    public static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     private static final Set<String> ISO_8601_COMPATIBLE_FORMATS = new LinkedHashSet<>(
         Arrays.asList( "yyyyMMdd'T'HHmmssZ", "yyyyMMdd'T'HHmmssSSSZ", "yyyyMMdd'T'HHmmssSSZ", "yyyyMMdd'T'HHmmssSZ" )
@@ -65,7 +66,7 @@ public class NDate implements Serializable {
      * @param date initial date
      */
     public NDate( LocalDateTime date ) {
-        setDate( Date.from(date.atZone(ZoneId.systemDefault()).toInstant()) );
+        setDate( date );
     }
 
     /**
@@ -183,16 +184,13 @@ public class NDate implements Serializable {
         }
 
         try {
-
             parse( value, pattern );
             return this;
-
         } catch( ParseException parseException ) {
 
-            if( ISO_8601_24H_FULL_FORMAT.equals(pattern) ) {
+            if( ISO_8601_FORMAT.equals(pattern) ) {
 
                 String isoValue = extractIsoValue( date );
-
                 for( String isoFormat : ISO_8601_COMPATIBLE_FORMATS ) {
                     try {
                         parse( isoValue, isoFormat );
@@ -215,21 +213,18 @@ public class NDate implements Serializable {
     }
 
     private void parse( String val, String pattern ) {
-
         SimpleDateFormat sdf = new SimpleDateFormat( pattern );
-
         try {
             currentTime.setTime( sdf.parse(val) );
         } catch( java.text.ParseException e ) {
             throw new ParseException( e, e.getMessage() );
         }
-
     }
 
     /**
-     * Date 객체로 날짜를 세팅한다.
+     * set date
      *
-     * @param date 날짜
+     * @param date date
      * @return self instance
      */
     public NDate setDate( Date date ) {
@@ -237,9 +232,55 @@ public class NDate implements Serializable {
     }
 
     /**
-     * Date 객체로 날짜를 세팅한다.
+     * set date
      *
-     * @param date 숫자형 날짜
+     * @param date      date
+     * @param zoneId    zone id
+     * @return  self instance
+     */
+    public NDate setDate( LocalDateTime date, ZoneId zoneId ) {
+        Date realDate = Date.from( date.atZone(zoneId).toInstant() );
+        setDate( realDate );
+        return this;
+    }
+
+    /**
+     * set date
+     *
+     * @param date date
+     * @return self instance
+     */
+    public NDate setDate( LocalDateTime date ) {
+        return setDate( date, ZoneId.systemDefault() );
+    }
+
+    /**
+     * set date
+     *
+     * @param date date
+     * @return self instance
+     */
+    public NDate setDate( LocalDate date ) {
+        return setDate( date, ZoneId.systemDefault() );
+    }
+
+    /**
+     * set date
+     *
+     * @param date      date
+     * @param zoneId    zone id
+     * @return  self instance
+     */
+    public NDate setDate( LocalDate date, ZoneId zoneId ) {
+        Date realDate = Date.from( date.atStartOfDay(zoneId).toInstant() );
+        setDate( realDate );
+        return this;
+    }
+
+    /**
+     * set date
+     *
+     * @param date the milliseconds since January 1, 1970, 00:00:00 GMT.
      * @return self instance
      */
     public NDate setDate( long date ) {
@@ -248,9 +289,9 @@ public class NDate implements Serializable {
     }
 
     /**
-     * Calendar 객체로 날짜를 세팅한다.
+     * set date
      *
-     * @param date 날짜객체
+     * @param date date
      * @return self instance
      */
     public NDate setDate( Calendar date ) {
@@ -259,9 +300,9 @@ public class NDate implements Serializable {
     }
 
     /**
-     * NDate 객체로 날짜를 세팅한다.
+     * set date
      *
-     * @param date 날짜객체
+     * @param date date
      * @return self instance
      */
     public NDate setDate( NDate date ) {
@@ -270,18 +311,18 @@ public class NDate implements Serializable {
     }
 
     /**
-     * NDate 객체를 Date 객체로 변환한다.
+     * convert to date
      *
-     * @return Date 객체
+     * @return Date instance
      */
     public Date toDate() {
         return this.currentTime.getTime();
     }
 
     /**
-     * NDate 객체를 Calendar 객체로 변환한다.
+     * convert to calendar.
      *
-     * @return Calendar 객체
+     * @return Calendar instance
      */
     public Calendar toCalendar() {
         return this.currentTime;
@@ -332,7 +373,7 @@ public class NDate implements Serializable {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return toString( DEFAULT_OUTPUT_FORMAT );
+        return toString(DEFAULT_FORMAT);
     }
 
     /**
@@ -617,12 +658,12 @@ public class NDate implements Serializable {
      * <pre>
      * NDate date = new NDate( "2012.02.29 13:21:41" );
      *
-     * System.out.println( date.getBeginningOfMonth() ); → '2012.02.01 00:00:00'
+     * System.out.println( date.beginningOfMonth() ); → '2012.02.01 00:00:00'
      * </pre>
      *
      * @return new NDate to be setted with beginning of month date
      */
-    public NDate getBeginningOfMonth() {
+    public NDate beginningOfMonth() {
 
         Calendar newDate = Calendar.getInstance();
         newDate.set( getYear(), getMonth() - 1, 1, 0, 0, 0 );
