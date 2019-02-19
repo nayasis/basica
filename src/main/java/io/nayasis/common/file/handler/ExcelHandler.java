@@ -3,7 +3,7 @@ package io.nayasis.common.file.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import io.nayasis.common.base.Types;
-import io.nayasis.common.base.Validator;
+import io.nayasis.common.validation.Validator;
 import io.nayasis.common.exception.unchecked.JsonMappingException;
 import io.nayasis.common.exception.unchecked.ParseException;
 import io.nayasis.common.file.Files;

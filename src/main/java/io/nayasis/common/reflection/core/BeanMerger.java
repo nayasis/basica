@@ -2,7 +2,7 @@ package io.nayasis.common.reflection.core;
 
 import io.nayasis.common.base.Classes;
 import io.nayasis.common.base.Types;
-import io.nayasis.common.base.Validator;
+import io.nayasis.common.validation.Validator;
 import io.nayasis.common.reflection.Reflector;
 
 import java.lang.reflect.Array;

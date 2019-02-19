@@ -3,7 +3,7 @@ package io.nayasis.common.model;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.nayasis.common.base.Strings;
-import io.nayasis.common.base.Validator;
+import io.nayasis.common.validation.Validator;
 import io.nayasis.common.exception.unchecked.ParseException;
 import io.nayasis.common.reflection.deserializer.NDateDeserializer;
 import io.nayasis.common.reflection.serializer.simple.SimpleNDateSerializer;

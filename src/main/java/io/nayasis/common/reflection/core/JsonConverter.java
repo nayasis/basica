@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapLikeType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.nayasis.common.base.Types;
-import io.nayasis.common.base.Validator;
+import io.nayasis.common.validation.Validator;
 import io.nayasis.common.exception.unchecked.JsonMappingException;
 
 import java.io.IOException;
