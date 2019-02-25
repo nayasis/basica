@@ -3,6 +3,8 @@ package io.nayasis.common.validation;
 import io.nayasis.common.base.Strings;
 import io.nayasis.common.file.Files;
 
+import java.io.File;
+
 /**
  * Assertion checker to assists in validation arguments
  */
@@ -14,6 +16,14 @@ public class Assert {
 
 	public static void isNotNull( Object object, Object... errorMessage ) throws IllegalArgumentException {
 		if( object == null ) throwException( errorMessage );
+	}
+
+	public static void exists( File filePath, Object... errorMessage ) throws IllegalArgumentException {
+		if( Files.notExists(filePath) ) throwException( errorMessage );
+	}
+
+	public static void notExists( File filePath, Object... errorMessage ) throws IllegalArgumentException {
+		if( Files.exists(filePath) ) throwException( errorMessage );
 	}
 
 	public static void exists( String filePath, Object... errorMessage ) throws IllegalArgumentException {
