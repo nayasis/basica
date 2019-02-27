@@ -958,7 +958,7 @@ public class Strings {
 	 * @return the String, converted to lowercase.
 	 */
 	public static String toLowerCase( Object value ) {
-		return nvl( value ).toLowerCase();
+		return nvl(value).toLowerCase();
 	}
 
 	/**
@@ -968,7 +968,29 @@ public class Strings {
 	 * @return the String, converted to uppercase.
 	 */
 	public static String toUpperCase( Object value ) {
-		return nvl( value ).toUpperCase();
+		return nvl(value).toUpperCase();
+	}
+
+	/**
+	 * extract upper characters from word
+	 *
+	 * @param string word
+	 * @return upper characters
+	 */
+	public static String extractUpperCharacters( String string ) {
+		if( isEmpty( string ) ) return "";
+		return string.replaceAll( "[^A-Z]", "" );
+	}
+
+	/**
+	 * extract lower characters from word
+	 *
+	 * @param string word
+	 * @return lower characters
+	 */
+	public static String extractLowerCharacters( String string ) {
+		if( isEmpty( string ) ) return "";
+		return string.replaceAll( "[^a-z]", "" );
 	}
 
 	/**

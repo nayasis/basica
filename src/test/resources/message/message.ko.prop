@@ -1,0 +1,15 @@
+err.sql.invalidExpression               = 검색 수식에 오류가 있습니다.\n괄호를 제대로 닫았는지 등을 확인해 주세요.
+err.session.expired                     = 세션이 종료되었습니다.
+err.session.unauthorized                = 접근권한이 없습니다.
+err.session.invalidIdOrPassword         = ID 또는 비밀번호가 올바르지 않습니다.{}
+err.session.outdate                     = 비밀번호 갱신이 필요합니다.
+err.session.changePasswordAuthority     = 로그인한 사용자만 비밀번호를 변경하실 수 있습니다.
+err.fileRepository.noFileInfo           = 파일ID({})가 존재하지 않습니다.
+err.fileRepository.noFile               = 파일({})이 서버에 존재하지 않습니다.
+err.fileRepository.noFileUpload         = 업로드할 파일이 없습니다.
+err.server.unknown                      = 서버에서 오류가 발생하였습니다.
+err.cache.noEvictAuthority              = 캐시 갱신 권한이 없는 사용자입니다.
+err.rule.invalidRegexp                  = 정규식 패턴이 아닙니다. ( 입력:{} )
+err.test.connectDbms                    = DBMS 연결테스트에 실패하였습니다.
+err.test.ruleScript                     = Script 실행에 실패하였습니다.\n\n{}
+err.dnd.newData                         = 새로 추가된 데이터는 순서 조정을 할 수 없습니다.

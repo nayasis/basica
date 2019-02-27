@@ -335,7 +335,7 @@ public class Classes {
 		log.trace( "pattern         : {}", pattern );
 		log.trace( "toFilePattern   : {}", toFilePattern(pattern) );
 
-		List<Path> paths = Files.search( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
+		List<Path> paths = Files.find( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
 
 		log.trace( "paths count : {}\npaths : {}", paths.size(), paths );
 
