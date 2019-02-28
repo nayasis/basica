@@ -55,7 +55,7 @@ public class Messages {
      * @param param     binding parameter replaced with '{}'
      * @return message corresponding to code
      */
-    public static String get( Locale locale, String code, Object... param ) {
+    public static String get( Locale locale, Object code, Object... param ) {
         return Strings.format( getMessage( code, locale ), param );
     }
 
@@ -89,7 +89,7 @@ public class Messages {
      * @param param     binding parameter replaced with '{}'
      * @return message corresponding to code
      */
-    public static String get( String code, Object... param ) {
+    public static String get( Object code, Object... param ) {
     	return get( Locale.getDefault(), code, param );
     }
 
@@ -100,12 +100,12 @@ public class Messages {
      * @param locale    locale
      * @return message corresponding to code
      */
-    private static String getMessage( String code, Locale locale ) {
+    private static String getMessage( Object code, Locale locale ) {
 
-        if( code == null || pool.isEmpty() ) return code;
+        if( code == null || pool.isEmpty() ) return "";
 
     	Map<Locale,String> messages = pool.get( code );
-    	if( messages.isEmpty() ) return code;
+    	if( messages.isEmpty() ) return "";
 
         Locale localeKey = locale;
 
