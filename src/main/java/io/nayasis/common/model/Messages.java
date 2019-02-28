@@ -109,9 +109,12 @@ public class Messages {
 
         Locale localeKey = locale;
 
-        if( ! messages.containsKey(locale) ) {
-            if( ! messages.containsKey( NULL_LOCALE ) ) {
-                localeKey = messages.keySet().iterator().next();
+        if( ! messages.containsKey(localeKey) ) {
+            localeKey = new Locale( locale.getLanguage() );
+            if( ! messages.containsKey(localeKey) ) {
+                if( ! messages.containsKey( NULL_LOCALE ) ) {
+                    localeKey = messages.keySet().iterator().next();
+                }
             }
         }
 
@@ -129,7 +132,6 @@ public class Messages {
     public static void load( String resourcePath ) throws UncheckedIOException {
         if( Strings.isEmpty(resourcePath) ) return;
         if( resourcePath.contains("*") ) {
-
             List<String> resources = Classes.findResources( resourcePath );
             resources.forEach( resource -> loadPool( resource ) );
         } else {
@@ -171,7 +173,6 @@ public class Messages {
     	String country  = Strings.extractUpperCharacters( localeString );
     	String language = Strings.extractLowerCharacters( localeString );
 
-    	if( Strings.isEmpty( country  ) ) country  = Locale.getDefault().getCountry();
     	if( Strings.isEmpty( language ) ) language = Locale.getDefault().getLanguage();
 
     	return new Locale( language, country );

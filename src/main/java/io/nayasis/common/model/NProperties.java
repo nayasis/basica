@@ -22,9 +22,7 @@ public class NProperties extends Properties {
     }
 
     public NProperties load( String resourcePath ) throws UncheckedIOException {
-
         BufferedInputStream inputStream = new BufferedInputStream( Files.getResource( resourcePath ) );
-
         try {
             String charset = Files.getCharset( inputStream );
             load( new BufferedReader( new InputStreamReader( inputStream, charset ) ) );
@@ -34,7 +32,6 @@ public class NProperties extends Properties {
         } finally {
             try { inputStream.close(); } catch ( IOException e ) {}
         }
-
     }
 
     public String get( String key ) {

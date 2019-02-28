@@ -1,12 +1,11 @@
 package io.nayasis.common.model;
 
 import io.nayasis.common.file.Files;
-import io.nayasis.common.reflection.Reflector;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Locale;
 
 @Slf4j
 public class MessagesTest {
@@ -18,7 +17,6 @@ public class MessagesTest {
 
         Messages.load( path );
 
-//        Assert.assertEquals( "세션이 종료되었습니다.", Messages.get("err.session.expired") );
         Assert.assertEquals( "Session is expired.", Messages.get("err.session.expired") );
 
     }
@@ -30,10 +28,9 @@ public class MessagesTest {
 
         Messages.load( path );
 
-        log.debug( Messages.get("err.session.expired") );
-
-//        Assert.assertEquals( "세션이 종료되었습니다.", Messages.get("err.session.expired") );
-//        Assert.assertEquals( "Session is expired.", Messages.get("err.session.expired") );
+        Assert.assertEquals( "Session is expired.", Messages.get( Locale.ENGLISH,"err.session.expired") );
+        Assert.assertEquals( "Session is expired.", Messages.get( Locale.UK,"err.session.expired") );
+        Assert.assertEquals( "세션이 종료되었습니다.", Messages.get( Locale.KOREAN,"err.session.expired") );
 
 
     }

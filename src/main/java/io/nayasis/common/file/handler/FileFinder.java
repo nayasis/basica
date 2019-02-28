@@ -1,11 +1,10 @@
 package io.nayasis.common.file.handler;
 
+import io.nayasis.common.base.Strings;
+
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * File Visitor
@@ -18,7 +17,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
     private boolean           includeDir;
     private boolean           includeFile;
     private Set<PathMatcher>  matchers;
-    private List<Path>        result = new ArrayList<>();
+    private List<String>      result = new ArrayList<>();
 
     /**
      * 기본 생성자
@@ -29,7 +28,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      */
     public FileFinder( boolean includeFile, boolean includeDir, String... pattern ) {
 
-        this.matchers     = io.nayasis.common.file.Files.toPathMacher( pattern );
+        this.matchers     = toPathMacher( pattern );
         this.checkPattern = ( matchers.size() != 0 );
         this.includeFile  = includeFile;
         this.includeDir   = includeDir;
@@ -62,7 +61,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
     private void add( Path path ) {
     	boolean isDir = Files.isDirectory( path );
     	if( (includeFile && ! isDir) || (includeDir && isDir) ) {
-    		result.add( path );
+    		result.add( path.toAbsolutePath().toString() );
     	}
     }
 
@@ -71,7 +70,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      *
      * @return 검색결과
      */
-    public List<Path> getFoundPaths() {
+    public List<String> getFoundPaths() {
         return result;
     }
 
@@ -96,14 +95,26 @@ public class FileFinder extends SimpleFileVisitor<Path> {
         return FileVisitResult.CONTINUE;
     }
 
-//    /*
-//     * (non-Javadoc)
-//     * @see java.nio.file.SimpleFileVisitor#visitFileFailed(java.lang.Object, java.io.IOException)
-//     */
-//    @Override
-//    public FileVisitResult visitFileFailed( Path file, IOException exception ) throws IOException {
-//    	if( exception != null ) throw exception;
-//        return FileVisitResult.CONTINUE;
-//    }
+    /**
+     * convert patterns to glob PathMatcher
+     *
+     * @param patterns patterns
+     * @return glob PathMatcher
+     */
+    public static Set<PathMatcher> toPathMacher( String... patterns ) {
+
+        Set<PathMatcher> matchers = new HashSet<>();
+
+        for( String pattern : new HashSet<>( Arrays.asList( patterns )) ) {
+            if( Strings.isEmpty( pattern ) ) continue;
+            if( ! pattern.contains("/") && ! pattern.contains("\\") ) {
+                pattern = "**/" + pattern;
+            }
+            matchers.add( FileSystems.getDefault().getPathMatcher( "glob:" + pattern ) );
+        }
+
+        return matchers;
+
+    }
 
 }
