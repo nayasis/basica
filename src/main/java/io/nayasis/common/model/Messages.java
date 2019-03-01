@@ -102,10 +102,12 @@ public class Messages {
      */
     private static String getMessage( Object code, Locale locale ) {
 
-        if( code == null || pool.isEmpty() ) return "";
+        String cd = Strings.nvl( code );
+
+        if( cd.isEmpty() || pool.isEmpty() ) return cd;
 
     	Map<Locale,String> messages = pool.get( code );
-    	if( messages.isEmpty() ) return "";
+    	if( messages == null || messages.isEmpty() ) return cd;
 
         Locale localeKey = locale;
 

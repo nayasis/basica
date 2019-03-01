@@ -18,6 +18,7 @@ public class MessagesTest {
         Messages.load( path );
 
         Assert.assertEquals( "Session is expired.", Messages.get("err.session.expired") );
+        Assert.assertEquals( "notExistCode", Messages.get("notExistCode") );
 
     }
 
@@ -31,7 +32,6 @@ public class MessagesTest {
         Assert.assertEquals( "Session is expired.", Messages.get( Locale.ENGLISH,"err.session.expired") );
         Assert.assertEquals( "Session is expired.", Messages.get( Locale.UK,"err.session.expired") );
         Assert.assertEquals( "세션이 종료되었습니다.", Messages.get( Locale.KOREAN,"err.session.expired") );
-
 
     }
 
