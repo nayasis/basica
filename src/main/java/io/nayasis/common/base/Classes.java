@@ -102,7 +102,7 @@ public class Classes {
 	 *
 	 * Type type = this.getClass().getGenericSuperclass();
 	 *
-	 * Class&lt;?&gt; klass = ClassUtil.getClass( type );
+	 * Class&lt;?&gt; klass = Classes.getClass( type );
 	 * </pre>
 	 *
 	 * @param type class type
@@ -133,13 +133,13 @@ public class Classes {
 	 * <pre>
 	 * public class Test&lt;T&gt; {
 	 *     public Test() {
-	 *         Class genericClass = ClassUtil.getGenericClass( this.getClass() );
+	 *         Class genericClass = Classes.getGenericClass( this.getClass() );
 	 *         -&gt; it returns type of <b>T</b> exactly.
 	 *     }
 	 * }
 	 *
 	 * Test&lt;HashMap&gt; test = new Test&lt;&gt;();
-	 * Class genericClass = ClassUtil.getGenericClass( test.getClass() );
+	 * Class genericClass = Classes.getGenericClass( test.getClass() );
 	 * -&gt; it returns <b>Object.class</b> only because instance has no information about Generic.
 	 * </pre>
 	 *
