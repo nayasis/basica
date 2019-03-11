@@ -82,15 +82,20 @@
       <artifactId>juniversalchardet</artifactId>
       <version>1.0.3</version>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+    </dependency>
 
-    <!-- for ZIP -->
+    <!-- zip -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <version>1.18</version>
       <optional>true</optional>
     </dependency>
-    <!-- for Excel -->
+    <!-- excel -->
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi-ooxml</artifactId>
@@ -103,12 +108,20 @@
       <version>2.6.12</version>
       <optional>true</optional>
     </dependency>
-
+    <!-- spring -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-jpa</artifactId>
+      <version>2.1.5.RELEASE</version>
+      <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
+      <version>2.2</version>
+      <optional>true</optional>
+    </dependency>
+
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
