@@ -2,6 +2,7 @@ package io.nayasis.common.cli;
 
 import io.nayasis.common.etc.Platform;
 import io.nayasis.common.exception.unchecked.CommandLineException;
+import io.nayasis.common.file.Files;
 import io.nayasis.common.file.worker.LineReader;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -57,7 +58,13 @@ public class WindowsCommandExecutorTest {
 
         StringBuffer output = new StringBuffer();
 
-        executor.run( "\"c:\\Program Files\\Microsoft Office\\Office15\\EXCEL.EXE\"", output );
+        String path = "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE";
+        if( Files.notExists(path) ) {
+            log.warn( "can not test" );
+            return;
+        }
+
+        executor.run( path, output );
 
         executor.waitFor();
 
@@ -74,10 +81,16 @@ public class WindowsCommandExecutorTest {
 
         StringBuffer output = new StringBuffer();
 
+        String path = "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE";
+        if( Files.notExists(path) ) {
+            log.warn( "can not test" );
+            return;
+        }
+
         // 하나의 CommandExecutor로 동시에 2개의 Command를 실행하지 못해야 한다.
 
-        executor.run( "\"c:\\Program Files\\Microsoft Office\\Office15\\EXCEL.EXE\"", output );
-        executor.run( "\"c:\\Program Files\\Microsoft Office\\Office15\\EXCEL.EXE\"", output );
+        executor.run( path, output );
+        executor.run( path, output );
 
         executor.waitFor();
 

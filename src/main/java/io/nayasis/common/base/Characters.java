@@ -38,6 +38,7 @@ public class Characters {
 		add( UnicodeBlock.HIRAGANA );
 		add( UnicodeBlock.KATAKANA );
 		add( UnicodeBlock.KATAKANA_PHONETIC_EXTENSIONS );
+		add( UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION );
 	}};
 
 	private static Set<UnicodeBlock> CJK = new HashSet<UnicodeBlock>() {{

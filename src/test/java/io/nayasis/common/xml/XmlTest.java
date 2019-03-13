@@ -94,7 +94,7 @@ public class XmlTest {
 
         Node node = xml.getChildNode( "//*[@id='c2']" );
 
-        assertEquals( "<col2 id=\"c2\" val=\"val2\">값2</col2>", node.toString().trim() );
+        assertEquals( "<col2 id=\"c2\" val=\"val2\">Value2</col2>", node.toString().trim() );
         assertEquals( "{id=c2, val=val2}", node.getAttrs().toString() );
 
         Node root = xml.getRoot();
@@ -104,7 +104,7 @@ public class XmlTest {
         Node child01 = root.getChildNode( "./row[2]/col2" );
         Node child02 = root.getChildNode( "//col2[2]" );
 
-        assertEquals( "<col2 id=\"c4\">값4</col2>", child01.toString().trim() );
+        assertEquals( "<col2 id=\"c4\">Value4</col2>", child01.toString().trim() );
         assertEquals( "c4", child01.getAttr("id") );
         assertEquals( "", child02.toString().trim() );
         assertEquals( null, child02.getAttr("id") );
@@ -123,8 +123,8 @@ public class XmlTest {
         Node node3 = node2.getChildNodes( "./row" ).get( 0 ).getChildNodes( "./col2" ).get( 0 );
 
         assertEquals( "col2", node3.getName() );
-        assertEquals( "값2",  node3.getText() );
-        assertEquals( "값2",  node3.getValue() );
+        assertEquals( "Value2",  node3.getText() );
+        assertEquals( "Value2",  node3.getValue() );
         assertEquals( "c2",   node3.getAttr("id") );
         assertEquals( "val2", node3.getAttr("val") );
         assertEquals( "{id=c2, val=val2}", node3.getAttrs().toString() );
@@ -192,14 +192,14 @@ public class XmlTest {
         return
             "<root>\n" +
                 "    <row>\n" +
-                "        <col1 id=\"c1\">값1</col1>\n" +
+                "        <col1 id=\"c1\">Value1</col1>\n" +
                 "    <row>\n" +
-                "                 <col2 id=\"c2\" val=\"val2\">값2</col2>\n" +
+                "                 <col2 id=\"c2\" val=\"val2\">Value2</col2>\n" +
                 "    </row>\n" +
                 "    </row>\n" +
                 "    <row>\n" +
-                "        <col1 id=\"c3\">값3</col1>\n" +
-                "        <col2 id=\"c4\">값4</col2>\n" +
+                "        <col1 id=\"c3\">Value3</col1>\n" +
+                "        <col2 id=\"c4\">Value4</col2>\n" +
                 "    </row>\n" +
                 "</root>";
     }
