@@ -6,6 +6,7 @@ import io.nayasis.common.etc.StopWatch;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Simple LRU Cache
@@ -102,6 +103,25 @@ public class LruCache<K,V> implements Cache<K,V> {
 	public void clear() {
 		map.clear();
 		creationTimes.clear();
+	}
+
+	@Override
+	public Set<K> keySet() {
+		return map.keySet();
+	}
+
+	@Override
+	public void putAll( Map<K,V> map ) {
+		map.keySet().forEach( key -> {
+			put( key, map.get(key) );
+		});
+	}
+
+	@Override
+	public void putAll( Cache<K, V> cache ) {
+		cache.keySet().forEach( key -> {
+			put( key, cache.get(key) );
+		});
 	}
 
 }

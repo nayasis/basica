@@ -132,6 +132,15 @@ public class NDate implements Serializable {
     }
 
     /**
+     * set current date to now
+     *
+     * @return self instance
+     */
+    public NDate setNow() {
+        return setDate( new Date() );
+    }
+
+    /**
      * 날짜를 [년-월-일-시-분-초] 순의 형식으로 세팅한다.
      *
      * <pre>

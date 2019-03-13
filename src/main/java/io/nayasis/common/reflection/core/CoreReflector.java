@@ -10,9 +10,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -54,7 +53,7 @@ public class CoreReflector {
      * @param <T>
      * @return  field's value
      */
-    public static <T> T getValue( Object target, Field field ) {
+    public static <T> T getValue( Object target, Field field ) throws UncheckedIllegalAccessException {
 
         final Object[] val = new Object[ 1 ];
 
@@ -70,7 +69,32 @@ public class CoreReflector {
 
     }
 
-    private static void execute( Object target, Field field, Runner runner ) {
+    /**
+     * get value from target instance's field
+     *
+     * @param target    target instance
+     * @param field     target field
+     * @param <T>
+     * @return  field's value
+     */
+    public static <T> T getValue( Object target, String field ) throws UncheckedIllegalAccessException {
+
+        Set<Field> fields = getFields( target, field );
+
+        if( fields.isEmpty() ) {
+            throw new UncheckedIllegalAccessException( Strings.format("There is no field({}) in class({})", field, target.getClass()) );
+        } else if( fields.size() > 1 ) {
+            List<String> fieldNames = fields.stream().map( f -> f.getName() ).collect( Collectors.toList() );
+            throw new UncheckedIllegalAccessException( Strings.format("Specify field name more precisely. (searchName: {}, field: {}, class: {})", field, fieldNames, target.getClass()) );
+        }
+
+        Field targetField = fields.iterator().next();
+
+        return getValue( target, targetField );
+
+    }
+
+    private static void execute( Object target, Field field, Runner runner ) throws UncheckedIllegalAccessException {
 
         if( target == null || field == null ) return;
 

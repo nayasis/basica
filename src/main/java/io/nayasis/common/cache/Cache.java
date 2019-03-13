@@ -1,6 +1,9 @@
 package io.nayasis.common.cache;
 
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface that defines common cache operations.<br><br>
@@ -31,5 +34,11 @@ public interface Cache<K,V> {
 	void clear( K key );
 
 	void clear();
+
+	Set<K> keySet();
+
+	void putAll( Map<K,V> map );
+
+	void putAll( Cache<K,V> cache );
 
 }

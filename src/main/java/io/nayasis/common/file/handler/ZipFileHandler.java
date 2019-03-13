@@ -74,7 +74,7 @@ public class ZipFileHandler {
 
     private void compress( File fileOrDirectoryToCompress, ArchiveOutputStream archiveOutpuStream ) {
 
-        List<File> fileList = new ArrayList<>();
+        List<File> files = new ArrayList<>();
 
         String basePath;
 
@@ -82,13 +82,13 @@ public class ZipFileHandler {
 
             basePath = fileOrDirectoryToCompress.getPath();
 
-            for( Path path : Files.search( fileOrDirectoryToCompress.getPath(), true, false, -1, "**.*" ) ) {
-                fileList.add( path.toFile() );
+            for( String path : Files.find( fileOrDirectoryToCompress.getPath(), true, false, -1, "**.*" ) ) {
+                files.add( new File(path) );
             }
 
         } else {
             basePath = fileOrDirectoryToCompress.getParent();
-            fileList.add( fileOrDirectoryToCompress );
+            files.add( fileOrDirectoryToCompress );
 
         }
 
@@ -100,7 +100,7 @@ public class ZipFileHandler {
 
             zos = archiveOutpuStream;
 
-            for( File file : fileList ) {
+            for( File file : files ) {
 
                 String name = Files.toRelativePath( basePath, file.getPath() );
 

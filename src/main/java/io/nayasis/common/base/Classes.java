@@ -5,6 +5,7 @@ import io.nayasis.common.cache.implement.LruCache;
 import io.nayasis.common.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.common.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.file.Files;
+import io.nayasis.common.file.handler.FileFinder;
 import io.nayasis.common.validation.Validator;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
@@ -101,7 +102,7 @@ public class Classes {
 	 *
 	 * Type type = this.getClass().getGenericSuperclass();
 	 *
-	 * Class&lt;?&gt; klass = ClassUtil.getClass( type );
+	 * Class&lt;?&gt; klass = Classes.getClass( type );
 	 * </pre>
 	 *
 	 * @param type class type
@@ -132,13 +133,13 @@ public class Classes {
 	 * <pre>
 	 * public class Test&lt;T&gt; {
 	 *     public Test() {
-	 *         Class genericClass = ClassUtil.getGenericClass( this.getClass() );
+	 *         Class genericClass = Classes.getGenericClass( this.getClass() );
 	 *         -&gt; it returns type of <b>T</b> exactly.
 	 *     }
 	 * }
 	 *
 	 * Test&lt;HashMap&gt; test = new Test&lt;&gt;();
-	 * Class genericClass = ClassUtil.getGenericClass( test.getClass() );
+	 * Class genericClass = Classes.getGenericClass( test.getClass() );
 	 * -&gt; it returns <b>Object.class</b> only because instance has no information about Generic.
 	 * </pre>
 	 *
@@ -290,8 +291,8 @@ public class Classes {
 	 */
 	public static List<String> findResources( String... pattern ) {
 
-		Set<String> resourceNamesInJar        = new HashSet<>();
-		Set<String> resourceNamesInFileSystem = new HashSet<>();
+		Set<String> resourcesInJar        = new HashSet<>();
+		Set<String> resourcesInFileSystem = new HashSet<>();
 
 		if( isRunningInJar() ) {
 
@@ -300,7 +301,7 @@ public class Classes {
 
 			JarFile jar = getJarFile( jarUrl );
 
-			Set<PathMatcher> matchers = Files.toPathMacher( toJarPattern( pattern ) );
+			Set<PathMatcher> matchers = FileFinder.toPathMacher( toJarPattern( pattern ) );
 			boolean addAll = ( matchers.size() == 0 );
 
 			if( log.isTraceEnabled() ) {
@@ -318,12 +319,12 @@ public class Classes {
 					}
 				}
 				if( addAll ) {
-					resourceNamesInJar.add( entry.getName() );
+					resourcesInJar.add( entry.getName() );
 				} else {
 					Path targetPath = Paths.get( entry.getName() );
 					for( PathMatcher matcher : matchers ) {
 						if( matcher.matches( targetPath )) {
-							resourceNamesInJar.add( entry.getName() );
+							resourcesInJar.add( entry.getName() );
 							break;
 						}
 					}
@@ -335,23 +336,23 @@ public class Classes {
 		log.trace( "pattern         : {}", pattern );
 		log.trace( "toFilePattern   : {}", toFilePattern(pattern) );
 
-		List<Path> paths = Files.search( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
+		List<String> paths = Files.find( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
 
 		log.trace( "paths count : {}\npaths : {}", paths.size(), paths );
 
-		for( Path path : paths ) {
-			String pathVal = Files.normalizeSeparator( path.toString() );
-			resourceNamesInFileSystem.add( pathVal.replace( Files.getRootPath(), "" ).replaceFirst( "^/", "" ) );
+		for( String path : paths ) {
+			String pathVal = Files.normalizeSeparator( path );
+			resourcesInFileSystem.add( pathVal.replace( Files.getRootPath(), "" ).replaceFirst( "^/", "" ) );
 		}
 
-		log.trace( ">> resource in jar : {}", resourceNamesInJar );
-		log.trace( ">> resource in file system : {}", resourceNamesInFileSystem );
+		log.trace( ">> resource in jar : {}", resourcesInJar );
+		log.trace( ">> resource in file system : {}", resourcesInFileSystem );
 
-		resourceNamesInJar.addAll( resourceNamesInFileSystem );
+		resourcesInJar.addAll( resourcesInFileSystem );
 
-		log.trace( ">> all resource : {}", resourceNamesInJar );
+		log.trace( ">> all resource : {}", resourcesInJar );
 
-		return new ArrayList<>( resourceNamesInJar );
+		return new ArrayList<>( resourcesInJar );
 
 	}
 
@@ -369,8 +370,9 @@ public class Classes {
 
 	private static String[] toFilePattern( String[] pattern ) {
 		String[] result = new String[ pattern.length ];
+		String rootPath = Files.getRootPath();
 		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
-			result[ i ] = ( Files.getRootPath() + "/" + pattern[ i ] )
+            result[ i ] = ( rootPath + "/" + pattern[i].replaceFirst( "^" + rootPath + "/", "" ) )
 				.replaceAll( "//", "/" )
 				.replaceAll( "(/WEB-INF/classes)+", "/WEB-INF/classes" );
         }
