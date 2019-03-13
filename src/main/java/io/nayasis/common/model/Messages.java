@@ -109,6 +109,9 @@ public class Messages {
     	Map<Locale,String> messages = pool.get( code );
     	if( messages == null || messages.isEmpty() ) return cd;
 
+    	if( locale == null )
+    	    locale = Locale.getDefault();
+
         Locale localeKey = locale;
 
         if( ! messages.containsKey(localeKey) ) {

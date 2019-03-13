@@ -25,7 +25,8 @@ public class MessagesTest {
     @Test
     public void loadMulti() {
 
-        String path = Files.getRootPath() + "/message/**.prop";
+//        String path = Files.getRootPath() + "/message/**.prop";
+        String path = "message/**.prop";
 
         Messages.load( path );
 
