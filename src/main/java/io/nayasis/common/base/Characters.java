@@ -64,7 +64,7 @@ public class Characters {
 	private static double fullwidth = 1;
 
 	/** font width of Half-width character */
-	private static double halfwidth = 0.5;
+	private static double halfwidth = 1;
 
 	/**
 	 * set font width of Full-width character

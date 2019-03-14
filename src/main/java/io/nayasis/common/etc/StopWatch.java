@@ -56,15 +56,18 @@ public class StopWatch {
 	}
 
 
-	public long elapsedNanoSeconds() {
+	public long elapsedNanoSeconds() throws IllegalStateException {
+		if( startTime == 0 ) {
+			throw new IllegalStateException( "StopWatch is not running." );
+		}
 		return System.nanoTime() - startTime;
 	}
 
-	public long elapsedMiliSeconds() {
+	public long elapsedMiliSeconds() throws IllegalStateException {
 		return elapsedNanoSeconds() / 1_000_000;
 	}
 
-	public double elapsedSeconds() {
+	public double elapsedSeconds() throws IllegalStateException {
 		return elapsedNanoSeconds() / 1_000_000_000.0;
 	}
 

@@ -252,4 +252,17 @@ public class StringsTest {
 
     }
 
+    @Test
+    public void displayLength() {
+
+        String value = "control값";
+
+        Characters.fullwidth( 1.0 );
+        Assert.assertEquals( 8, Strings.getDisplayLength( value ) );
+
+        Characters.fullwidth( 2.0 );
+        Assert.assertEquals( 9, Strings.getDisplayLength( value ) );
+
+    }
+
  }
