@@ -24,6 +24,8 @@ public class StringsTest {
         assertEquals( "abc PRE 2 POST", Strings.format( "{name} PRE {age} POST", parameter ) );
         assertEquals( "abc PRE   2 POST", Strings.format( "{name} PRE {age:%3d} POST", parameter ) );
 
+        assertEquals( "5K\nUtil\ndesc", Strings.format("{}\n{}\n{}", "5K", "Util", "desc") );
+
     }
 
     @Test
@@ -128,12 +130,14 @@ public class StringsTest {
     @Test
     public void tokenize() {
 
-        assertEquals( "[I , m ,  boy || you , re ,  girl]", Strings.tokenize( "I am a boy || you are a girl", "a" ).toString() );
-        assertEquals( "[I am a boy ,  you are a girl]", Strings.tokenize( "I am a boy || you are a girl", "||" ).toString() );
-        assertEquals( "[I am a boy || you are a girl]", Strings.tokenize( "I am a boy || you are a girl", "" ).toString() );
-        assertEquals( "[I am a boy || you are a girl]", Strings.tokenize( "I am a boy || you are a girl", "ZZ" ).toString() );
+        assertEquals( "[I, m, boy || you, re, girl]", Strings.tokenize( "I am a boy || you are a girl", "a" ).toString() );
+        assertEquals( "[I am a boy, you are a girl]", Strings.tokenize( "I am a boy || you are a girl", "||" ).toString() );
+        assertEquals( "[I am a boy || ZAyou are a girl]", Strings.tokenize( "I am a boy || ZAyou are a girl", "" ).toString() );
+        assertEquals( "[I am a boy ||, you are a girl]", Strings.tokenize( "I am a boy || ZAyou are a girl", "ZA" ).toString() );
+        assertEquals( "[a, b, c, d]", Strings.tokenize("a b\tc\nd", " \n\t" ).toString() );
 
-        log.debug( Strings.tokenize( "I am a boy || you are a girl", " " ).toString() );
+        log.debug( Strings.tokenize( "I am a boy || ZAyou are a girl", " " ).toString() );
+        log.debug( Strings.tokenize( "I am a boy || ZAyou are a girl", "ZA" ).toString() );
 
     }
 

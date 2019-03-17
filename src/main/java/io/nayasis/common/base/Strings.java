@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -495,11 +496,11 @@ public class Strings {
 	 * Split string around matches of the given <a href="../util/regex/Pattern.html#sum">regular expression</a>.
 	 *
 	 * @param value				string value
-	 * @param regexpDelimeter	the delimiting regular expression
-	 * @param includeDelimeter	include delimeter in result
+	 * @param regexpDelimiter	the delimiting regular expression
+	 * @param includeDelimiter	include delimiter in result
 	 * @return	string array comupted by splitting around matches of the given regular expression
 	 */
-	public static List<String> split( Object value, String regexpDelimeter, boolean includeDelimeter ) {
+	public static List<String> split( Object value, String regexpDelimiter, boolean includeDelimiter ) {
 
 		List<String> result = new ArrayList<>();
 
@@ -507,12 +508,12 @@ public class Strings {
 
 		String val = trim( value );
 
-		if( isEmpty(regexpDelimeter) ) {
+		if( isEmpty(regexpDelimiter) ) {
 			result.add( val );
 			return result;
 		}
 
-		Pattern pattern = Pattern.compile( regexpDelimeter );
+		Pattern pattern = Pattern.compile( regexpDelimiter );
 		Matcher matcher = pattern.matcher( val );
 
 		int caret = 0;
@@ -521,7 +522,7 @@ public class Strings {
 			if( caret != matcher.start() ) {
 				result.add( val.substring( caret, matcher.start() ).trim() );
 			}
-			if( includeDelimeter ) {
+			if( includeDelimiter ) {
 				result.add( matcher.group() );
 			}
 			caret = matcher.end();
@@ -537,10 +538,10 @@ public class Strings {
 
 
 	/**
-     * tokenize text by seperator
+     * tokenize text by separator
      *
      * @param value     value to tokenize
-     * @param separator sepertator to tokenize
+     * @param separator separator to tokenize
      * @return tokenized word list
      */
     public static List<String> tokenize( Object value, String separator ) {
@@ -549,30 +550,11 @@ public class Strings {
 
     	if( isEmpty(value) ) return result;
 
-    	String workVal = value.toString();
+		StringTokenizer tokenizer = new StringTokenizer( value.toString(), separator );
 
-    	if( isEmpty(separator) ) {
-			result.add( workVal );
-			return result;
+		while( tokenizer.hasMoreTokens() ) {
+			result.add( tokenizer.nextToken().trim() );
 		}
-
-    	int fromIndex = 0, toIndex = 0, separatorLength = separator.length();
-
-    	List<int[]> indexes = new ArrayList<>();
-
-    	while( true ) {
-    		toIndex = workVal.indexOf( separator, fromIndex );
-    		if( toIndex < 0 ) {
-    			indexes.add( new int[] {fromIndex, workVal.length()} );
-    			break;
-    		}
-    		indexes.add( new int[] {fromIndex, toIndex} );
-    		fromIndex = toIndex + separatorLength;
-    	}
-
-    	for( int[] index : indexes ) {
-    		result.add( workVal.substring( index[0], index[1] ) );
-    	}
 
     	return result;
 

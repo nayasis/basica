@@ -116,7 +116,7 @@ public class Formatter {
             params = new HashMap();
             int index = 0;
             for( Object param : parameter ) {
-                params.put( String.format(FORMAT_INDEX, index), param );
+                params.put( String.format(FORMAT_INDEX, index++), param );
             }
         }
 
