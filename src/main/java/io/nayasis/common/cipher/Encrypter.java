@@ -5,6 +5,7 @@ import io.nayasis.common.exception.unchecked.DecodingException;
 import io.nayasis.common.exception.unchecked.EncodingException;
 import io.nayasis.common.exception.unchecked.NoSuchAlgorithmException;
 import io.nayasis.common.validation.Validator;
+import org.springframework.util.Assert;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -27,6 +28,7 @@ import java.security.SecureRandom;
 public class Encrypter {
 
     private String algorithm;
+    private Key    defaultSecretKey = null;
 
     /**
      * default constructor
@@ -45,6 +47,35 @@ public class Encrypter {
         getCipher();
     }
 
+    public Key getDefaultSecretKey() {
+        return defaultSecretKey;
+    }
+
+    public Encrypter setDefaultSecretKey( Key defaultSecretKey ) {
+        this.defaultSecretKey = defaultSecretKey;
+        return this;
+    }
+
+    public Encrypter setDefaultSecretKey( String defaultSecretKey ) {
+        this.defaultSecretKey = toSecretKey( defaultSecretKey );
+        return this;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    /**
+     * encrypt value
+     *
+     * @param value         value to encrypt
+     * @return encrypted value
+     */
+    public String encrypt( String value ) {
+        Assert.notNull( defaultSecretKey, "default secret key is missing.");
+        return encrypt( value, defaultSecretKey );
+    }
+
     /**
      * encrypt value
      *
@@ -54,17 +85,6 @@ public class Encrypter {
      */
     public String encrypt( String value, String secretKey ) {
         return encrypt( value, toSecretKey(secretKey) );
-    }
-
-    /**
-     * decrypt value
-     *
-     * @param value         value to decrypt
-     * @param secretKey     secret key
-     * @return  decrypted value
-     */
-    public String decrypt( String value, String secretKey ) {
-        return decrypt( value, toSecretKey(secretKey) );
     }
 
     /**
@@ -86,6 +106,28 @@ public class Encrypter {
             throw new EncodingException( e );
         }
 
+    }
+
+    /**
+     * decrypt value
+     *
+     * @param value         value to decrypt
+     * @return  decrypted value
+     */
+    public String decrypt( String value ) {
+        Assert.notNull( defaultSecretKey, "default secret key is missing.");
+        return decrypt( value, defaultSecretKey );
+    }
+
+    /**
+     * decrypt value
+     *
+     * @param value         value to decrypt
+     * @param secretKey     secret key
+     * @return  decrypted value
+     */
+    public String decrypt( String value, String secretKey ) {
+        return decrypt( value, toSecretKey(secretKey) );
     }
 
     /**
