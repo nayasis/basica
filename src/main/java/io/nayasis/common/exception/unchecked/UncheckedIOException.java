@@ -15,15 +15,15 @@ public class UncheckedIOException extends BaseRuntimeException {
         super();
     }
 
-    public UncheckedIOException(Throwable rootCause ) {
+    public UncheckedIOException( Throwable rootCause ) {
         super( rootCause );
     }
 
-    public UncheckedIOException(String message, Object... messageParam ) {
+    public UncheckedIOException( String message, Object... messageParam ) {
         super( message, messageParam );
     }
 
-    public UncheckedIOException(Throwable rootCause, String message, Object... messageParam ) {
+    public UncheckedIOException( Throwable rootCause, String message, Object... messageParam ) {
     	super( rootCause, message, messageParam );
     }
 
