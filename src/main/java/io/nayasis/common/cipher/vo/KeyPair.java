@@ -19,6 +19,18 @@ public class KeyPair {
     private PublicKey  publicKey;
     private PrivateKey privateKey;
 
+    public KeyPair() {}
+
+    public KeyPair( PublicKey publicKey, PrivateKey privateKey ) {
+        this.publicKey = publicKey;
+        this.privateKey = privateKey;
+    }
+
+    public KeyPair( String publicKey, String privateKey ) {
+        setPublicKey( publicKey );
+        setPrivateKey( privateKey );
+    }
+
     public void setKeyPair( java.security.KeyPair keyPair ) {
         setPublicKey( keyPair.getPublic() );
         setPrivateKey( keyPair.getPrivate() );
@@ -66,11 +78,11 @@ public class KeyPair {
         }
     }
 
-    public String getEncodedPublicKey() {
+    public String getTextPublicKey() {
         return Base64.encodeBase64String( publicKey.getEncoded() );
     }
 
-    public String getEncodedPrivateKey() {
+    public String getTextPrivateKey() {
         return Base64.encodeBase64String( privateKey.getEncoded() );
     }
 

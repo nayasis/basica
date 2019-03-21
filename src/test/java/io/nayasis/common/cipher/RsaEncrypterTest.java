@@ -2,7 +2,6 @@ package io.nayasis.common.cipher;
 
 import io.nayasis.common.base.Strings;
 import io.nayasis.common.cipher.vo.KeyPair;
-import io.nayasis.common.model.NMap;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -13,6 +12,24 @@ public class RsaEncrypterTest {
 
     @Test
     public void test() {
+        checkValidation( "Hello RSA world !" );
+    }
+
+    @Test
+    public void longText() {
+        checkValidation( "basica 정화수 鄭柱虎 merong GTA VI ファイナルファンタジー 1234567890 maxbyte 53 is possible to encrypt." );
+    }
+
+    private void printLine() {
+        System.out.println( Strings.lpad("", 60, '-' ) );
+    }
+
+    private void print( KeyPair keyPair ) {
+        log.debug( "public key  : {}", keyPair.getTextPublicKey() );
+        log.debug( "private key : {}", keyPair.getTextPublicKey() );
+    }
+
+    private void checkValidation( String plainText ) {
 
         RsaEncrypter encryptor = new RsaEncrypter();
 
@@ -22,8 +39,6 @@ public class RsaEncrypterTest {
 
         printLine();
 
-        String plainText = "Hello RSA world !";
-
         String encrypt = encryptor.encrypt( plainText, keyPair.getPublicKey() );
         String decrypt = encryptor.decrypt( encrypt, keyPair.getPrivateKey() );
 
@@ -32,15 +47,6 @@ public class RsaEncrypterTest {
 
         assertEquals( plainText, decrypt );
 
-    }
-
-    private void printLine() {
-        System.out.println( Strings.lpad("", 60, '-' ) );
-    }
-
-    private void print( KeyPair keyPair ) {
-        log.debug( "public key  : {}", keyPair.getEncodedPublicKey() );
-        log.debug( "private key : {}", keyPair.getEncodedPublicKey() );
     }
 
 }
