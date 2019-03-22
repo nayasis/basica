@@ -138,9 +138,7 @@ public class Encrypter {
      * @return  decrypted value
      */
     public String decrypt( String value, Key secretKey ) throws DecodingException {
-
         Cipher cipher = getCipher();
-
         try {
             cipher.init( Cipher.DECRYPT_MODE, secretKey );
             byte[] decrypted = cipher.doFinal( toByteArray( value ) );
@@ -148,7 +146,6 @@ public class Encrypter {
         } catch( InvalidKeyException | BadPaddingException | IllegalBlockSizeException e ) {
             throw new DecodingException( e );
         }
-
     }
 
     private Cipher getCipher() throws NoSuchAlgorithmException {

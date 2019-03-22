@@ -41,9 +41,13 @@ public class KeyPair {
     }
 
     public void setPublicKey( String publicKey ) {
+        this.publicKey = makePublicKey( publicKey );
+    }
+
+    public PublicKey makePublicKey( String publicKey ) {
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec( Base64.decodeBase64(publicKey) );
-            this.publicKey = getKeyFactory().generatePublic( keySpec );
+            return getKeyFactory().generatePublic( keySpec );
         } catch ( InvalidKeySpecException e ) {
             throw new RuntimeException( e );
         }
@@ -70,9 +74,13 @@ public class KeyPair {
     }
 
     public void setPrivateKey( String privateKey ) {
+        this.privateKey = makePrivateKey( privateKey );
+    }
+
+    public PrivateKey makePrivateKey( String privateKey ) {
         try {
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec( Base64.decodeBase64(privateKey) );
-            this.privateKey = getKeyFactory().generatePrivate( keySpec );
+            return getKeyFactory().generatePrivate( keySpec );
         } catch ( InvalidKeySpecException e ) {
             throw new RuntimeException( e );
         }
