@@ -19,11 +19,9 @@ public class Command {
 	private List<String> command = new ArrayList<>();
 
 	private StringBuffer outputPipe;
-
 	private StringBuffer errorPipe;
 
 	private LineReader worker;
-
 	private File workingDirectory;
 
 	public List<String> get() {
@@ -35,8 +33,18 @@ public class Command {
 		return this;
 	}
 
-	public Command addPath( String path ) {
-		this.command.add( String.format("\"%s\"", path) );
+	/**
+	 * add command in double quote.
+	 *
+	 * <pre>
+	 *   addQuote( "mailto:google@gmail.com" );
+	 *     -> stored as "\"mailto:google@gmail.com\"".
+	 * </pre>
+	 * @param command	command
+	 * @return self instance
+	 */
+	public Command addQuote( String command ) {
+		this.command.add( String.format("\"%s\"", Strings.nvl(command).replaceAll("\"", "\\\"") ));
 		return this;
 	}
 
