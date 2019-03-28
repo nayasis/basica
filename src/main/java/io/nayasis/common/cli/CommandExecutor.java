@@ -83,7 +83,7 @@ public class CommandExecutor {
 	 * @param command command to execute
 	 * @return self instance
 	 */
-	public CommandExecutor run( Command command ) {
+	public CommandExecutor run( Command command ) throws CommandLineException {
 
 		if( command == null ) return this;
 

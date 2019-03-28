@@ -30,24 +30,28 @@ public class Command {
 		return command;
 	}
 
-	public void add( String command ) {
+	public Command add( String command ) {
 		this.command.add( command );
+		return this;
 	}
 
-	public void addPath( String path ) {
+	public Command addPath( String path ) {
 		this.command.add( String.format("\"%s\"", path) );
+		return this;
 	}
 
 	public String toString() {
 		return Strings.join( command, " " );
 	}
 
-	public void set( String command ) {
+	public Command set( String command ) {
 		this.command = new CommandParser().parse( command );
+		return this;
 	}
 
-	public void set( List<String> command ) {
+	public Command set( List<String> command ) {
 		this.command = command;
+		return this;
 	}
 
 	public boolean hasCommand() {
@@ -58,24 +62,27 @@ public class Command {
 		return outputPipe;
 	}
 
-	public void setOutputPipe( StringBuffer redirectPipe ) {
+	public Command setOutputPipe( StringBuffer redirectPipe ) {
 		this.outputPipe = redirectPipe;
+		return this;
 	}
 
 	public StringBuffer getErrorPipe() {
 		return errorPipe;
 	}
 
-	public void setErrorPipe( StringBuffer redirectPipe ) {
+	public Command setErrorPipe( StringBuffer redirectPipe ) {
 		this.errorPipe = redirectPipe;
+		return this;
 	}
 
 	public LineReader getWorker() {
 		return worker;
 	}
 
-	public void setWorker( LineReader worker ) {
+	public Command setWorker( LineReader worker ) {
 		this.worker = worker;
+		return this;
 	}
 
 	public File getWorkingDirectory() {
@@ -85,12 +92,14 @@ public class Command {
 		return null;
 	}
 
-	public void setWorkingDirectory( File workingDirectory ) {
+	public Command setWorkingDirectory( File workingDirectory ) {
 		this.workingDirectory = workingDirectory;
+		return this;
 	}
 
-	public void setWorkingDirectory( String workingDirectory ) {
+	public Command setWorkingDirectory( String workingDirectory ) {
 		this.workingDirectory = new File( workingDirectory );
+		return this;
 	}
 
 

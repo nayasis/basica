@@ -13,10 +13,14 @@ public class Platform {
     /** Java Virtual Machine architect */
     public static final String  jvmArchitecture = System.getProperty( "sun.arch.data.model" );
     /** is WINDOWS O/S */
-    public static final boolean isWindows       = osName.startsWith( "Windows" );
+    public static final boolean isWindows       = osName.toLowerCase().contains( "win" );
     /** is LINUX O/S */
-    public static final boolean isLinux         = osName.startsWith( "Linux" );
+    public static final boolean isLinux         = osName.toLowerCase().contains( "linux" );
+    /** is UNIX O/S */
+    public static final boolean isUnix          = osName.toLowerCase().contains( "unix" );
+    /** is SOLARIS O/S */
+    public static final boolean isSolaris       = osName.toLowerCase().contains( "solaris" ) || osName.toLowerCase().contains( "sunos" );
     /** is MAC O/S */
-    public static final boolean isMac           = osName.startsWith( "Mac OS" );
+    public static final boolean isMac           = osName.toLowerCase().contains( "mac" );
 
 }
