@@ -216,7 +216,8 @@ public class Classes {
 		if( klass == null || extendKlass.length == 0 ) return false;
 		Set<Class<?>> parents = findParents( klass );
 		for( Class<?> target : extendKlass ) {
-			if( klass == target || Modifier.isFinal(target.getModifiers()) ) continue;
+			if( klass == target ) return true;
+			if( Modifier.isFinal(target.getModifiers()) ) continue;
 			if( parents.contains( target ) ) return true;
 		}
 		return false;
