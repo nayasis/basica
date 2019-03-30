@@ -1,13 +1,18 @@
 package io.nayasis.common.reflection;
 
+import io.nayasis.common.validation.Validator;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
+@Slf4j
 public class ReflectorTest {
 
     @Test
@@ -36,6 +41,27 @@ public class ReflectorTest {
 
     }
 
+    @Test
+    public void toJsonJava8Date() {
+
+        Account jake = Account.builder()
+            .name("jake")
+            .age( 9 )
+            .regDt(LocalDateTime.now())
+            .address("Jeongja, Sung-Nam si")
+            .balance(BigDecimal.ZERO)
+            .build();
+
+        String json = Reflector.toJson(jake);
+
+        Map map = Reflector.toMapFrom(json);
+
+        String regDt = (String) map.get("regDt");
+
+        Assert.assertTrue(Validator.isMatched(regDt, "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}"));
+
+    }
+
 }
 
 @Data
@@ -54,8 +80,9 @@ class User {
 @Builder
 @ToString
 class Account {
-    private String     name;
-    private Integer    age;
-    private String     address;
-    private BigDecimal balance;
+    private String        name;
+    private Integer       age;
+    private String        address;
+    private BigDecimal    balance;
+    private LocalDateTime regDt;
 }

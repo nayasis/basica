@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.nayasis.common.model.NDate;
 import io.nayasis.common.reflection.deserializer.DateDeserializer;
 import io.nayasis.common.reflection.deserializer.NDateDeserializer;
@@ -35,6 +36,7 @@ public class NObjectMapper extends ObjectMapper {
 	}
 
 	protected void init( boolean sort ) {
+
 		configure( JsonParser.Feature.ALLOW_SINGLE_QUOTES,                true  ); // 문자열 구분기호를 " 뿐만 아니라 ' 도 허용
 		configure( SerializationFeature.FAIL_ON_EMPTY_BEANS,              false ); // Bean 이 null 일 경우 허용
 		configure( SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS, true  ); // char 배열을 문자로 강제 변환하지 않는다.
@@ -43,6 +45,9 @@ public class NObjectMapper extends ObjectMapper {
 		configure( MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS,           true  ); // private 변수라도 강제로 매핑
 		configure( DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,   true  );
 		configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS,        true  ); // only applied to Map ( not to bean )
+
+		// java 8 date & time
+		configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false ).registerModule( new JavaTimeModule() );
 	}
 
 	protected void setCustomDeserializer() {
