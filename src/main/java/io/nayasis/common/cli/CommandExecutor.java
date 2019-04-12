@@ -62,16 +62,16 @@ public class CommandExecutor {
 	 *
 	 * @param commandLine	command line
 	 * @param output		memory to pile up process output
-	 * @param worker        worker to execute something based on process output
+	 * @param lineReader    lineReader to execute something based on process output
 	 * @return self instance
 	 */
-	public CommandExecutor run( String commandLine, StringBuffer output, LineReader worker ) {
+	public CommandExecutor run( String commandLine, StringBuffer output, LineReader lineReader ) {
 
 		Command command = new Command();
 
 		command.set( commandLine );
 		command.setOutputPipe( output );
-		command.setWorker( worker );
+		command.setWorker( lineReader );
 
 		return run( command );
 
@@ -117,9 +117,7 @@ public class CommandExecutor {
 			return this;
 
 		} catch ( IOException e ) {
-
 			throw new CommandLineException( e, "It happens ERROR while executing command ({})", command );
-
 		}
 
 	}
