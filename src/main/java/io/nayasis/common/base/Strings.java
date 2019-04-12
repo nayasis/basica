@@ -536,24 +536,35 @@ public class Strings {
 
 	}
 
+	/**
+	 * tokenize text by separator
+	 *
+	 * @param value     		value to tokenize
+	 * @param separator 		separator to tokenize
+	 * @return tokenized word list
+	 */
+	public static List<String> tokenize( Object value, String separator) {
+		return tokenize( value, separator, false );
+	}
 
 	/**
      * tokenize text by separator
      *
-     * @param value     value to tokenize
-     * @param separator separator to tokenize
+     * @param value     		value to tokenize
+     * @param separator 		separator to tokenize
+     * @param includeSeperator	include seperator in result
      * @return tokenized word list
      */
-    public static List<String> tokenize( Object value, String separator ) {
+    public static List<String> tokenize( Object value, String separator, boolean includeSeperator ) {
 
     	List<String> result = new ArrayList<>();
 
     	if( isEmpty(value) ) return result;
 
-		StringTokenizer tokenizer = new StringTokenizer( value.toString(), separator );
+		StringTokenizer tokenizer = new StringTokenizer( value.toString(), separator, includeSeperator );
 
 		while( tokenizer.hasMoreTokens() ) {
-			result.add( tokenizer.nextToken().trim() );
+			result.add( tokenizer.nextToken() );
 		}
 
     	return result;

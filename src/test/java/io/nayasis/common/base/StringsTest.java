@@ -130,11 +130,12 @@ public class StringsTest {
     @Test
     public void tokenize() {
 
-        assertEquals( "[I, m, boy || you, re, girl]", Strings.tokenize( "I am a boy || you are a girl", "a" ).toString() );
-        assertEquals( "[I am a boy, you are a girl]", Strings.tokenize( "I am a boy || you are a girl", "||" ).toString() );
+        assertEquals( "[I , m ,  boy || you , re ,  girl]", Strings.tokenize( "I am a boy || you are a girl", "a" ).toString() );
+        assertEquals( "[I am a boy ,  you are a girl]", Strings.tokenize( "I am a boy || you are a girl", "||" ).toString() );
         assertEquals( "[I am a boy || ZAyou are a girl]", Strings.tokenize( "I am a boy || ZAyou are a girl", "" ).toString() );
-        assertEquals( "[I am a boy ||, you are a girl]", Strings.tokenize( "I am a boy || ZAyou are a girl", "ZA" ).toString() );
+        assertEquals( "[I am a boy || , you are a girl]", Strings.tokenize( "I am a boy || ZAyou are a girl", "ZA" ).toString() );
         assertEquals( "[a, b, c, d]", Strings.tokenize("a b\tc\nd", " \n\t" ).toString() );
+        assertEquals( "[kube,  , ,,  , c]", Strings.tokenize("kube , c", " ,", true).toString() );
 
         log.debug( Strings.tokenize( "I am a boy || ZAyou are a girl", " " ).toString() );
         log.debug( Strings.tokenize( "I am a boy || ZAyou are a girl", "ZA" ).toString() );
