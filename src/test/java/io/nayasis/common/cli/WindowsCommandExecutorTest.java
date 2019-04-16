@@ -1,5 +1,7 @@
 package io.nayasis.common.cli;
 
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
 import io.nayasis.common.etc.Platform;
 import io.nayasis.common.exception.unchecked.CommandLineException;
 import io.nayasis.common.file.Files;
@@ -9,7 +11,10 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 public class WindowsCommandExecutorTest {
@@ -17,6 +22,21 @@ public class WindowsCommandExecutorTest {
     @Before
     public void checkPlatform() {
         Assume.assumeTrue( Platform.isWindows );
+    }
+
+    @Test
+    public void basic() {
+
+        new Thread() {
+            @Override public void run() {
+                try {
+                    Runtime.getRuntime().exec("cmd /c start notepad" );
+                } catch ( IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }.run();
+
     }
 
     @Test
@@ -108,7 +128,7 @@ public class WindowsCommandExecutorTest {
 
         executor.waitFor();
 
-        log.debug( "Done !!\n{}", output );
+//        log.debug( "Done !!\n{}", output );
 
     }
 
@@ -119,16 +139,31 @@ public class WindowsCommandExecutorTest {
 
         StringBuffer output = new StringBuffer();
 
-        Command command = new Command();
-
-        command.set( Arrays.asList( "cmd", "/c", "c:", "&&", "cd", "c:\\Windows", "&&", "dir" ) );
-        command.setOutputPipe( output );
-
-        executor.run( command );
+        executor.run( "cmd /c c: && cd \"c:\\Windows\" && dir", output );
 
         executor.waitFor();
 
         log.debug( "Done !!\n{}", output );
+
+    }
+
+    @Test
+    public void readDirWithLanterna() {
+
+        List<String> command = Arrays.asList( "cmd", "/c", "c:", "&&", "cd", "c:\\Windows", "&&", "dir" );
+
+        ProcessBuilder builder = new ProcessBuilder( command );
+
+        builder.redirectOutput( ProcessBuilder.Redirect.INHERIT );
+
+        try {
+            Process process = builder.start();
+            // wait for termination.
+            process.waitFor();
+
+        } catch ( IOException | InterruptedException e ) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -149,6 +184,28 @@ public class WindowsCommandExecutorTest {
         executor.waitFor();
 
         log.debug( "Done !!\n{}", output );
+
+    }
+
+    @Test
+    public void createLanternaTerminal() throws IOException {
+
+        Terminal terminal = new DefaultTerminalFactory( System.out, System.in, Charset.forName(Platform.osCharset) ).createTerminal();
+
+        terminal.enterPrivateMode();
+
+        terminal.setCursorPosition( 10, 5 );
+        terminal.putCharacter( 'H' );
+        terminal.putCharacter( 'e' );
+        terminal.putCharacter( 'l' );
+        terminal.putCharacter( 'l' );
+        terminal.putCharacter( 'o' );
+        terminal.putCharacter( '!' );
+
+        terminal.flush();
+
+//        terminal.exitPrivateMode();
+
 
     }
 

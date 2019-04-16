@@ -39,11 +39,11 @@ public class CommandExecutor {
 	 * run command
 	 *
 	 * @param commandLine command line
-	 * @param worker      worker to execute something based on process output
+	 * @param lineReader  reader to execute something based on process output
 	 * @return self instance
 	 */
-	public CommandExecutor run( String commandLine, LineReader worker ) {
-		return run( commandLine, null, worker );
+	public CommandExecutor run( String commandLine, LineReader lineReader ) {
+		return run( commandLine, null, lineReader );
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class CommandExecutor {
 	 *
 	 * @param commandLine	command line
 	 * @param output		memory to pile up process output
-	 * @param lineReader    lineReader to execute something based on process output
+	 * @param lineReader    reader to execute something based on process output
 	 * @return self instance
 	 */
 	public CommandExecutor run( String commandLine, StringBuffer output, LineReader lineReader ) {
@@ -100,6 +100,8 @@ public class CommandExecutor {
 			if( command.getWorkingDirectory() != null ) {
 				builder.directory( command.getWorkingDirectory() );
 			}
+
+            builder.redirectOutput( ProcessBuilder.Redirect.INHERIT );
 
 			process = builder.start();
 
@@ -176,13 +178,13 @@ public class CommandExecutor {
 
 	}
 
-	private void waitThread( ProcessOutputThread thread, Integer timeOut ) {
+	private void waitThread( ProcessOutputThread thread, Integer timeout ) {
 		if( thread == null || ! thread.isAlive() ) return;
 		try {
-			if( timeOut == null ) {
+			if( timeout == null ) {
 				thread.join();
 			} else {
-				thread.join( timeOut );
+				thread.join( timeout );
 			}
         } catch( InterruptedException e ) {
 			thread.interrupt();
