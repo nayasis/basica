@@ -19,11 +19,11 @@ public class CommandExecutor {
 
 	private static Logger log = LoggerFactory.getLogger( CommandExecutor.class );
 
-	private Process        process         = null;
-	private BufferedWriter processPipe     = null;
+	private Process             process      = null;
+	private BufferedWriter      inputPipe    = null;
 
-	private ProcessOutputThread outputThread    = null;
-	private ProcessOutputThread errorThread     = null;
+	private ProcessOutputThread outputThread = null;
+	private ProcessOutputThread errorThread  = null;
 
 	/**
 	 * run command
@@ -66,15 +66,10 @@ public class CommandExecutor {
 	 * @return self instance
 	 */
 	public CommandExecutor run( String commandLine, StringBuffer output, LineReader lineReader ) {
-
 		Command command = new Command();
-
 		command.set( commandLine );
 		command.setOutputPipe( output );
-		command.setWorker( lineReader );
-
-		return run( command );
-
+		return run( command, lineReader );
 	}
 
 	/**
@@ -84,6 +79,16 @@ public class CommandExecutor {
 	 * @return self instance
 	 */
 	public CommandExecutor run( Command command ) throws CommandLineException {
+		return run( command, null );
+	}
+
+	/**
+	 * run command
+	 *
+	 * @param command command to execute
+	 * @return self instance
+	 */
+	public CommandExecutor run( Command command, LineReader lineReader ) throws CommandLineException {
 
 		if( command == null ) return this;
 
@@ -91,7 +96,7 @@ public class CommandExecutor {
 
 		if( ! command.hasCommand() ) throw new CommandLineException( "there is no command to execute" );
 
-		log.debug( "Command Line : {}", command );
+		log.trace( "Command Line : {}", command );
 
 		try {
 
@@ -101,20 +106,18 @@ public class CommandExecutor {
 				builder.directory( command.getWorkingDirectory() );
 			}
 
-            builder.redirectOutput( ProcessBuilder.Redirect.INHERIT );
-
 			process = builder.start();
 
-			errorThread = new ProcessOutputThread( process.getErrorStream(), command.getErrorPipe(), command.getWorker() );
+			errorThread = new ProcessOutputThread( process.getErrorStream(), command.getErrorPipe(), lineReader );
 			errorThread.setDaemon( true );
 
-			outputThread = new ProcessOutputThread( process.getInputStream(), command.getOutputPipe(), command.getWorker() );
+			outputThread = new ProcessOutputThread( process.getInputStream(), command.getOutputPipe(), lineReader );
 			outputThread.setDaemon( true );
 
 			errorThread.start();
 			outputThread.start();
 
-			processPipe = new BufferedWriter( new OutputStreamWriter( process.getOutputStream(), Platform.osCharset ) );
+			inputPipe = new BufferedWriter( new OutputStreamWriter( process.getOutputStream(), Platform.osCharset ) );
 
 			return this;
 
@@ -213,13 +216,13 @@ public class CommandExecutor {
 		destroyThread( outputThread );
 		destroyThread( errorThread );
 
-		if( processPipe != null ) {
+		if( inputPipe != null ) {
 			try {
-				processPipe.close();
+				inputPipe.close();
 			} catch( IOException e ) {
 				log.error( e.getMessage(), e );
 			} finally {
-				processPipe = null;
+				inputPipe = null;
 			}
 		}
 
@@ -238,15 +241,15 @@ public class CommandExecutor {
 	 */
 	public CommandExecutor sendCommand( String command ) {
 
-		if( processPipe == null ) return this;
+		if( inputPipe == null ) return this;
 
 		log.trace( "command to send : {}", command );
 
 		try {
 
-			processPipe.write( command );
-			processPipe.write( "\n" );
-	        processPipe.flush();
+			inputPipe.write( command );
+			inputPipe.write( "\n" );
+	        inputPipe.flush();
 
 
 		} catch( IOException e ) {

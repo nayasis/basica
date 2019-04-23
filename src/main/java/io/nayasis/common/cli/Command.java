@@ -21,7 +21,6 @@ public class Command {
 	private StringBuffer outputPipe;
 	private StringBuffer errorPipe;
 
-	private LineReader worker;
 	private File workingDirectory;
 
 	public List<String> get() {
@@ -81,15 +80,6 @@ public class Command {
 
 	public Command setErrorPipe( StringBuffer redirectPipe ) {
 		this.errorPipe = redirectPipe;
-		return this;
-	}
-
-	public LineReader getWorker() {
-		return worker;
-	}
-
-	public Command setWorker( LineReader worker ) {
-		this.worker = worker;
 		return this;
 	}
 

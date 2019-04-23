@@ -15,66 +15,63 @@ public class ProcessOutputThread extends Thread {
 	private static Logger log = LoggerFactory.getLogger( ProcessOutputThread.class );
 
 	private InputStream  inputStream;
-	private StringBuffer message;
-	private LineReader   worker;
+	private StringBuffer output;
+	private LineReader   lineReader;
 
 	/**
 	 * constructor
 	 *
 	 * @param processOutputStream 	process output stream
-	 * @param messageStorage 		memory to pile up process output
-	 * @param worker 				worker to execute something based on process output
+	 * @param output 				memory to pile up process output
+	 * @param lineReader 			lineReader to execute something based on process output
 	 */
-	public ProcessOutputThread( InputStream processOutputStream, StringBuffer messageStorage, LineReader worker ) {
+	public ProcessOutputThread( InputStream processOutputStream, StringBuffer output, LineReader lineReader ) {
 		this.inputStream = processOutputStream;
-		this.message     = messageStorage;
-		this.worker      = worker;
+		this.output      = output;
+		this.lineReader  = lineReader;
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-
-		log.trace( "ProcessOuputThread({}) is start", Thread.currentThread().getName() );
-
+		log.trace( "ProcessOutputThread({}) is start", Thread.currentThread().getName() );
 		try {
-
-			readInputStream( inputStream, message, worker );
-
+			readInputStream( inputStream, lineReader );
 		} catch ( Exception e ) {
 			log.error( e.getMessage(), e );
-
 		} finally {
 			try { if (inputStream != null) inputStream.close(); } catch ( IOException e ) {}
-			log.trace( "ProcessOuputThread({}) is closed", Thread.currentThread().getName() );
+			log.trace( "ProcessOutputThread({}) is closed", Thread.currentThread().getName() );
 		}
 	}
 
 	/**
-	 * convert input stream to text and put it to worker
+	 * convert input stream to text and put it to lineReader
 	 *
 	 * @param inputStream process output stream
-	 * @param message     memory to pile up process output
-	 * @return 문자
+	 * @param lineReader  line reader
 	 */
-	private void readInputStream( InputStream inputStream, StringBuffer message, LineReader worker ) {
-		String  buffer;
+	private void readInputStream( InputStream inputStream, LineReader lineReader ) {
+
+		String buffer;
+
 		try (
 			BufferedReader reader = new BufferedReader( new InputStreamReader(inputStream, Platform.osCharset) )
 		){
 			while ( ! isInterrupted() && (buffer = reader.readLine()) != null ) {
-				if( message != null ) {
-					message.append( buffer ).append( '\n' );
+				if( output != null ) {
+					output.append( buffer ).append( '\n' );
 				}
-				if( worker != null ) {
-					worker.read( buffer );
+				if( lineReader != null ) {
+					lineReader.read( buffer );
 				}
 			}
 		} catch ( IOException e ) {
 			log.error( e.getMessage(), e );
 			interrupt();
 		}
+
 	}
 
 }
