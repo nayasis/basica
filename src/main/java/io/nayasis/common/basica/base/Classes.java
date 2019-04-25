@@ -315,14 +315,12 @@ public class Classes {
 			log.trace( ">> entry in jar" );
 			for( JarEntry entry : Collections.list( jar.entries() ) ) {
 				if( log.isTraceEnabled() ) {
-					if( entry.getName().startsWith( "WEB-INF/classes" ) && entry.getName().endsWith( ".xml" )) {
-						log.trace( entry.getName() );
-					}
+					log.trace( entry.getName() );
 				}
 				if( addAll ) {
 					resourcesInJar.add( entry.getName() );
 				} else {
-					Path targetPath = Paths.get( entry.getName() );
+					Path targetPath = Paths.get( entry.getName().replaceAll( "^(BOOT|WEB)-INF/classes/", "" ) );
 					for( PathMatcher matcher : matchers ) {
 						if( matcher.matches( targetPath )) {
 							resourcesInJar.add( entry.getName() );
@@ -366,7 +364,7 @@ public class Classes {
 		URL root = getClassLoader().getResource( "" );
 		if( root == null ) return true;
 		String file = root.getFile();
-		return Validator.isMatched( file, "(?i).*\\.(jar|war)$" );
+		return Validator.isMatched( root.toString(), "(?i)^(jar|war):.*$" );
 	}
 
 	private static String[] toFilePattern( String[] pattern ) {
@@ -375,7 +373,9 @@ public class Classes {
 		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
             result[ i ] = ( rootPath + "/" + pattern[i].replaceFirst( "^" + rootPath + "/", "" ) )
 				.replaceAll( "//", "/" )
-				.replaceAll( "(/WEB-INF/classes)+", "/WEB-INF/classes" );
+				.replaceAll( "(/WEB-INF/classes)+", "/WEB-INF/classes" )
+				.replaceAll( "(/BOOT-INF/classes)+", "/BOOT-INF/classes" )
+			;
         }
 		return result;
 	}
@@ -392,9 +392,10 @@ public class Classes {
 		try {
 			String filePath = new File( url.toURI().getSchemeSpecificPart() ).getPath();
 			filePath = Files.normalizeSeparator( filePath )
-				.replaceFirst( "\\/WEB-INF\\/classes(!)?(\\/)?", "" )
+				.replaceFirst( "\\/(WEB-INF|BOOT-INF)\\/classes(!)?(\\/)?", "" )
 				.replaceFirst( "!$", "" )
 				.replaceFirst( "file:", "" );
+			log.trace( "jar file : {}", filePath );
             return new JarFile( filePath );
         } catch( IOException | URISyntaxException e ) {
             throw new UncheckedIOException( e );

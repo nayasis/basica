@@ -173,24 +173,25 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>src/main/java</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+      <!--<plugin>-->
+        <!--<groupId>org.codehaus.mojo</groupId>-->
+        <!--<artifactId>build-helper-maven-plugin</artifactId>-->
+        <!--<version>3.0.0</version>-->
+        <!--<executions>-->
+          <!--<execution>-->
+            <!--<id>add-source</id>-->
+            <!--<phase>generate-sources</phase>-->
+            <!--<goals>-->
+              <!--<goal>add-source</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+              <!--<sources>-->
+                <!--<source>src/main/java</source>-->
+              <!--</sources>-->
+            <!--</configuration>-->
+          <!--</execution>-->
+        <!--</executions>-->
+      <!--</plugin>-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -203,7 +204,8 @@
               <goal>jar</goal>
             </goals>
             <configuration>
-              <archive combine.children="append">
+              <!--<archive combine.children="append">-->
+              <archive>
                 <manifestEntries>
                   <Automatic-Module-Name>io.nayasis.common.basica</Automatic-Module-Name>
                 </manifestEntries>
