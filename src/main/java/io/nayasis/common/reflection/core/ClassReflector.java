@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 
 
 /**
- * Core reflector
+ * Class reflector
  *
  * @author nayasis@gmail.com
  * @since 2017-03-24
  */
-public class CoreReflector {
+public class ClassReflector {
 
     private static final LruCache<Class,Set<Field>>       CACHE_FIELD       = new LruCache<>(256 );
     private static final LruCache<Class,Set<Method>>      CACHE_METHOD      = new LruCache<>(256 );

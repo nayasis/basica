@@ -8,7 +8,7 @@ import io.nayasis.common.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.common.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.model.NList;
 import io.nayasis.common.reflection.core.BeanMerger;
-import io.nayasis.common.reflection.core.CoreReflector;
+import io.nayasis.common.reflection.core.ClassReflector;
 import io.nayasis.common.reflection.core.JsonConverter;
 import io.nayasis.common.reflection.mapper.Invocator;
 import io.nayasis.common.reflection.mapper.MethodInvocator;
@@ -145,7 +145,7 @@ public class Reflector {
 	 */
     public static String toString( Object bean ) {
     	NList result = new NList();
-        for( Field field : CoreReflector.getFields(bean) ) {
+        for( Field field : ClassReflector.getFields(bean) ) {
         	if( ! field.isAccessible() ) field.setAccessible( true );
 			String typeName = field.getType().getName();
         	result.add( "field", field.getName() );

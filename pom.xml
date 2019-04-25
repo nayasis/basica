@@ -266,7 +266,7 @@
             <configuration>
               <merge>true</merge>
               <includes><include>**/*</include></includes>
-              <message>basica snapshot-${project.version}</message>                         <!-- git commit message -->
+              <message>basica snapshot-${project.version}</message>                  <!-- git commit message -->
               <noJekyll>true</noJekyll>                                              <!-- disable webpage processing -->
               <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
               <branch>refs/heads/master</branch>                                     <!-- remote branch name -->
