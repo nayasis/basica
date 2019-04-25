@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.nayasis.common</groupId>
   <artifactId>basica</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <name>basica</name>
   <description>
     basic utility components
@@ -18,7 +18,7 @@
   </licenses>
   <developers>
     <developer>
-      <name>Hwasu Jung</name>
+      <name>Jung Hwasu</name>
       <email>nayasis@gmail.com</email>
       <roles>
         <role>author</role>
@@ -37,9 +37,9 @@
   </issueManagement>
 
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <jdk.version>1.8</jdk.version>
+    <java.version>1.8</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
     <github.global.server>github</github.global.server>
@@ -97,6 +97,11 @@
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.12</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
     </dependency>
 
     <!-- zip -->
@@ -165,153 +170,198 @@
     </dependency>
   </dependencies>
 
-  <profiles>
-    <profile>
-      <id>central</id>
-      <activation>
-        <property>
-          <name>central</name>
-        </property>
-      </activation>
-      <distributionManagement>
-        <snapshotRepository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-      </distributionManagement>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.7</version>
-            <extensions>true</extensions>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
             <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+              <sources>
+                <source>src/main/java</source>
+              </sources>
             </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.4</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <encoding>${project.build.sourceEncoding}</encoding>
-                  <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>github</id>
-      <activation>
-        <property>
-          <name>github</name>
-        </property>
-      </activation>
-      <distributionManagement>
-        <repository>
-          <id>internal.repo</id>
-          <name>Temporary Staging Repository</name>
-          <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
-      </distributionManagement>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.github.github</groupId>
-            <artifactId>site-maven-plugin</artifactId>
-            <version>0.11</version>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
             <configuration>
-              <merge>true</merge>
-              <includes><include>**/*</include></includes>
-              <message>basica snapshot-${project.version}</message>                  <!-- git commit message -->
-              <noJekyll>true</noJekyll>                                              <!-- disable webpage processing -->
-              <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-              <branch>refs/heads/master</branch>                                     <!-- remote branch name -->
-              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repo name -->
-              <repositoryOwner>nayasis</repositoryOwner>                             <!-- github username  -->
+              <archive combine.children="append">
+                <manifestEntries>
+                  <Automatic-Module-Name>io.nayasis.common.basica</Automatic-Module-Name>
+                </manifestEntries>
+              </archive>
             </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>site</goal>
-                </goals>
-                <phase>deploy</phase>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.4</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!--<profiles>-->
+    <!--<profile>-->
+      <!--<id>central</id>-->
+      <!--<activation>-->
+        <!--<property>-->
+          <!--<name>central</name>-->
+        <!--</property>-->
+      <!--</activation>-->
+      <!--<distributionManagement>-->
+        <!--<snapshotRepository>-->
+          <!--<id>ossrh</id>-->
+          <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+        <!--</snapshotRepository>-->
+        <!--<repository>-->
+          <!--<id>ossrh</id>-->
+          <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+        <!--</repository>-->
+      <!--</distributionManagement>-->
+      <!--<build>-->
+        <!--<plugins>-->
+          <!--<plugin>-->
+            <!--<groupId>org.sonatype.plugins</groupId>-->
+            <!--<artifactId>nexus-staging-maven-plugin</artifactId>-->
+            <!--<version>1.6.7</version>-->
+            <!--<extensions>true</extensions>-->
+            <!--<configuration>-->
+              <!--<serverId>ossrh</serverId>-->
+              <!--<nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
+              <!--<autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+            <!--</configuration>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-gpg-plugin</artifactId>-->
+            <!--<version>1.6</version>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>sign-artifacts</id>-->
+                <!--<phase>verify</phase>-->
+                <!--<goals>-->
+                  <!--<goal>sign</goal>-->
+                <!--</goals>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-source-plugin</artifactId>-->
+            <!--<version>3.0.1</version>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>attach-sources</id>-->
+                <!--<goals>-->
+                  <!--<goal>jar</goal>-->
+                <!--</goals>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+            <!--<version>2.10.4</version>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>attach-javadocs</id>-->
+                <!--<goals>-->
+                  <!--<goal>jar</goal>-->
+                <!--</goals>-->
+                <!--<configuration>-->
+                  <!--<encoding>${project.build.sourceEncoding}</encoding>-->
+                  <!--<additionalparam>-Xdoclint:none</additionalparam>-->
+                <!--</configuration>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+        <!--</plugins>-->
+      <!--</build>-->
+    <!--</profile>-->
+    <!--<profile>-->
+      <!--<id>github</id>-->
+      <!--<activation>-->
+        <!--<property>-->
+          <!--<name>github</name>-->
+        <!--</property>-->
+      <!--</activation>-->
+      <!--<distributionManagement>-->
+        <!--<repository>-->
+          <!--<id>internal.repo</id>-->
+          <!--<name>Temporary Staging Repository</name>-->
+          <!--<url>file://${project.build.directory}/mvn-repo</url>-->
+        <!--</repository>-->
+      <!--</distributionManagement>-->
+      <!--<build>-->
+        <!--<plugins>-->
+          <!--<plugin>-->
+            <!--<groupId>com.github.github</groupId>-->
+            <!--<artifactId>site-maven-plugin</artifactId>-->
+            <!--<version>0.11</version>-->
+            <!--<configuration>-->
+              <!--<merge>true</merge>-->
+              <!--<includes><include>**/*</include></includes>-->
+              <!--<message>basica snapshot-${project.version}</message>                  &lt;!&ndash; git commit message &ndash;&gt;-->
+              <!--<noJekyll>true</noJekyll>                                              &lt;!&ndash; disable webpage processing &ndash;&gt;-->
+              <!--<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> &lt;!&ndash; matches distribution management repository url above &ndash;&gt;-->
+              <!--<branch>refs/heads/master</branch>                                     &lt;!&ndash; remote branch name &ndash;&gt;-->
+              <!--<repositoryName>UnofficialMavenRepository</repositoryName>             &lt;!&ndash; github repo name &ndash;&gt;-->
+              <!--<repositoryOwner>nayasis</repositoryOwner>                             &lt;!&ndash; github username  &ndash;&gt;-->
+            <!--</configuration>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<goals>-->
+                  <!--<goal>site</goal>-->
+                <!--</goals>-->
+                <!--<phase>deploy</phase>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-source-plugin</artifactId>-->
+            <!--<version>3.0.1</version>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>attach-sources</id>-->
+                <!--<goals>-->
+                  <!--<goal>jar</goal>-->
+                <!--</goals>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+          <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-javadoc-plugin</artifactId>-->
+            <!--<version>2.10.4</version>-->
+            <!--<executions>-->
+              <!--<execution>-->
+                <!--<id>attach-javadocs</id>-->
+                <!--<phase>verify</phase>-->
+                <!--<goals>-->
+                  <!--<goal>jar</goal>-->
+                <!--</goals>-->
+              <!--</execution>-->
+            <!--</executions>-->
+          <!--</plugin>-->
+        <!--</plugins>-->
+      <!--</build>-->
+    <!--</profile>-->
+  <!--</profiles>-->
 
 </project>
