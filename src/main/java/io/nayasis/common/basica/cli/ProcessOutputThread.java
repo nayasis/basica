@@ -9,14 +9,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.CountDownLatch;
 
 public class ProcessOutputThread extends Thread {
 
 	private static Logger log = LoggerFactory.getLogger( ProcessOutputThread.class );
 
-	private InputStream  inputStream;
-	private StringBuffer output;
-	private LineReader lineReader;
+	private InputStream    inputStream;
+	private StringBuffer   output;
+	private LineReader     lineReader;
+	private CountDownLatch latch;
 
 	/**
 	 * constructor
@@ -24,11 +26,13 @@ public class ProcessOutputThread extends Thread {
 	 * @param processOutputStream 	process output stream
 	 * @param output 				memory to pile up process output
 	 * @param lineReader 			lineReader to execute something based on process output
+	 * @param latch 			    thread counter
 	 */
-	public ProcessOutputThread( InputStream processOutputStream, StringBuffer output, LineReader lineReader ) {
+	public ProcessOutputThread( InputStream processOutputStream, StringBuffer output, LineReader lineReader, CountDownLatch latch ) {
 		this.inputStream = processOutputStream;
 		this.output      = output;
 		this.lineReader  = lineReader;
+		this.latch       = latch;
 	}
 
 	/* (non-Javadoc)
@@ -67,6 +71,7 @@ public class ProcessOutputThread extends Thread {
 					lineReader.read( buffer );
 				}
 			}
+			latch.countDown();
 		} catch ( IOException e ) {
 			log.error( e.getMessage(), e );
 			interrupt();

@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * OS command line executor
@@ -24,6 +26,7 @@ public class CommandExecutor {
 
 	private ProcessOutputThread outputThread = null;
 	private ProcessOutputThread errorThread  = null;
+	private CountDownLatch      latch        = new CountDownLatch(2);
 
 	/**
 	 * run command
@@ -108,10 +111,10 @@ public class CommandExecutor {
 
 			process = builder.start();
 
-			errorThread = new ProcessOutputThread( process.getErrorStream(), command.getErrorPipe(), lineReader );
+			errorThread = new ProcessOutputThread( process.getErrorStream(), command.getErrorPipe(), lineReader, latch );
 			errorThread.setDaemon( true );
 
-			outputThread = new ProcessOutputThread( process.getInputStream(), command.getOutputPipe(), lineReader );
+			outputThread = new ProcessOutputThread( process.getInputStream(), command.getOutputPipe(), lineReader, latch );
 			outputThread.setDaemon( true );
 
 			errorThread.start();
@@ -172,26 +175,16 @@ public class CommandExecutor {
 			Thread.interrupted();
 		}
 
-		waitThread( outputThread, timeout );
-		waitThread( errorThread, timeout );
+		try {
+			latch.await( timeout, TimeUnit.MILLISECONDS );
+		} catch ( InterruptedException e ) {
+			log.trace( e.getMessage(), e );
+		}
 
 		destroy();
 
 		return exitValue;
 
-	}
-
-	private void waitThread( ProcessOutputThread thread, Integer timeout ) {
-		if( thread == null || ! thread.isAlive() ) return;
-		try {
-			if( timeout == null ) {
-				thread.join();
-			} else {
-				thread.join( timeout );
-			}
-        } catch( InterruptedException e ) {
-			thread.interrupt();
-        }
 	}
 
 	/**
@@ -230,7 +223,9 @@ public class CommandExecutor {
 
 	private void destroyThread( ProcessOutputThread thread ) {
 		if( thread == null ) return;
-		thread.interrupt();
+		try {
+			thread.interrupt();
+		} catch ( Throwable e ) {}
 	}
 
 	/**
@@ -250,7 +245,6 @@ public class CommandExecutor {
 			inputPipe.write( command );
 			inputPipe.write( "\n" );
 	        inputPipe.flush();
-
 
 		} catch( IOException e ) {
         	log.error( e.getMessage(), e );
