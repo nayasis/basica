@@ -1,7 +1,6 @@
 package io.nayasis.common.basica.cipher.vo;
 
-import org.apache.commons.codec.binary.Base64;
-
+import java.util.Base64;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -46,7 +45,7 @@ public class KeyPair {
 
     public PublicKey makePublicKey( String publicKey ) {
         try {
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec( Base64.decodeBase64(publicKey) );
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec( Base64.getDecoder().decode(publicKey) );
             return getKeyFactory().generatePublic( keySpec );
         } catch ( InvalidKeySpecException e ) {
             throw new RuntimeException( e );
@@ -79,7 +78,7 @@ public class KeyPair {
 
     public PrivateKey makePrivateKey( String privateKey ) {
         try {
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec( Base64.decodeBase64(privateKey) );
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec( Base64.getDecoder().decode(privateKey) );
             return getKeyFactory().generatePrivate( keySpec );
         } catch ( InvalidKeySpecException e ) {
             throw new RuntimeException( e );
@@ -87,11 +86,11 @@ public class KeyPair {
     }
 
     public String getTextPublicKey() {
-        return Base64.encodeBase64String( publicKey.getEncoded() );
+        return Base64.getEncoder().encodeToString( publicKey.getEncoded() );
     }
 
     public String getTextPrivateKey() {
-        return Base64.encodeBase64String( privateKey.getEncoded() );
+        return Base64.getEncoder().encodeToString( privateKey.getEncoded() );
     }
 
 }
