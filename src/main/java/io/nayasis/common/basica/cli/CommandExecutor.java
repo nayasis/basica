@@ -176,12 +176,14 @@ public class CommandExecutor {
 		}
 
 		try {
-			latch.await( timeout, TimeUnit.MILLISECONDS );
-		} catch ( InterruptedException e ) {
-			log.trace( e.getMessage(), e );
+			if( latch.getCount() != 0 ) {
+				latch.await( timeout, TimeUnit.MILLISECONDS );
+			}
+		} catch ( Throwable e ) {
+			throw new RuntimeException( e );
+		} finally {
+			destroy();
 		}
-
-		destroy();
 
 		return exitValue;
 
