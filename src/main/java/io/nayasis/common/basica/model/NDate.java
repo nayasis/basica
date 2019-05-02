@@ -707,10 +707,10 @@ public class NDate implements Serializable {
     }
 
     /**
-     * 두 날짜간 일자 차이를 구한다.
+     * get days difference between them
      *
-     * @param date 비교할 날짜
-     * @return 일자 차이
+     * @param date date to compare
+     * @return days difference
      */
     public int betweenDays( NDate date ) {
 
@@ -724,10 +724,10 @@ public class NDate implements Serializable {
     }
 
     /**
-     * 두 날짜간 시간 차이를 구한다.
+     * get hours difference between them
      *
-     * @param       date    비교할 날짜
-     * @return      시간 차이
+     * @param date date to compare
+     * @return hours difference
      */
     public int betweenHours( NDate date ) {
 
@@ -738,6 +738,16 @@ public class NDate implements Serializable {
 
         return (int) ( diff / 3600000 ); // 60 * 60 * 1000
 
+    }
+
+    /**
+     * get times difference between them
+     *
+     * @param date date to compare
+     * @return times difference
+     */
+    public long betweenTimes( NDate date ) {
+        return getDifference( this.currentTime, date.currentTime );
     }
 
     /**
