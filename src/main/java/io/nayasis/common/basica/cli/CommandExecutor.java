@@ -176,7 +176,9 @@ public class CommandExecutor {
 		}
 
 		try {
-			if( latch.getCount() != 0 ) {
+			if( timeout == null ) {
+				latch.await();
+			} else {
 				latch.await( timeout, TimeUnit.MILLISECONDS );
 			}
 		} catch ( Throwable e ) {
