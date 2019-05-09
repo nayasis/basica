@@ -309,12 +309,14 @@
             <version>0.12</version>
             <configuration>
               <merge>true</merge>
-              <includes><include>**/*</include></includes>
-              <message>snapshot-${project.version}</message>                         <!-- git commit message -->
+              <includes>
+                <include>**/*</include>
+              </includes>
+              <message>${project.version}</message>                                  <!-- git commit message -->
               <noJekyll>true</noJekyll>                                              <!-- disable webpage processing -->
               <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
               <branch>refs/heads/master</branch>                                     <!-- remote branch name -->
-              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repo name -->
+              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repository name -->
               <repositoryOwner>nayasis</repositoryOwner>                             <!-- github username  -->
             </configuration>
             <executions>
@@ -322,7 +324,7 @@
                 <goals>
                   <goal>site</goal>
                 </goals>
-                <phase>site</phase>
+                <phase>deploy</phase>
               </execution>
             </executions>
           </plugin>
