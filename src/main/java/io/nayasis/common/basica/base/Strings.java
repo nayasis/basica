@@ -655,9 +655,7 @@ public class Strings {
      * @return encoded text
      * @throws UncheckedIOException if I/O exception occurs.
      */
-    public static String encode( Object value ) {
-
-    	String result;
+    public static String encode( Object value ) throws UncheckedIOException {
 
     	try (
     		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -665,13 +663,11 @@ public class Strings {
 		) {
     		oos.writeObject( value );
     		oos.close();
-    		result = DatatypeConverter.printBase64Binary( bos.toByteArray() );
+    		return DatatypeConverter.printBase64Binary( bos.toByteArray() );
 
     	} catch ( IOException e ) {
     		throw new UncheckedIOException( e );
 		}
-
-        return result;
 
     }
 
@@ -687,21 +683,17 @@ public class Strings {
 
     	byte o[] = DatatypeConverter.parseBase64Binary( nvl(value) );
 
-        Object vo;
-
     	try (
     		ByteArrayInputStream bis = new ByteArrayInputStream( o );
     		ObjectInputStream    ois = new ObjectInputStream( bis )
 		) {
-    		vo = ois.readObject();
+    		return ois.readObject();
 
     	} catch (IOException e) {
     		throw new UncheckedIOException( e );
 		} catch ( ClassNotFoundException e) {
 			throw new UncheckedClassNotFoundException( e );
 		}
-
-        return  vo;
 
     }
 
