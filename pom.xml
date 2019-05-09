@@ -42,7 +42,6 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
-    <maven.javadoc.skip>true</maven.javadoc.skip>
   </properties>
 
   <repositories>
@@ -293,6 +292,7 @@
       <id>github</id>
       <properties>
         <github.global.server>github</github.global.server>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
       </properties>
       <distributionManagement>
         <repository>
