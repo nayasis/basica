@@ -3,6 +3,7 @@ package io.nayasis.common.basica.cache.implement;
 import io.nayasis.common.basica.cache.Cache;
 import io.nayasis.common.basica.etc.StopWatch;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,10 +15,10 @@ import java.util.Set;
  * @param <K>
  * @param <V>
  */
-public class LruCache<K,V> implements Cache<K,V> {
+public class LruCache<K,V> implements Cache<K,V>, Serializable {
 
 	protected Map<K,V>         map            = null;
-	protected Map<K, StopWatch> creationTimes  = new HashMap<>();
+	protected Map<K,StopWatch> creationTimes  = new HashMap<>();
 	private   int              flushCycle     = Integer.MAX_VALUE;
 	private   boolean          hasFlushCycle  = false;
 

@@ -2,10 +2,11 @@ package io.nayasis.common.basica.etc;
 
 import io.nayasis.common.basica.model.NList;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StopWatch {
+public class StopWatch implements Serializable {
 
 	private String       id        = null;
 	private long         startTime = 0;
@@ -111,7 +112,7 @@ public class StopWatch {
 
 	}
 
-	private static class Log {
+	private static class Log implements Serializable {
 
 		public long   timeMillis;
 		public String taskName;
