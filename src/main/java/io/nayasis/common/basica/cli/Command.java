@@ -22,6 +22,12 @@ public class Command {
 
 	private File workingDirectory;
 
+	public Command() {}
+
+	public Command( String command ) {
+		set( command );
+	}
+
 	public List<String> get() {
 		return command;
 	}
