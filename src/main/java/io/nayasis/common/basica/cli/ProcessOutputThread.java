@@ -1,6 +1,6 @@
 package io.nayasis.common.basica.cli;
 
-import io.nayasis.common.basica.etc.Platform;
+import io.nayasis.common.basica.etc.Platforms;
 import io.nayasis.common.basica.file.worker.LineReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +61,7 @@ public class ProcessOutputThread extends Thread {
 		String buffer;
 
 		try (
-			BufferedReader reader = new BufferedReader( new InputStreamReader(inputStream, Platform.osCharset) )
+			BufferedReader reader = new BufferedReader( new InputStreamReader(inputStream, Platforms.osCharset) )
 		){
 			while ( ! isInterrupted() && (buffer = reader.readLine()) != null ) {
 				if( output != null ) {

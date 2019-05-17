@@ -2,7 +2,7 @@ package io.nayasis.common.basica.cli;
 
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-import io.nayasis.common.basica.etc.Platform;
+import io.nayasis.common.basica.etc.Platforms;
 import io.nayasis.common.basica.exception.unchecked.CommandLineException;
 import io.nayasis.common.basica.file.Files;
 import io.nayasis.common.basica.file.worker.LineReader;
@@ -21,7 +21,7 @@ public class WindowsCommandExecutorTest {
 
     @Before
     public void checkPlatform() {
-        Assume.assumeTrue( Platform.isWindows );
+        Assume.assumeTrue( Platforms.isWindows );
     }
 
     @Test
@@ -190,7 +190,7 @@ public class WindowsCommandExecutorTest {
     @Test
     public void createLanternaTerminal() throws IOException {
 
-        Terminal terminal = new DefaultTerminalFactory( System.out, System.in, Charset.forName(Platform.osCharset) ).createTerminal();
+        Terminal terminal = new DefaultTerminalFactory( System.out, System.in, Charset.forName( Platforms.osCharset) ).createTerminal();
 
         terminal.enterPrivateMode();
 

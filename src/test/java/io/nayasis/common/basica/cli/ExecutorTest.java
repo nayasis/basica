@@ -6,7 +6,7 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
-import io.nayasis.common.basica.etc.Platform;
+import io.nayasis.common.basica.etc.Platforms;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -72,7 +72,7 @@ public class ExecutorTest {
 
     private static void runTerminal() throws IOException {
 
-        Terminal terminal = new DefaultTerminalFactory( System.out, System.in, Charset.forName( Platform.osCharset) )
+        Terminal terminal = new DefaultTerminalFactory( System.out, System.in, Charset.forName( Platforms.osCharset) )
 //            .setForceTextTerminal( true )
             .createTerminal();
 

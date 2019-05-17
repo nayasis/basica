@@ -1,6 +1,6 @@
 package io.nayasis.common.basica.cli;
 
-import io.nayasis.common.basica.etc.Platform;
+import io.nayasis.common.basica.etc.Platforms;
 import io.nayasis.common.basica.exception.unchecked.CommandLineException;
 import io.nayasis.common.basica.file.worker.LineReader;
 import org.slf4j.Logger;
@@ -120,7 +120,7 @@ public class CommandExecutor {
 			errorThread.start();
 			outputThread.start();
 
-			inputPipe = new BufferedWriter( new OutputStreamWriter( process.getOutputStream(), Platform.osCharset ) );
+			inputPipe = new BufferedWriter( new OutputStreamWriter( process.getOutputStream(), Platforms.osCharset ) );
 
 			return this;
 

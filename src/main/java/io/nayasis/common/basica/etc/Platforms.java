@@ -1,6 +1,6 @@
 package io.nayasis.common.basica.etc;
 
-public class Platform {
+public class Platforms {
 
     /** O/S name */
     public static final String  osName          = System.getProperty( "os.name" );
