@@ -101,7 +101,9 @@ public class Command {
 	}
 
 	public Command setWorkingDirectory( String workingDirectory ) {
-		this.workingDirectory = new File( workingDirectory );
+	    if( Strings.isNotEmpty( workingDirectory ) ) {
+	        this.workingDirectory = new File( workingDirectory );
+        }
 		return this;
 	}
 
