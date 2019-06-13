@@ -24,6 +24,19 @@ public class Formatter {
      * @param format                format string
      * @param parameter             binding parameter
      * @param binder                binder containing binding logic
+     * @param <T>
+     * @return formatter string
+     */
+    public <T> String bindParam( ExtractPattern pattern, Object format, T parameter, ParameterBinder<T> binder ) {
+        return bindParam( pattern, format, parameter, binder, false );
+    }
+
+    /**
+     * return formatted string binding parameters
+     *
+     * @param format                format string
+     * @param parameter             binding parameter
+     * @param binder                binder containing binding logic
      * @param koreanModification    flag whether modify korean JOSA characters
      * @param <T>
      * @return formatter string
