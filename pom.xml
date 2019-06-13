@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.nayasis.common</groupId>
   <artifactId>basica</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <name>basica</name>
   <description>
     basic utility components
@@ -18,7 +18,7 @@
   </licenses>
   <developers>
     <developer>
-      <name>Hwasu Jung</name>
+      <name>Jung Hwasu</name>
       <email>nayasis@gmail.com</email>
       <roles>
         <role>author</role>
@@ -37,27 +37,21 @@
   </issueManagement>
 
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <jdk.version>1.8</jdk.version>
+    <java.version>1.8</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
-    <github.global.server>github</github.global.server>
-    <maven.javadoc.skip>true</maven.javadoc.skip>
-    <!--<skipTests>false</skipTests>-->
   </properties>
 
   <repositories>
     <repository>
-      <id>codelds</id>
-      <url>https://code.lds.org/nexus/content/groups/main-repo</url>
-    </repository>
-    <repository>
       <id>bintray</id>
       <url>http://jcenter.bintray.com</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
+    </repository>
+    <repository>
+      <id>UnofficialNybatisMavenRepository</id>
+      <url>https://github.com/nayasis/UnofficialMavenRepository/raw/master/</url>
     </repository>
   </repositories>
 
@@ -91,12 +85,12 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
+      <version>1.7.26</version>
     </dependency>
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.12</version>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
     </dependency>
 
     <!-- zip -->
@@ -106,6 +100,7 @@
       <version>1.18</version>
       <optional>true</optional>
     </dependency>
+
     <!-- excel -->
     <dependency>
       <groupId>org.apache.poi</groupId>
@@ -133,6 +128,7 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- test -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -154,19 +150,74 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
-      <version>1.3.0-alpha4</version>
+      <version>1.2.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.lanterna</groupId>
+      <artifactId>lanterna</artifactId>
+      <version>3.0.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>default-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <archive combine.children="append">
+                <manifestEntries>
+                  <Automatic-Module-Name>io.nayasis.common.basica</Automatic-Module-Name>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
   <profiles>
     <profile>
       <id>central</id>
-      <activation>
-        <property>
-          <name>central</name>
-        </property>
-      </activation>
       <distributionManagement>
         <snapshotRepository>
           <id>ossrh</id>
@@ -239,11 +290,10 @@
     </profile>
     <profile>
       <id>github</id>
-      <activation>
-        <property>
-          <name>github</name>
-        </property>
-      </activation>
+      <properties>
+        <github.global.server>github</github.global.server>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+      </properties>
       <distributionManagement>
         <repository>
           <id>internal.repo</id>
@@ -256,15 +306,17 @@
           <plugin>
             <groupId>com.github.github</groupId>
             <artifactId>site-maven-plugin</artifactId>
-            <version>0.11</version>
+            <version>0.12</version>
             <configuration>
               <merge>true</merge>
-              <includes><include>**/*</include></includes>
-              <message>basica snapshot-${project.version}</message>                         <!-- git commit message -->
+              <includes>
+                <include>**/*</include>
+              </includes>
+              <message>${project.version}</message>                                  <!-- git commit message -->
               <noJekyll>true</noJekyll>                                              <!-- disable webpage processing -->
               <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
               <branch>refs/heads/master</branch>                                     <!-- remote branch name -->
-              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repo name -->
+              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repository name -->
               <repositoryOwner>nayasis</repositoryOwner>                             <!-- github username  -->
             </configuration>
             <executions>
@@ -273,33 +325,6 @@
                   <goal>site</goal>
                 </goals>
                 <phase>deploy</phase>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.4</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
               </execution>
             </executions>
           </plugin>
