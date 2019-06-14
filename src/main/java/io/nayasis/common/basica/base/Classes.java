@@ -332,8 +332,10 @@ public class Classes {
 
 		}
 
-		log.trace( "pattern         : {}", pattern );
-		log.trace( "toFilePattern   : {}", toFilePattern(pattern) );
+		if( log.isTraceEnabled() ) {
+			log.trace( "pattern         : {}", Arrays.toString(pattern) );
+			log.trace( "toFilePattern   : {}", Arrays.toString(toFilePattern(pattern)) );
+		}
 
 		List<String> paths = Files.find( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
 
