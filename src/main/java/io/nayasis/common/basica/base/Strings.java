@@ -1256,7 +1256,7 @@ public class Strings {
 	 * @param e
 	 * @return stacktrace
 	 */
-	public String toString( Throwable e ) {
+	public static String readStackTrace( Throwable e ) {
 		StringWriter writer = new StringWriter();
 		e.printStackTrace( new PrintWriter( writer ) );
 		return writer.toString();
