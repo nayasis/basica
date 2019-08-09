@@ -1251,5 +1251,15 @@ public class Strings {
 		return costs[target.length()];
 	}
 
+	/**
+	 * convert Throwable(or Exception) stacktrace to String
+	 * @param e
+	 * @return stacktrace
+	 */
+	public static String readStackTrace( Throwable e ) {
+		StringWriter writer = new StringWriter();
+		e.printStackTrace( new PrintWriter( writer ) );
+		return writer.toString();
+	}
 
 }
