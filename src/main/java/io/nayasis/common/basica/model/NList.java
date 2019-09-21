@@ -472,7 +472,8 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
 
         for( NMap row : body ) {
             try {
-                result.add( row.toBean( klass ) );
+                Object bean = row.toBean( klass );
+                result.add( bean == null ? null : (T) bean );
             } catch( Exception e ) {
                 if( ! ignoreCastingException ) {
                     throw e;
