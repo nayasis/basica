@@ -9,6 +9,7 @@ import io.nayasis.common.basica.file.Files;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,8 +82,8 @@ public class ZipFileHandler {
 
             basePath = fileOrDirectoryToCompress.getPath();
 
-            for( String path : Files.find( fileOrDirectoryToCompress.getPath(), true, false, -1, "**.*" ) ) {
-                files.add( new File(path) );
+            for( Path path : Files.find( fileOrDirectoryToCompress.getPath(), true, false, -1, "**.*" ) ) {
+                files.add( path.toFile() );
             }
 
         } else {
@@ -90,7 +91,6 @@ public class ZipFileHandler {
             files.add( fileOrDirectoryToCompress );
 
         }
-
 
         FileInputStream     fis = null;
         ArchiveOutputStream zos = null;

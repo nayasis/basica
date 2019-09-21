@@ -337,12 +337,12 @@ public class Classes {
 			log.trace( "toFilePattern   : {}", Arrays.toString(toFilePattern(pattern)) );
 		}
 
-		List<String> paths = Files.find( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
+		List<Path> paths = Files.find( Files.getRootPath(), true, false, -1, toFilePattern( pattern ) );
 
 		log.trace( "paths count : {}\npaths : {}", paths.size(), paths );
 
-		for( String path : paths ) {
-			String pathVal = Files.normalizeSeparator( path );
+		for( Path path : paths ) {
+			String pathVal = Files.normalizeSeparator( path.toString() );
 			resourcesInFileSystem.add( pathVal.replace( Files.getRootPath(), "" ).replaceFirst( "^/", "" ) );
 		}
 
