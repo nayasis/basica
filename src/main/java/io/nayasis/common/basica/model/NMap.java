@@ -6,7 +6,7 @@ import io.nayasis.common.basica.reflection.Reflector;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class NMap extends LinkedHashMap {
+public class NMap<K,V> extends LinkedHashMap<K,V> {
 
     private static final long serialVersionUID = 4923230488045574545L;
 
