@@ -17,7 +17,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
     private boolean           includeDir;
     private boolean           includeFile;
     private Set<PathMatcher>  matchers;
-    private List<String>      result = new ArrayList<>();
+    private List<Path>        result = new ArrayList<>();
 
     /**
      * 기본 생성자
@@ -61,7 +61,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
     private void add( Path path ) {
     	boolean isDir = Files.isDirectory( path );
     	if( (includeFile && ! isDir) || (includeDir && isDir) ) {
-    		result.add( path.toAbsolutePath().toString() );
+    		result.add( path.toAbsolutePath() );
     	}
     }
 
@@ -70,7 +70,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      *
      * @return 검색결과
      */
-    public List<String> getFoundPaths() {
+    public List<Path> getFoundPaths() {
         return result;
     }
 

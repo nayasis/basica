@@ -1,18 +1,24 @@
 package io.nayasis.common.basica.reflection.core;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapLikeType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.nayasis.common.basica.base.Types;
-import io.nayasis.common.basica.validation.Validator;
 import io.nayasis.common.basica.exception.unchecked.JsonMappingException;
+import io.nayasis.common.basica.validation.Validator;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Json Converter
@@ -25,7 +31,6 @@ import java.util.*;
 public class JsonConverter {
 
     private ObjectMapper objectMapper;
-    private JsonInclude.Value DEFAULT_INCLUSION = JsonInclude.Value.empty();
 
     public JsonConverter( ObjectMapper mapper ) {
         this.objectMapper = mapper;

@@ -1,5 +1,6 @@
 package io.nayasis.common.basica.model;
 
+import com.jayway.jsonpath.JsonPath;
 import io.nayasis.common.basica.reflection.Reflector;
 
 import java.util.LinkedHashMap;
@@ -101,6 +102,35 @@ public class NMap extends LinkedHashMap {
 
         return result.toString( showHeader, true );
 
+    }
+
+    /**
+     * Get value by json path
+     *
+     * @param jsonPath json path
+     * @see <a href="https://github.com/jayway/JsonPath">json path example</a>
+     * @return value(s) extracted by json path
+     */
+    public <T> T getByJsonPath( String jsonPath ) {
+        Object val;
+        if( containsKey( jsonPath ) ) {
+            val = get( jsonPath );
+        } else {
+            val = JsonPath.read( this, jsonPath );
+        }
+        return val == null ? null : (T) val;
+    }
+
+    /**
+     * rebuild key to JsonPath. <br><br>
+     *
+     * Map can contains POJO and then JsonPath could not working on it.
+     * it change all POJO value to Map.
+     *
+     * @return self instance
+     */
+    public NMap rebuildKeyToJsonPath() {
+        return new JsonPathMapper().toJsonPath( this );
     }
 
 

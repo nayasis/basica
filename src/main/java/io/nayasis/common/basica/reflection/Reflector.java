@@ -29,8 +29,10 @@ import java.util.Map;
  */
 public class Reflector {
 
-	private static JsonConverter jsonConverter         = new JsonConverter( new NObjectMapper() );
-	private static JsonConverter sortableJsonConverter = new JsonConverter( new NObjectMapper(true) );
+	private static JsonConverter jsonConverterNullable         = new JsonConverter( new NObjectMapper(false,false) );
+	private static JsonConverter jsonConverterNotNull          = new JsonConverter( new NObjectMapper(false,true) );
+	private static JsonConverter jsonConverterSortableNullable = new JsonConverter( new NObjectMapper(true,false) );
+	private static JsonConverter jsonConverterSortableNotNull  = new JsonConverter( new NObjectMapper(true,true) );
 	private static Cloner        cloner                = new Cloner();
 
 	/**
@@ -175,7 +177,7 @@ public class Reflector {
 	 * @return json text
 	 */
 	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort ) throws JsonMappingException {
-		return toJson( fromBean, prettyPrint, sort, null );
+		return toJson( fromBean, prettyPrint, sort, true, null );
 	}
 
 	/**
@@ -184,11 +186,17 @@ public class Reflector {
 	 * @param fromBean		instance to convert as json data
 	 * @param prettyPrint	whether or not to make json text pretty
 	 * @param sort			whether or not to sort key of json
+	 * @param ignoreNull	ignore null value
 	 * @param view	        json view class
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort, Class view ) throws JsonMappingException {
-		JsonConverter converter = sort ? jsonConverter : sortableJsonConverter;
+	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull, Class view ) throws JsonMappingException {
+		JsonConverter converter;
+		if( sort ) {
+			converter = ignoreNull ? jsonConverterNotNull : jsonConverterNullable;
+		} else {
+			converter = ignoreNull ? jsonConverterSortableNotNull : jsonConverterSortableNullable;
+		}
 		return converter.toJson( fromBean, prettyPrint, view );
 	}
 
@@ -212,7 +220,7 @@ public class Reflector {
 	 * @return json text
 	 */
 	public static String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonMappingException {
-		return toJson( fromBean, prettyPrint, false, view );
+		return toJson( fromBean, prettyPrint, false, true, view );
 	}
 
 	/**
@@ -259,7 +267,7 @@ public class Reflector {
 	 * @return map with flattern key
 	 */
 	public static Map<String, Object> toFlattenMap( Object object ) throws JsonMappingException {
-		return jsonConverter.toFlattenMap( object );
+		return jsonConverterNullable.toFlattenMap( object );
 	}
 
 	/**
@@ -285,7 +293,7 @@ public class Reflector {
 	 * @return map with flattern key
 	 */
 	public static Map<String, Object> toUnflatternMap( Object object ) throws JsonMappingException {
-		return jsonConverter.toUnflattenMap( object );
+		return jsonConverterNullable.toUnflattenMap( object );
 	}
 
 	/**
@@ -295,7 +303,7 @@ public class Reflector {
 	 * @return valid or not
 	 */
 	public static boolean isJson(String json ) {
-		return jsonConverter.isJson( json );
+		return jsonConverterNullable.isJson( json );
 	}
 
 	/**
@@ -306,7 +314,7 @@ public class Reflector {
 	 * @return	bean filled by object's value
 	 */
 	public static <T> T toBeanFrom( Object object, Class<T> toClass ) throws JsonMappingException {
-		return jsonConverter.toBeanFrom( object, toClass );
+		return jsonConverterNullable.toBeanFrom( object, toClass );
 	}
 
 	/**
@@ -323,7 +331,7 @@ public class Reflector {
 	 * @return	bean filled by object's value
 	 */
 	public static <T> T toBeanFrom( Object object, TypeReference<T> typeReference ) throws JsonMappingException {
-		return jsonConverter.toBeanFrom( object, typeReference );
+		return jsonConverterNullable.toBeanFrom( object, typeReference );
 	}
 
 	/**
@@ -335,7 +343,7 @@ public class Reflector {
      * @return list
      */
 	public static <T> List<T> toListFrom( Object json, Class<T> genericType ) throws JsonMappingException {
-		return jsonConverter.toListFrom( json, genericType );
+		return jsonConverterNullable.toListFrom( json, genericType );
 	}
 
 	/**
@@ -354,7 +362,7 @@ public class Reflector {
 	 * @return	Map filled by object's value
 	 */
 	public static Map toMapFrom( Object object ) throws JsonMappingException {
-		return jsonConverter.toMapFrom( object );
+		return jsonConverterNullable.toMapFrom( object );
 	}
 
 	/**
