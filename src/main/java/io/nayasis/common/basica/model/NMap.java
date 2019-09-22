@@ -112,11 +112,13 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
      * @return value(s) extracted by json path
      */
     public <T> T getByJsonPath( String jsonPath ) {
-        Object val;
+        Object val = null;
         if( containsKey( jsonPath ) ) {
             val = get( jsonPath );
         } else {
-            val = JsonPath.read( this, jsonPath );
+            try {
+                val = JsonPath.read( this, jsonPath );
+            } catch ( Exception e ) {}
         }
         return val == null ? null : (T) val;
     }
