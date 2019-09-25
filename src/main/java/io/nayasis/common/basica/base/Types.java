@@ -244,6 +244,14 @@ public class Types {
         return instance != null && isPrimitive( instance.getClass() );
     }
 
+    public static boolean isEnum( Class klass ) {
+        return klass.isEnum();
+    }
+
+    public static boolean isEnum( Object instance ) {
+        return instance != null && isEnum( instance.getClass() );
+    }
+
     public static boolean isNotPrimitive( Object instance ) {
         return ! isPrimitive( instance );
     }
@@ -295,7 +303,12 @@ public class Types {
     }
 
     public static String toString( Object val ) {
-        return val == null ? null : val.toString();
+        if( val == null ) return null;
+        if( isEnum(val) ) {
+            return ((Enum)val).name();
+        } else {
+            return val.toString();
+        }
     }
 
     public static Integer toInt( Object value ) throws NumberFormatException {
