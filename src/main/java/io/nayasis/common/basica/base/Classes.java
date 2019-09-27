@@ -224,6 +224,24 @@ public class Classes {
 	}
 
 	/**
+	 * Check if a class was extended or implemented by found class
+	 *
+	 * @param klass  		class to inspect
+	 * @param extendKlass	class to be extended in inspect class
+	 * @return true if inspect class is extended of implemented by found class
+	 */
+	public static boolean isExtendedBy( Class<?> klass, Collection<Class<?>> extendKlass ) {
+		if( klass == null || Validator.isEmpty(extendKlass) ) return false;
+		Set<Class<?>> parents = findParents( klass );
+		for( Class<?> target : extendKlass ) {
+			if( klass == target ) return true;
+			if( Modifier.isFinal(target.getModifiers()) ) continue;
+			if( parents.contains( target ) ) return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Check if an instnace was extended or implemented by found class
 	 *
 	 * @param instance  instance to inspect
@@ -231,6 +249,17 @@ public class Classes {
 	 * @return true if inspect instance is extended of implemented by found class
 	 */
 	public static boolean isExtendedBy( Object instance, Class<?>... extendKlass ) {
+		return instance != null && isExtendedBy( instance.getClass(), extendKlass );
+	}
+
+	/**
+	 * Check if an instnace was extended or implemented by found class
+	 *
+	 * @param instance  instance to inspect
+	 * @param extendKlass	   class to be extended in inspect instance
+	 * @return true if inspect instance is extended of implemented by found class
+	 */
+	public static boolean isExtendedBy( Object instance, Collection<Class<?>> extendKlass ) {
 		return instance != null && isExtendedBy( instance.getClass(), extendKlass );
 	}
 

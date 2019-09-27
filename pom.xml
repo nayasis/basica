@@ -46,11 +46,7 @@
 
   <repositories>
     <repository>
-      <id>bintray</id>
-      <url>http://jcenter.bintray.com</url>
-    </repository>
-    <repository>
-      <id>UnofficialNybatisMavenRepository</id>
+      <id>private</id>
       <url>https://github.com/nayasis/UnofficialMavenRepository/raw/master/</url>
     </repository>
   </repositories>
@@ -101,6 +97,12 @@
       <groupId>com.jayway.jsonpath</groupId>
       <artifactId>json-path</artifactId>
       <version>2.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.4</version>
+      <scope>provided</scope>
     </dependency>
 
     <!-- zip -->
