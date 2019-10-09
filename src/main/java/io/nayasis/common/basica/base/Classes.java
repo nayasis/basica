@@ -7,10 +7,10 @@ import io.nayasis.common.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.basica.file.Files;
 import io.nayasis.common.basica.file.handler.FileFinder;
 import io.nayasis.common.basica.validation.Validator;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,14 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -34,9 +41,9 @@ import java.util.jar.JarFile;
  *
  * @author nayasis@gmail.com
  */
+@Slf4j
+@UtilityClass
 public class Classes {
-
-	private static Logger log = LoggerFactory.getLogger( Classes.class );
 
 	private static LruCache<Class<?>,Set<Class<?>>> CACHE_CONTAINED_PARENT = new LruCache<>( 256 );
 

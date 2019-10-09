@@ -3,8 +3,7 @@ package io.nayasis.common.basica.cli;
 import io.nayasis.common.basica.etc.Platforms;
 import io.nayasis.common.basica.exception.unchecked.CommandLineException;
 import io.nayasis.common.basica.file.worker.LineReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -17,9 +16,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @author nayasis@gmail.com
  */
+@Slf4j
 public class CommandExecutor {
-
-	private static Logger log = LoggerFactory.getLogger( CommandExecutor.class );
 
 	private Process             process      = null;
 	private BufferedWriter      inputPipe    = null;

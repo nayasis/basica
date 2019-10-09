@@ -2,8 +2,7 @@ package io.nayasis.common.basica.cli;
 
 import io.nayasis.common.basica.etc.Platforms;
 import io.nayasis.common.basica.file.worker.LineReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,9 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.CountDownLatch;
 
+@Slf4j
 public class ProcessOutputThread extends Thread {
-
-	private static Logger log = LoggerFactory.getLogger( ProcessOutputThread.class );
 
 	private InputStream    inputStream;
 	private StringBuffer   output;

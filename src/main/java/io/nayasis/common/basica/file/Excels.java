@@ -5,8 +5,8 @@ import io.nayasis.common.basica.file.handler.ExcelHandler;
 import io.nayasis.common.basica.file.handler.implement.ExcelHandlerApachePoi;
 import io.nayasis.common.basica.file.handler.implement.ExcelHandlerJxl;
 import io.nayasis.common.basica.model.NList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.InputStream;
@@ -20,9 +20,9 @@ import java.util.Map;
  * @author nayasis@gmail.com
  *
  */
+@Slf4j
+@UtilityClass
 public class Excels {
-
-	private static Logger log = LoggerFactory.getLogger( Excels.class );
 
 	private static ExcelHandler excelHandler = null;
 
