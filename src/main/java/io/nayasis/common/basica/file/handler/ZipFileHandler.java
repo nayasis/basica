@@ -1,5 +1,6 @@
 package io.nayasis.common.basica.file.handler;
 
+import lombok.Cleanup;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -21,15 +22,12 @@ import java.util.List;
  */
 public class ZipFileHandler {
 
-    private void uncompress( ArchiveInputStream inputstreamToUncompress, File outputDirectory ) {
+    private void uncompress( ArchiveInputStream input, File outputDirectory ) {
 
         ArchiveEntry entry ;
+        @Cleanup ArchiveInputStream zis = input;
 
-        try (
-            ArchiveInputStream zis = inputstreamToUncompress
-
-        ) {
-
+        try {
             while ( (entry = zis.getNextEntry()) != null ) {
 
                 File target = new File ( outputDirectory, entry.getName() );
@@ -37,21 +35,17 @@ public class ZipFileHandler {
 
                 if ( entry.isDirectory() ){
                     target.mkdirs();
-
                 } else {
 
                     int     length = 0;
                     byte [] buffer = new byte[ 1024 * 8 ];
 
-                    BufferedOutputStream bos = new BufferedOutputStream( new FileOutputStream(target) );
-
+                    @Cleanup BufferedOutputStream bos = new BufferedOutputStream( new FileOutputStream(target) );
                     while ( (length = zis.read(buffer)) >= 0 ){
                         bos.write(buffer, 0, length);
                     }
 
-                    bos.close();
                 }
-
             }
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
@@ -59,56 +53,46 @@ public class ZipFileHandler {
 
     }
 
-    public void unzip( File fileToUnzip, File targetDirectory, Charset charset ) {
-
+    public void unzip( File target, File directory, Charset charset ) {
         try {
-
-            ArchiveInputStream stream = new ZipArchiveInputStream( new FileInputStream(fileToUnzip), charset.name(), true );
-            uncompress( stream, targetDirectory );
-
+            ArchiveInputStream stream = new ZipArchiveInputStream(
+                new FileInputStream(target), charset.name(), true );
+            uncompress( stream, directory );
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
         }
-
     }
 
-    private void compress( File fileOrDirectoryToCompress, ArchiveOutputStream archiveOutpuStream ) {
+    private void compress( File target, ArchiveOutputStream outputStream ) {
 
         List<File> files = new ArrayList<>();
 
         String basePath;
 
-        if( fileOrDirectoryToCompress.isDirectory() ) {
-
-            basePath = fileOrDirectoryToCompress.getPath();
-
-            for( Path path : Files.find( fileOrDirectoryToCompress.getPath(), true, false, -1, "**.*" ) ) {
+        if( target.isDirectory() ) {
+            basePath = target.getPath();
+            for( Path path : Files.findFile( target.getPath(), -1, "**.*" ) ) {
                 files.add( path.toFile() );
             }
-
         } else {
-            basePath = fileOrDirectoryToCompress.getParent();
-            files.add( fileOrDirectoryToCompress );
-
+            basePath = target.getParent();
+            files.add( target );
         }
 
         FileInputStream     fis = null;
-        ArchiveOutputStream zos = null;
+        ArchiveOutputStream zos = outputStream;
 
         try {
 
-            zos = archiveOutpuStream;
-
             for( File file : files ) {
 
-                String name = Files.toRelativePath( basePath, file.getPath() );
-
+                String       name  = Files.toRelativePath( basePath, file.getPath() );
                 ArchiveEntry entry = zos.createArchiveEntry( file, name );
 
                 zos.putArchiveEntry( entry );
 
-                int    length;
-                byte[] buf     = new byte[ 1024 * 8 ];
+                int length;
+                byte[] buf = new byte[ 1024 * 8 ];
 
                 fis = new FileInputStream( file );
 
@@ -131,22 +115,16 @@ public class ZipFileHandler {
     }
 
     public void zip( File fileOrDirectoryToZip, File targetFile, Charset charset ) {
-
         try {
 
             ZipArchiveOutputStream stream = new ZipArchiveOutputStream( targetFile );
-
             stream.setEncoding( charset.name() );
-
             stream.setCreateUnicodeExtraFields( ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS );
-
             compress( fileOrDirectoryToZip, stream );
 
         } catch( IOException e ) {
-
             throw new UncheckedIOException( e );
         }
-
     }
 
 }
