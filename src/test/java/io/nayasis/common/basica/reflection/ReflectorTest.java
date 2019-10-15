@@ -66,7 +66,6 @@ public class ReflectorTest {
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 class User {
     private String name;
     private int    age;
@@ -76,7 +75,6 @@ class User {
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 class Account {
     private String        name;
     private Integer       age;
