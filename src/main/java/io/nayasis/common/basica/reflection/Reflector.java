@@ -292,7 +292,7 @@ public class Reflector {
 	 * @param object	json string, Map or bean
 	 * @return map with flattern key
 	 */
-	public static Map<String, Object> toUnflatternMap( Object object ) throws JsonMappingException {
+	public static Map<String, Object> toUnflattenMap( Object object ) throws JsonMappingException {
 		return jsonConverterNullable.toUnflattenMap( object );
 	}
 
@@ -302,7 +302,7 @@ public class Reflector {
 	 * @param json	json text
 	 * @return valid or not
 	 */
-	public static boolean isJson(String json ) {
+	public static boolean isJson( String json ) {
 		return jsonConverterNullable.isJson( json );
 	}
 
@@ -337,13 +337,13 @@ public class Reflector {
 	/**
 	 * convert json to list
 	 *
-	 * @param json			json text or collection
-	 * @param genericType   list's generic type
+	 * @param json		json text or collection
+	 * @param generic   generic type of List
 	 * @param <T> generic type
      * @return list
      */
-	public static <T> List<T> toListFrom( Object json, Class<T> genericType ) throws JsonMappingException {
-		return jsonConverterNullable.toListFrom( json, genericType );
+	public static <T> List<T> toListFrom( Object json, Class<T> generic ) throws JsonMappingException {
+		return jsonConverterNullable.toListFrom( json, generic );
 	}
 
 	/**

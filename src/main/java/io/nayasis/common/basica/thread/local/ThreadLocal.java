@@ -18,7 +18,7 @@ public final class ThreadLocal {
 
 	private static ThreadLocalWatcher watcher = new ThreadLocalWatcher();
 
-	private static Map<String,Map<String,Object>> staticPool = new HashMap<>();
+	private static Map<String,Map<String,Object>> pool = new HashMap<>();
 
 	private ThreadLocal() {}
 
@@ -46,12 +46,12 @@ public final class ThreadLocal {
 
 	private static Map<String,Object> getThreadLocal() {
 		synchronized( lock ) {
-			if( ! staticPool.containsKey(ThreadRoot.getKey()) ) {
-				staticPool.put( ThreadRoot.getKey(), new HashMap<>() );
+			if( ! pool.containsKey(ThreadRoot.getKey()) ) {
+				pool.put( ThreadRoot.getKey(), new HashMap<>() );
 			}
 			lock.notifyAll();
         }
-		return staticPool.get( ThreadRoot.getKey() );
+		return pool.get( ThreadRoot.getKey() );
 	}
 
 	/**
@@ -93,7 +93,7 @@ public final class ThreadLocal {
 	public static void clear() {
 		watcher.notifyObservers();
 		synchronized( lock ) {
-			staticPool.remove( ThreadRoot.getKey() );
+			pool.remove( ThreadRoot.getKey() );
 			lock.notifyAll();
         }
 		watcher.notifyObservers( ThreadRoot.WATCHER_KEY );
@@ -122,8 +122,8 @@ public final class ThreadLocal {
 	 *
 	 * @return static pool to store indivisual thread local ( 'Key' is the unique key to distinguish indivisual thread local. )
 	 */
-	public static Map<String,Map<String,Object>> getStaticPool() {
-		return staticPool;
+	public static Map<String,Map<String,Object>> getPool() {
+		return pool;
 	}
 
 }

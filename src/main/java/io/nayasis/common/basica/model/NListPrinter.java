@@ -64,7 +64,7 @@ public class NListPrinter {
     private void printKey( StringBuilder writer, Map<Object, Integer> columnWidthList ) {
         for( Object key : nlist.header.keySet() ) {
             writer.append( "| " );
-            writer.append( Strings.displayRpad(key, columnWidthList.get(key), ' ') );
+            writer.append( Strings.dprpad(key, columnWidthList.get(key), ' ') );
         }
         writer.append( "|\n" );
     }
@@ -95,10 +95,10 @@ public class NListPrinter {
             writer.append( "| " );
 
             if( nlist.alias.containsKey(key) ) {
-                writer.append( Strings.displayRpad(String.format( "(%s)", nlist.alias.get(key) ), columnWidthList.get(key), ' ') );
+                writer.append( Strings.dprpad(String.format( "(%s)", nlist.alias.get(key) ), columnWidthList.get(key), ' ') );
 
             } else {
-                writer.append( Strings.displayRpad("", columnWidthList.get(key), ' ') );
+                writer.append( Strings.dprpad("", columnWidthList.get(key), ' ') );
             }
 
         }
@@ -117,7 +117,7 @@ public class NListPrinter {
 
             for( Object key : nlist.header.keySet() ) {
                 writer.append("| ");
-                writer.append( Strings.displayRpad(getValue(i, key), columnWidthList.get(key), ' ') );
+                writer.append( Strings.dprpad(getValue(i, key), columnWidthList.get(key), ' ') );
             }
 
             writer.append( "|\n" );
@@ -130,9 +130,9 @@ public class NListPrinter {
             int    innerLineLength = newLine.length() - 4;
 
             writer.append( newLine );
-            writer.append( "| " ).append( Strings.displayRpad( String.format("Omit [%d] cnt", nlist.size() - printCnt), innerLineLength, ' ') ).append( "|\n" );
-            writer.append( "| " ).append( Strings.displayRpad("If you want to see all,",      innerLineLength, ' ') ).append( "|\n" );
-            writer.append( "| " ).append( Strings.displayRpad("Use toDebugString() instead.", innerLineLength, ' ') ).append( "|\n" );
+            writer.append( "| " ).append( Strings.dprpad( String.format("Omit [%d] cnt", nlist.size() - printCnt), innerLineLength, ' ') ).append( "|\n" );
+            writer.append( "| " ).append( Strings.dprpad("If you want to see all,",      innerLineLength, ' ') ).append( "|\n" );
+            writer.append( "| " ).append( Strings.dprpad("Use toDebugString() instead.", innerLineLength, ' ') ).append( "|\n" );
 
         }
 

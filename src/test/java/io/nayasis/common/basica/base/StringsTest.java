@@ -1,6 +1,8 @@
 package io.nayasis.common.basica.base;
 
 import io.nayasis.common.basica.model.NMap;
+import io.nayasis.common.basica.reflection.Reflector;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,6 +29,28 @@ public class StringsTest {
         assertEquals( "5K\nUtil\ndesc", Strings.format("{}\n{}\n{}", "5K", "Util", "desc") );
 
     }
+
+    @Test
+    public void formatFromBean() {
+
+        String json = "{'a':1, 'b':2, 'c':'abcd'}";
+
+        Bean param = Reflector.toBeanFrom(json, Bean.class);
+
+        System.out.println( Strings.format("{a} is {b} or {c}", param) );
+
+        Assert.assertEquals( "1 is 2 or abcd", Strings.format("{a} is {b} or {c}", param) );
+
+        @Data
+        class Bean {
+            private int    a;
+            private int    b;
+            private String c;
+        }
+
+    }
+
+
 
     @Test
     public void changeHangulJosa() {
@@ -105,13 +129,13 @@ public class StringsTest {
 
         String value = "jdbc:sqlite:./target/test-classes/localDb/#{Merong}#{Nayasis}SimpleLauncherHelloWorld.db";
 
-        List<String> capturedList = Strings.capturePatterns( value, "#\\{(.+?)\\}" );
+        List<String> capturedList = Strings.capture( value, "#\\{(.+?)\\}" );
 
         assertEquals( 2, capturedList.size() );
         assertEquals( Arrays.asList( "Merong", "Nayasis" ), capturedList );
 
         value = "< Ref id=\"refOrigin2\" />";
-        List<String> refIds = Strings.capturePatterns( value, "(?i)< *?ref +?id *?= *?['\"](.*?)['\"] *?\\/>" );
+        List<String> refIds = Strings.capture( value, "(?i)< *?ref +?id *?= *?['\"](.*?)['\"] *?\\/>" );
         assertEquals( "[refOrigin2]", refIds.toString() );
 
     }
@@ -223,8 +247,8 @@ public class StringsTest {
     @Test
     public void camel() {
 
-        assertEquals( "lndPlus19Yn", Strings.camel( "lnd_plus19_yn" ) );
-        assertEquals( "lnd_plus19_yn", Strings.uncamel( "lndPlus19Yn" ) );
+        assertEquals( "lndPlus19Yn", Strings.toCamel( "lnd_plus19_yn" ) );
+        assertEquals( "lnd_plus19_yn", Strings.toSnake( "lndPlus19Yn" ) );
 
     }
 
@@ -236,10 +260,10 @@ public class StringsTest {
         String word03 = "<script>aaa(\"aaa\",'b'){}</script>";
         String word04 = "066&";
 
-        assertEquals( word02, Strings.escapeXss( word01 ) );
-        assertEquals( word01, Strings.unescapeXss( word02 ) );
-        assertEquals( word03, Strings.unescapeXss( word03 ) );
-        assertEquals( word04, Strings.unescapeXss( word04 ) );
+        assertEquals( word02, Strings.clearXss( word01 ) );
+        assertEquals( word01, Strings.restoreXss( word02 ) );
+        assertEquals( word03, Strings.restoreXss( word03 ) );
+        assertEquals( word04, Strings.restoreXss( word04 ) );
 
     }
 
