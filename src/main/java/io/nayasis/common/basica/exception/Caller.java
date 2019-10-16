@@ -7,7 +7,6 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 
 @Value
 @Accessors(fluent = true)
@@ -23,15 +22,12 @@ public class Caller {
 
     public Caller( int depth ) {
 
-        StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
+        stacktrace = Thread.currentThread().getStackTrace();
 
-        int length = stacktrace.length;
-        int index  = Math.max( 0, depth + 2 );
-            index  = Math.min( index, length - 1 );
+        depth = Math.max( depth, 0 );
+        depth = Math.min( depth, stacktrace.length - 1 );
 
-        this.stacktrace = Arrays.copyOfRange(stacktrace, index, length - 1);
-
-        StackTraceElement trace = stacktrace[ index ];
+        StackTraceElement trace = stacktrace[ depth ];
 
         className  = trace.getClassName();
         fileName   = trace.getFileName();
