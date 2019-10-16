@@ -26,9 +26,9 @@ import java.util.zip.GZIPOutputStream;
  */
 public class Strings {
 
-	private static final Pattern   PATTERN_CAMEL   = Pattern.compile( "(_[a-zA-Z])" );
-	private static final Pattern PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
-	private static final Formatter formatter       = new Formatter();
+	private static final Pattern   PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
+	private static final Pattern   PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
+	private static final Formatter formatter     = new Formatter();
 
 	/**
 	 * get display length applying character's font width. <br>

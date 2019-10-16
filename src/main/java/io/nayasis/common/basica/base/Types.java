@@ -3,6 +3,7 @@ package io.nayasis.common.basica.base;
 import io.nayasis.common.basica.model.NDate;
 import io.nayasis.common.basica.model.NList;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Type Check Utility
@@ -258,48 +260,30 @@ public class Types {
 
     public static List toList( Object instance ) {
 
-        List result = null;
+        if( instance == null ) return new ArrayList();
 
-        if( instance == null ) {
-            result = new ArrayList();
-
+        if( instance instanceof Collection ) {
+            return new ArrayList<>( (Collection) instance );
+        } else if( instance instanceof NList ) {
+            return ((NList) instance).toList();
+        } else if( isArray(instance) ) {
+            return arrayToList( instance );
         } else {
-
-            if( instance instanceof Collection ) {
-                result = new ArrayList<>( (Collection) instance );
-            } else if( instance instanceof NList ) {
-                result = ((NList) instance).toList();
-            } else if( isArray(instance) ) {
-                result = Arrays.asList( (Object[]) instance );
-            }
-
+            return new ArrayList( Arrays.asList(instance) );
         }
+    }
 
-        return result;
-
+    private static List arrayToList( Object object ) {
+        List list = new ArrayList();
+        int size = Array.getLength( object );
+        for( int i=0; i < size; i++ ) {
+            list.add( Array.get( object, i ) );
+        }
+        return list;
     }
 
     public static Collection toCollection( Object value ) {
-
-        Collection result = null;
-
-        if( value == null ) {
-            result = new ArrayList();
-
-        } else {
-
-            if( value instanceof Collection ) {
-                result = (Collection) value;
-            } else if( value instanceof NList ) {
-                result = ((NList) value).toList();
-            } else if( isArray(value) ) {
-                result = Arrays.asList( (Object[]) value );
-            }
-
-        }
-
-        return result;
-
+        return toList( value );
     }
 
     public static String toString( Object val ) {

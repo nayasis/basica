@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,11 +35,7 @@ public class StringsTest {
     public void formatFromBean() {
 
         String json = "{'a':1, 'b':2, 'c':'abcd'}";
-
         Bean param = Reflector.toBeanFrom(json, Bean.class);
-
-        System.out.println( Strings.format("{a} is {b} or {c}", param) );
-
         Assert.assertEquals( "1 is 2 or abcd", Strings.format("{a} is {b} or {c}", param) );
 
         @Data
@@ -48,6 +45,13 @@ public class StringsTest {
             private String c;
         }
 
+    }
+
+    @Test
+    public void formatFromMap() {
+        String json = "{'a':1, 'b':2, 'c':'abcd'}";
+        Map param = Reflector.toMapFrom( json );
+        Assert.assertEquals( "1 is 2 or abcd", Strings.format("{a} is {b} or {c}", param) );
     }
 
 

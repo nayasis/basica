@@ -14,18 +14,18 @@ import java.util.regex.Matcher;
  */
 public class Formatter {
 
-    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(|.+?)(|[^\\\\])\\}",    new int[]{2,3}, "\\\\(\\{|\\})",     "$1" );
-//    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(|.+?[^\\\\])\\}",    new int[]{2}, "\\\\(\\{|\\})",     "$1" );
-    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{(|.+?[^\\\\])\\}",   new int[]{2}, "\\\\(#|\\{|\\})",   "$1" );
-    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{(|.+?[^\\\\])\\}", new int[]{2}, "\\\\(\\$|\\{|\\})", "$1" );
-    public static final String         FORMAT_INDEX   = "_{{%d}}";
+    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(.*?)(|[^\\\\])\\}",    new int[]{2,3}, "\\\\(\\{|\\})",     "$1" );
+    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{(.*?)(|[^\\\\])\\}",   new int[]{2,3}, "\\\\(#|\\{|\\})",   "$1" );
+    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{(.*?)(|[^\\\\])\\}", new int[]{2,3}, "\\\\(\\$|\\{|\\})", "$1" );
+
+    protected static final String FORMAT_INDEX = "_{{%d}}";
 
     /**
      * return formatted string binding parameters
      *
-     * @param format                format string
-     * @param parameter             binding parameter
-     * @param binder                binder containing binding logic
+     * @param format    format string
+     * @param parameter binding parameter
+     * @param binder    binder containing binding logic
      * @param <T>
      * @return formatter string
      */
@@ -58,29 +58,23 @@ public class Formatter {
 
         while( matcher.find() ) {
 
-            StringBuilder definition = new StringBuilder();
-
-            for( int i : pattern.getTargetGroups() ) {
-                definition.append( matcher.group(i) );
-            }
-
-            Key key = new Key( definition.toString(), index );
+            Key key = new Key( getDefinition(matcher,pattern), index );
 
             sb.append( removeEscapeParamTag(pattern,source.substring(cursor, matcher.start())) );
 
-            int count = matcher.groupCount();
+            String value = null;
 
-            for( int i = 1; i < pattern.getTargetGroups(); i++ ) {
-                sb.append( matcher.group(i) );
-            }
+            for( int i = 1, iCnt = matcher.groupCount(); i <= iCnt; i++ ) {
 
-            String val = binder.bind( key.getName(), key.getFormat(), parameter );
+                if( pattern.getTargetGroups().contains(i) ) {
+                    if( value == null ) {
+                        value = binder.bind( key.getName(), key.getFormat(), parameter );
+                        sb.append( value );
+                    }
+                } else {
+                    sb.append( matcher.group(i) );
+                }
 
-            sb.append( val );
-
-
-            for(int i = pattern.getTargetGroups() + 1; i <= count; i++ ) {
-                sb.append( matcher.group(i) );
             }
 
             index++;
@@ -88,7 +82,7 @@ public class Formatter {
             cursor = matcher.end();
 
             if( koreanModification ) {
-                if( modifyKorean(val, cursor, sb, source) ) {
+                if( modifyKorean(value, cursor, sb, source) ) {
                     cursor++;
                     continue;
                 }
@@ -100,6 +94,14 @@ public class Formatter {
 
         return sb.toString();
 
+    }
+
+    private String getDefinition( Matcher matcher, ExtractPattern pattern ) {
+        StringBuilder sb = new StringBuilder();
+        for( int i : pattern.getTargetGroups() ) {
+            sb.append( matcher.group(i) );
+        }
+        return sb.toString();
     }
 
     private String removeEscapeParamTag( ExtractPattern pattern, String val ) {
