@@ -1,9 +1,11 @@
 package io.nayasis.common.basica.base.format;
 
 import io.nayasis.common.basica.base.Strings;
+import lombok.Data;
 
 import static io.nayasis.common.basica.base.format.Formatter.FORMAT_INDEX;
 
+@Data
 public class Key {
 
     private String name   = "";
@@ -23,22 +25,6 @@ public class Key {
             name = String.format( FORMAT_INDEX, index );
         }
 
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName( String name ) {
-        this.name = name;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public void setFormat( String format ) {
-        this.format = format;
     }
 
 }

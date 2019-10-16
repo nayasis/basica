@@ -27,7 +27,7 @@ import java.util.zip.GZIPOutputStream;
 public class Strings {
 
 	private static final Pattern   PATTERN_CAMEL   = Pattern.compile( "(_[a-zA-Z])" );
-	private static final Pattern   PATTERN_UNCAMEL = Pattern.compile( "([A-Z])" );
+	private static final Pattern PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
 	private static final Formatter formatter       = new Formatter();
 
 	/**
@@ -65,7 +65,7 @@ public class Strings {
      * @param padChar	padding character
      * @return padding string value
 	 */
-	public static String displayLpad( Object value, int length, char padChar ) {
+	public static String dplpad( Object value, int length, char padChar ) {
 		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
 				: value.toString().length() + ( length - getDisplayLength( value ) );
 		return lpad( value, adjustLength, padChar );
@@ -79,7 +79,7 @@ public class Strings {
 	 * @param padChar	padding character
 	 * @return padding string value
 	 */
-	public static String displayRpad( Object value, int length, char padChar ) {
+	public static String dprpad( Object value, int length, char padChar ) {
 		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
 				: value.toString().length() + ( length - getDisplayLength( value ) );
 
@@ -153,6 +153,22 @@ public class Strings {
 		if( one != null && other == null ) return false;
 		return one.equals( other );
 	}
+
+    /**
+     * Check a string is equals to other string.
+     *
+     * it is free from NullPointException.
+     *
+     * @param one    string to compare
+     * @param other  other string to compare
+     * @return true if each are equal.
+     */
+    public static boolean equalsIgnoreCase( String one, String other ) {
+        if( one == null && other == null ) return true;
+        if( one == null && other != null ) return false;
+        if( one != null && other == null ) return false;
+        return one.equalsIgnoreCase( other );
+    }
 
 	/**
 	 * return formatted string binding parameters.<br><br>
@@ -292,13 +308,13 @@ public class Strings {
 	 * convert text to camel case
 	 *
      * <pre>
-     * String text = DataConverter.getCamel( "unicode_text" );
+     * String text = Strings.toCamel( "unicode_text" );
      * System.out.println( text ); -> "unicodeText""
      * </pre>
      * @param text   text to convert
      * @return camel cased text
      */
-    public static String camel( String text ) {
+    public static String toCamel( String text ) {
 
     	if( isEmpty(text) ) return "";
 
@@ -322,15 +338,15 @@ public class Strings {
      * convert camel cased text to underscored text
 	 *
      * <pre>
-     * String text = Strings.uncamel( "unicodeText" );
+     * String text = Strings.snake( "unicodeText" );
      * System.out.println( text ); → "unicode_text"
      * </pre>
      * @param text     text to convert
      * @return underscored text
      */
-    public static String uncamel( String text ) {
+    public static String toSnake( String text ) {
 
-        Matcher matcher = PATTERN_UNCAMEL.matcher( text );
+        Matcher matcher = PATTERN_SNAKE.matcher( text );
         StringBuffer sb = new StringBuffer();
 
         while( matcher.find() ) {
@@ -461,10 +477,10 @@ public class Strings {
      * </pre>
      *
      * @param collection 	collection to join
-     * @param concator 		concatenation delimiter
+     * @param concater 		concatenation string
      * @return joined text
      */
-    public static String join( Collection<?> collection, String concator ) {
+    public static String join( Collection<?> collection, String concater ) {
 
     	if( collection == null || collection.size() == 0 ) return "";
 
@@ -475,7 +491,7 @@ public class Strings {
     		index--;
     		if( e == null ) continue;
     		sb.append( e.toString() );
-    		if( index > 0 ) sb.append( concator );
+    		if( index > 0 ) sb.append( concater );
     	}
     	return sb.toString();
 
@@ -484,23 +500,23 @@ public class Strings {
 	/**
 	 * Split string around matches of the given <a href="../util/regex/Pattern.html#sum">regular expression</a>.
 	 *
-	 * @param value				string value
-	 * @param regexDelimeter	the delimiting regular expression
-	 * @return	string array comupted by splitting around matches of the given regular expression
+	 * @param value		string value
+	 * @param separator	regular expression separator
+	 * @return	string array divided by regular expression matcher
 	 */
-	public static List<String> split( Object value, String regexDelimeter ) {
-		return split( value, regexDelimeter, false );
+	public static List<String> split( Object value, String separator ) {
+		return split( value, separator, false );
 	}
 
 	/**
 	 * Split string around matches of the given <a href="../util/regex/Pattern.html#sum">regular expression</a>.
 	 *
 	 * @param value				string value
-	 * @param regexpDelimiter	the delimiting regular expression
-	 * @param includeDelimiter	include delimiter in result
-	 * @return	string array comupted by splitting around matches of the given regular expression
+	 * @param separator	        regular expression separator
+	 * @param includeSeparator	include separator in result
+	 * @return	string array divided by regular expression matcher
 	 */
-	public static List<String> split( Object value, String regexpDelimiter, boolean includeDelimiter ) {
+	public static List<String> split( Object value, String separator, boolean includeSeparator ) {
 
 		List<String> result = new ArrayList<>();
 
@@ -508,12 +524,12 @@ public class Strings {
 
 		String val = trim( value );
 
-		if( isEmpty(regexpDelimiter) ) {
+		if( isEmpty(separator) ) {
 			result.add( val );
 			return result;
 		}
 
-		Pattern pattern = Pattern.compile( regexpDelimiter );
+		Pattern pattern = Pattern.compile( separator );
 		Matcher matcher = pattern.matcher( val );
 
 		int caret = 0;
@@ -522,7 +538,7 @@ public class Strings {
 			if( caret != matcher.start() ) {
 				result.add( val.substring( caret, matcher.start() ).trim() );
 			}
-			if( includeDelimiter ) {
+			if( includeSeparator ) {
 				result.add( matcher.group() );
 			}
 			caret = matcher.end();
@@ -543,7 +559,7 @@ public class Strings {
 	 * @param separator 		separator to tokenize
 	 * @return tokenized word list
 	 */
-	public static List<String> tokenize( Object value, String separator) {
+	public static List<String> tokenize( Object value, String separator ) {
 		return tokenize( value, separator, false );
 	}
 
@@ -552,16 +568,16 @@ public class Strings {
      *
      * @param value     		value to tokenize
      * @param separator 		separator to tokenize
-     * @param includeSeperator	include seperator in result
+     * @param includeSeparator	include separator in result
      * @return tokenized word list
      */
-    public static List<String> tokenize( Object value, String separator, boolean includeSeperator ) {
+    public static List<String> tokenize( Object value, String separator, boolean includeSeparator ) {
 
     	List<String> result = new ArrayList<>();
 
     	if( isEmpty(value) ) return result;
 
-		StringTokenizer tokenizer = new StringTokenizer( value.toString(), separator, includeSeperator );
+		StringTokenizer tokenizer = new StringTokenizer( value.toString(), separator, includeSeparator );
 
 		while( tokenizer.hasMoreTokens() ) {
 			result.add( tokenizer.nextToken() );
@@ -577,7 +593,7 @@ public class Strings {
      * @param text text to change
      * @return uncapitalized text
      */
-    public static String uncapitalize( Object text ) {
+    public static String upcapitalize( Object text ) {
     	if( isEmpty(text) ) return "";
     	char[] array = nvl( text ).toCharArray();
     	array[ 0 ] = Character.toLowerCase( array[0] );
@@ -613,7 +629,7 @@ public class Strings {
      */
     public static String compressSpace( Object value ) {
     	if( isEmpty(value) ) return "";
-    	return value.toString().replaceAll( "  +", " " ).trim();
+    	return value.toString().replaceAll( "[ \t]+", " " ).trim();
     }
 
 	/**
@@ -630,7 +646,7 @@ public class Strings {
 	 */
 	public static String compressBlank( Object value ) {
 		if( isEmpty(value) ) return "";
-		return value.toString().replaceAll( "[ \n\r]+", " " ).trim();
+		return value.toString().replaceAll( "[ \t\n\r]+", " " ).trim();
 	}
 
 	/**
@@ -679,7 +695,9 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
-    public static Object decode( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
+    public static <T> T decode( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
+
+        if( value == null ) return null;
 
     	byte o[] = DatatypeConverter.parseBase64Binary( nvl(value) );
 
@@ -687,7 +705,7 @@ public class Strings {
     		ByteArrayInputStream bis = new ByteArrayInputStream( o );
     		ObjectInputStream    ois = new ObjectInputStream( bis )
 		) {
-    		return ois.readObject();
+    		return (T) ois.readObject();
 
     	} catch (IOException e) {
     		throw new UncheckedIOException( e );
@@ -781,7 +799,7 @@ public class Strings {
 	}
 
 	/**
-	 * compare string by LIKE method similar with DBMS.
+	 * compare string like DBMS's LIKE.
 	 *
 	 * <pre>
 	 * {@link Strings#like}( "ABCDEFG", "%BCD%"   ) -> true
@@ -841,7 +859,7 @@ public class Strings {
 	}
 
 	/**
-	 * compare string by <b>NOT LIKE</b> method similar with DBMS.
+	 * compare string like DBMS's <b>NOT LIKE</b>.
 	 *
 	 * <pre>
 	 * {@link Strings#notLike}( "ABCDEFG", "%BCD%"   ) -> false
@@ -899,9 +917,9 @@ public class Strings {
 	 * @param pattern regular expression (only captured pattern (wrapped by (...)) can be extracted)
 	 * @return captured words
 	 */
-	public static List<String> capturePatterns( Object value, String pattern ) {
+	public static List<String> capture( Object value, String pattern ) {
 		Pattern p = ( pattern == null ) ? null : Pattern.compile( pattern );
-		return capturePatterns( value, p );
+		return capture( value, p );
 	}
 
 	/**
@@ -924,7 +942,7 @@ public class Strings {
 	 * @param pattern regular expression (only captured pattern (wrapped by (...)) can be extracted)
 	 * @return captured words
 	 */
-	public static List<String> capturePatterns( Object value, Pattern pattern ) {
+	public static List<String> capture( Object value, Pattern pattern ) {
 		List<String> result = new ArrayList<>();
 		if( isEmpty(value) || isEmpty(pattern) ) return result;
 		Matcher matcher = pattern.matcher( value.toString() );
@@ -962,7 +980,7 @@ public class Strings {
 	 * @param string word
 	 * @return upper characters
 	 */
-	public static String extractUpperCharacters( String string ) {
+	public static String extractUppers( String string ) {
 		if( isEmpty( string ) ) return "";
 		return string.replaceAll( "[^A-Z]", "" );
 	}
@@ -973,7 +991,7 @@ public class Strings {
 	 * @param string word
 	 * @return lower characters
 	 */
-	public static String extractLowerCharacters( String string ) {
+	public static String extractLowers( String string ) {
 		if( isEmpty( string ) ) return "";
 		return string.replaceAll( "[^a-z]", "" );
 	}
@@ -1049,12 +1067,12 @@ public class Strings {
 	}
 
 	/**
-	 * escape XSS(cross site script) pattern in text
+	 * clear XSS(cross site script) pattern in text
 	 *
 	 * @param value target value
 	 * @return escaped string
 	 */
-	public static String escapeXss( Object value ) {
+	public static String clearXss( Object value ) {
 
 		if( isEmpty(value) ) return "";
 
@@ -1082,12 +1100,12 @@ public class Strings {
 	}
 
 	/**
-	 * unescape XSS(cross site script) pattern in text
+	 * restore XSS(cross site script) pattern in text
 	 *
 	 * @param value target value
 	 * @return unescaped string
 	 */
-	public static String unescapeXss( Object value ) {
+	public static String restoreXss( Object value ) {
 
 		if( isEmpty(value) ) return "";
 
@@ -1150,26 +1168,26 @@ public class Strings {
 	 * Strings.mask( "***_****_***\\",  word ) ); -&gt; "010_3115_502"
 	 * </pre>
 	 *
-	 * @param maskPattern	mask pattern to apply. only '*' character is substitute with word.
-	 *                     if you want to print '*' character itself, set pattern as '\\*'
+	 * @param pattern	mask pattern to apply. only '*' character is substitute with word.
+	 *                  if you want to print '*' character itself, set pattern as '\\*'
 	 * @param word  word to mask
 	 * @return masked text
 	 */
-	public static String mask( String maskPattern, String word ) {
+	public static String mask( String pattern, String word ) {
 
-		if( isEmpty(maskPattern) || isEmpty(word) ) return "";
+		if( isEmpty(pattern) || isEmpty(word) ) return "";
 
 		StringBuilder sb = new StringBuilder();
 
 		int k = 0;
 
-		int lastIdxMask = maskPattern.length() - 1;
+		int lastIdxMask = pattern.length() - 1;
 		int lastIdxWord = word.length() - 1;
 
 		for( int i = 0; i <= lastIdxMask; i++ ) {
 
-			char curr = maskPattern.charAt( i );
-			char next = ( i == lastIdxMask ) ? '\n' : maskPattern.charAt( i + 1 );
+			char curr = pattern.charAt( i );
+			char next = ( i == lastIdxMask ) ? '\n' : pattern.charAt( i + 1 );
 
 			if( curr == '\\' ) {
 				if( i != lastIdxMask ) sb.append( next );
@@ -1256,9 +1274,9 @@ public class Strings {
 	 * @param e
 	 * @return stacktrace
 	 */
-	public static String readStackTrace( Throwable e ) {
+	public static String toStringFromThrowable( Throwable e ) {
 		StringWriter writer = new StringWriter();
-		e.printStackTrace( new PrintWriter( writer ) );
+		e.printStackTrace( new PrintWriter(writer) );
 		return writer.toString();
 	}
 

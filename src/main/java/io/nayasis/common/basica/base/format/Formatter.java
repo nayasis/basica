@@ -3,6 +3,7 @@ package io.nayasis.common.basica.base.format;
 import io.nayasis.common.basica.base.Characters;
 import io.nayasis.common.basica.base.Strings;
 import io.nayasis.common.basica.base.Types;
+import io.nayasis.common.basica.reflection.Reflector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,9 +14,10 @@ import java.util.regex.Matcher;
  */
 public class Formatter {
 
-    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(|.+?[^\\\\])\\}",    2, "\\\\(\\{|\\})",     "$1" );
-    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{(|.+?[^\\\\])\\}",   2, "\\\\(#|\\{|\\})",   "$1" );
-    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{(|.+?[^\\\\])\\}", 2, "\\\\(\\$|\\{|\\})", "$1" );
+    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(|.+?)(|[^\\\\])\\}",    new int[]{2,3}, "\\\\(\\{|\\})",     "$1" );
+//    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(|.+?[^\\\\])\\}",    new int[]{2}, "\\\\(\\{|\\})",     "$1" );
+    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{(|.+?[^\\\\])\\}",   new int[]{2}, "\\\\(#|\\{|\\})",   "$1" );
+    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{(|.+?[^\\\\])\\}", new int[]{2}, "\\\\(\\$|\\{|\\})", "$1" );
     public static final String         FORMAT_INDEX   = "_{{%d}}";
 
     /**
@@ -56,11 +58,19 @@ public class Formatter {
 
         while( matcher.find() ) {
 
-            Key key = new Key( matcher.group(pattern.getTargetGroup()), index );
+            StringBuilder definition = new StringBuilder();
+
+            for( int i : pattern.getTargetGroups() ) {
+                definition.append( matcher.group(i) );
+            }
+
+            Key key = new Key( definition.toString(), index );
 
             sb.append( removeEscapeParamTag(pattern,source.substring(cursor, matcher.start())) );
 
-            for( int i = 1; i < pattern.getTargetGroup(); i++ ) {
+            int count = matcher.groupCount();
+
+            for( int i = 1; i < pattern.getTargetGroups(); i++ ) {
                 sb.append( matcher.group(i) );
             }
 
@@ -68,7 +78,8 @@ public class Formatter {
 
             sb.append( val );
 
-            for( int i = pattern.getTargetGroup() + 1; i <= matcher.groupCount(); i++ ) {
+
+            for(int i = pattern.getTargetGroups() + 1; i <= count; i++ ) {
                 sb.append( matcher.group(i) );
             }
 
@@ -121,19 +132,7 @@ public class Formatter {
 
         if( parameter.length == 0 ) return Strings.nvl( format );
 
-        Map params;
-
-        if( parameter.length == 1 && Types.isMap(parameter[0]) ) {
-            params = (Map) parameter[0];
-        } else {
-            params = new HashMap();
-            int index = 0;
-            for( Object param : parameter ) {
-                params.put( String.format(FORMAT_INDEX, index++), param );
-            }
-        }
-
-        return bindParam( PATTERN_BASIC, format, params, (key, userFormat, param) -> {
+        return bindParam( PATTERN_BASIC, format, toParam(parameter), (key, userFormat, param) -> {
 
             Object val = param.get( key );
 
@@ -144,6 +143,25 @@ public class Formatter {
             }
 
         }, true );
+
+    }
+
+    private Map toParam( Object ... parameters ) {
+
+        if( parameters.length == 1 ) {
+            if ( Types.isMap(parameters[0]) ) {
+                return (Map) parameters[0];
+            } else if ( Types.isNotPrimitive(parameters[0]) ) {
+                return Reflector.toMapFrom(parameters[0]);
+            }
+        }
+
+        Map params = new HashMap();
+        int index = 0;
+        for( Object param : parameters ) {
+            params.put( String.format(FORMAT_INDEX, index++), param );
+        }
+        return params;
 
     }
 

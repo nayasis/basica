@@ -7,7 +7,7 @@
     </layout>
   </appender>
 
-  <logger name="io.nayasis.basica" level="debug">
+  <logger name="io.nayasis.common.basica" level="debug">
     <appender-ref ref="console" />
   </logger>
 

@@ -25,9 +25,8 @@ public class ZipFileHandler {
     private void uncompress( ArchiveInputStream input, File outputDirectory ) {
 
         ArchiveEntry entry ;
-        @Cleanup ArchiveInputStream zis = input;
 
-        try {
+        try ( ArchiveInputStream zis = input ) {
             while ( (entry = zis.getNextEntry()) != null ) {
 
                 File target = new File ( outputDirectory, entry.getName() );

@@ -175,8 +175,8 @@ public class Messages {
 
     	String localeString = sentences.get( size - 1 );
 
-    	String country  = Strings.extractUpperCharacters( localeString );
-    	String language = Strings.extractLowerCharacters( localeString );
+    	String country  = Strings.extractUppers( localeString );
+    	String language = Strings.extractLowers( localeString );
 
     	if( Strings.isEmpty( language ) ) language = Locale.getDefault().getLanguage();
 
