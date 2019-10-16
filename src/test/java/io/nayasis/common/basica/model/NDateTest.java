@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static io.nayasis.common.basica.model.NDate.ISO_8601_FORMAT;
 import static org.junit.Assert.*;
 
 @Slf4j
@@ -49,12 +50,13 @@ public class NDateTest {
     @Test
     public void testIsoConverting() {
 
-        String format = NDate.ISO_8601_FORMAT;
+        String format = ISO_8601_FORMAT;
+
+        log.debug( new NDate( "2014-01-01T00:00:00+0900", format ).toString( format ) );
 
         log.debug( new NDate( "2014-01-01T00:00:00.123+0900", format ).toString( format ) );
         log.debug( new NDate( "2014-01-01T00:00:00.12+0900", format ).toString( format ) );
         log.debug( new NDate( "2014-01-01T00:00:00.1+0900", format ).toString( format ) );
-        log.debug( new NDate( "2014-01-01T00:00:00+0900", format ).toString( format ) );
         log.debug( new NDate( "2014-01-01T00:0000+0900", format ).toString( format ) );
         log.debug( new NDate( "2014-01-01T000000+0900", format ).toString( format ) );
         log.debug( new NDate( "2014-0101T000000+0900", format ).toString( format ) );

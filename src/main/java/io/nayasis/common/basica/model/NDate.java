@@ -9,8 +9,16 @@ import io.nayasis.common.basica.reflection.serializer.simple.SimpleNDateSerializ
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static java.util.Calendar.MILLISECOND;
 
@@ -27,23 +35,14 @@ public class NDate implements Serializable {
 	public static final NDate MIN = new NDate("0000-01-01");
 	public static final NDate MAX = new NDate("9999-12-31 23:59:59.999");
 
-    private Calendar currentTime = Calendar.getInstance();
-
-    public static final String FULL_FORMAT     = "yyyyMMddHHmmssSSS";
     public static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String DEFAULT_FORMAT  = "yyyy-MM-dd HH:mm:ss";
 
-    private static final String DEFAULT_FORMAT  = "yyyy-MM-dd HH:mm:ss";
     private static final Set<String> ISO_8601_COMPATIBLE_FORMATS = new LinkedHashSet<>(
-        Arrays.asList( "yyyyMMdd'T'HHmmssZ", "yyyyMMdd'T'HHmmssSSSZ", "yyyyMMdd'T'HHmmssSSZ", "yyyyMMdd'T'HHmmssSZ" )
+        Arrays.asList( "yyyyMMddHHmmssZ", "yyyyMMddHHmmssSSZ", "yyyyMMddHHmmssSZ" )
     );
 
-    private static final Set<String> ALL_FORMATS = new LinkedHashSet<>();
-    static {
-        ALL_FORMATS.add( DEFAULT_FORMAT  );
-        ALL_FORMATS.add( FULL_FORMAT     );
-        ALL_FORMATS.add( ISO_8601_FORMAT );
-        ALL_FORMATS.addAll( ISO_8601_COMPATIBLE_FORMATS );
-    }
+    private Calendar currentTime = Calendar.getInstance();
 
     /**
      * constructor with current date
@@ -184,48 +183,22 @@ public class NDate implements Serializable {
      */
     public NDate setDate( String date, String format ) throws ParseException {
 
-        if( Strings.isEmpty(date) ) {
-            setDate( new Date() );
-            return this;
-        }
-
-        String pattern = toDateFormat( format, true );
-        String value   = toDateDigit( date );
-
-        int length = Math.min( pattern.length(), value.length() );
-
-        pattern = pattern.substring( 0, length ).replaceAll( "T", "'T'" );
-        value   = value.substring( 0, length );
+        if( Strings.isEmpty(date) )
+            return setDate( new Date() );
 
         try {
-            parse( value, pattern );
-            return this;
-        } catch( ParseException e ) {
-            for( String isoFormat : ISO_8601_COMPATIBLE_FORMATS ) {
-                try {
-                    return setDate( date, isoFormat );
-                } catch( ParseException isoError ) {}
+            return setDate( NDateParser.toDate(date,format) );
+        } catch ( ParseException e ) {
+            if( ISO_8601_FORMAT.equals(format) ) {
+                for( String pattern : ISO_8601_COMPATIBLE_FORMATS ) {
+                    try {
+                        return setDate( NDateParser.toDate(date,pattern) );
+                    } catch (ParseException ex) {}
+                }
             }
             throw e;
         }
 
-    }
-
-    private String strip( String format ) {
-        return format.replaceAll( "[^yMdTHmsSZ]", "" );
-    }
-
-    private String toDateDigit( String value ) {
-        return value.replaceAll( "[^0-9T\\+]", "" );
-    }
-
-    private void parse( String val, String pattern ) {
-        SimpleDateFormat sdf = new SimpleDateFormat( pattern );
-        try {
-            currentTime.setTime( sdf.parse(val) );
-        } catch( java.text.ParseException e ) {
-            throw new ParseException( e, e.getMessage() );
-        }
     }
 
     /**
@@ -385,37 +358,21 @@ public class NDate implements Serializable {
      * convert to String in specific format
      *
      * @param format date format [YYYY:year, MM:month, DD:day, HH:hour, MI:minute, SS:second, FFF:milli-second ]
-     * @return 포맷에 맞는 날짜 문자열
+     * @return formatted date
      */
     public String toString( String format ) {
-        SimpleDateFormat sdf = new SimpleDateFormat( toDateFormat(format,false) );
+        SimpleDateFormat sdf = new SimpleDateFormat( toDateFormat(format) );
         return sdf.format( toDate() );
     }
 
-    /**
-     * convert format to SimpleDateFormat
-     *
-     * @param format    date format [YYYY:year, MM:month, DD:day, HH:hour, MI:minute, SS:second, FFF:milli-second ]
-     * @param doStrip   strip non date-digit ( remove all except 'yyyyMMddTHHmmssSSSZZZ' )
-     * @return SimpleDateFormat
-     */
-    private String toDateFormat( String format, boolean doStrip ) {
-
-        if( Strings.isEmpty(format) ) return FULL_FORMAT;
-
-        if( ALL_FORMATS.contains(format) ) return format;
-
-        format = format
-        	.replaceAll( "YYYY", "yyyy" )
-            .replaceAll( "([^D])DD([^D]|$)", "$1dd$2" )
+    private String toDateFormat( String format ) {
+        if( Strings.isEmpty(format) ) return DEFAULT_FORMAT;
+        return format
+            .replaceAll( "YYYY", "yyyy" )
+            .replaceAll( "(^|[^D])DD([^D]|$)", "$1dd$2" )
             .replaceAll( "MI",     "mm"   )
-            .replaceAll( "([^S])SS([^S]|$)", "$1ss$2" )
-            .replaceAll( "F",    "S"    );
-
-        if( doStrip ) format = strip( format );
-
-        return format;
-
+            .replaceAll( "(^|[^S])SS([^S]|$)", "$1ss$2" )
+            .replaceAll( "(^|[^F])FFF([^F]|$)", "$1SSS$2" );
     }
 
     /**
