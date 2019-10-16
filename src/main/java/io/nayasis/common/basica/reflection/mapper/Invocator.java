@@ -7,10 +7,10 @@ import java.lang.reflect.UndeclaredThrowableException;
 
 public class Invocator<T> implements InvocationHandler {
 
-    private T               originalInstance;
-    private MethodInvocator methodInvocator;
+    private T             originalInstance;
+    private MethodInvoker methodInvocator;
 
-    public Invocator( T instance, MethodInvocator methodInvocator  ) {
+    public Invocator( T instance, MethodInvoker methodInvocator  ) {
         this.originalInstance = instance;
         this.methodInvocator  = methodInvocator;
     }
