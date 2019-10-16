@@ -3,7 +3,6 @@ package io.nayasis.common.basica.model;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.nayasis.common.basica.base.Strings;
-import io.nayasis.common.basica.validation.Validator;
 import io.nayasis.common.basica.exception.unchecked.ParseException;
 import io.nayasis.common.basica.reflection.deserializer.NDateDeserializer;
 import io.nayasis.common.basica.reflection.serializer.simple.SimpleNDateSerializer;
@@ -13,29 +12,38 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
+import static java.util.Calendar.MILLISECOND;
+
 /**
- * represents a specific instant in time with millisecond precision
+ * NDate
  *
  * @author nayasis@gmail.com
+ * @since 2013-03-04
  */
 @JsonSerialize( using = SimpleNDateSerializer.class )
 @JsonDeserialize( using = NDateDeserializer.class )
 public class NDate implements Serializable {
 
-	public static final NDate MIN_DATE = new NDate("0000-01-01");
-	public static final NDate MAX_DATE = new NDate("9999-12-31 23:59:59.999");
+	public static final NDate MIN = new NDate("0000-01-01");
+	public static final NDate MAX = new NDate("9999-12-31 23:59:59.999");
 
     private Calendar currentTime = Calendar.getInstance();
 
-    private static final String DEFAULT_INPUT_FORMAT  = "yyyyMMddHHmmssSSS";
-
-    public static final String DEFAULT_FORMAT  = "YYYY-MM-DD HH:MI:SS";
-    public static final String FULL_FORMAT     = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    public static final String FULL_FORMAT     = "yyyyMMddHHmmssSSS";
     public static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
+    private static final String DEFAULT_FORMAT  = "yyyy-MM-dd HH:mm:ss";
     private static final Set<String> ISO_8601_COMPATIBLE_FORMATS = new LinkedHashSet<>(
         Arrays.asList( "yyyyMMdd'T'HHmmssZ", "yyyyMMdd'T'HHmmssSSSZ", "yyyyMMdd'T'HHmmssSSZ", "yyyyMMdd'T'HHmmssSZ" )
     );
+
+    private static final Set<String> ALL_FORMATS = new LinkedHashSet<>();
+    static {
+        ALL_FORMATS.add( DEFAULT_FORMAT  );
+        ALL_FORMATS.add( FULL_FORMAT     );
+        ALL_FORMATS.add( ISO_8601_FORMAT );
+        ALL_FORMATS.addAll( ISO_8601_COMPATIBLE_FORMATS );
+    }
 
     /**
      * constructor with current date
@@ -97,7 +105,7 @@ public class NDate implements Serializable {
     }
 
     /**
-     * [년-월-일-시-분-초] 순서로 날짜 객체를 생성한다.
+     * construct in sequence [year, month, day, hour, minute, second, milli-second]
      *
      * <pre>
      * NDate date01 = new NDate( "2012.01" );
@@ -107,15 +115,15 @@ public class NDate implements Serializable {
      * NDate date05 = new NDate( "2012-01-02 13:20:42" );
      * </pre>
      *
-     * @param date 날짜
-     * @throws ParseException YYYY-MM-DD-HH-MI-SS 순서로 날짜를 해석하지 못했을 경우
+     * @param date date
+     * @throws ParseException fail in parsing date with defined format
      */
     public NDate( String date ) throws ParseException {
         setDate( date );
     }
 
     /**
-     * 특정 형식에 대해 날짜 객체를 생성한다.
+     * construct date in specific format
      *
      * <pre>
      * NDate date01 = new NDate( "01/22/1977", "MM/DD/YYYY" );
@@ -123,9 +131,9 @@ public class NDate implements Serializable {
      * NDate date03 = new NDate( "23:42 01/22", "HH:MI MM/DD" );
      * </pre>
      *
-     * @param date 날짜
-     * @param format 날짜포맷 날짜포맷 [YYYY:년, MM:월, DD:일, HH:시, MI:분, SS:초 ]
-     * @throws ParseException 정의한 format 으로 날짜를 해석하지 못했을 경우
+     * @param date      date
+     * @param format    date format [YYYY:year, MM:month, DD:day, HH:hour, MI:minute, SS:second, FFF:milli-second ]
+     * @throws ParseException fail in parsing date with defined format
      */
     public NDate( String date, String format ) throws ParseException {
         setDate( date, format );
@@ -141,27 +149,27 @@ public class NDate implements Serializable {
     }
 
     /**
-     * 날짜를 [년-월-일-시-분-초] 순의 형식으로 세팅한다.
+     * set date in sequence [year, month, day, hour, minute, second, milli-second]
      *
      * <pre>
      * NDate date = new NDate();
      *
      * date.setDate( "2011.12.24" );
-     * date.setDate( "2011-12-24" ); → 포맷 중간의 구분자가 달라도 처리 가능
+     * date.setDate( "2011-12-24" );
      * date.setDate( "2011.12.24 12:20" );
      * date.setDate( "2011.12.24 13:20:45" );
      * </pre>
      *
      * @param date date string
      * @return self instance
-     * @throws ParseException YYYY-MM-DD-HH-MI-SS 순서로 날짜를 해석하지 못했을 경우
+     * @throws ParseException fail in parsing date with defined format
      */
     public NDate setDate( String date ) throws ParseException {
         return setDate( date, null );
     }
 
     /**
-     * 날짜를 세팅한다.
+     * set date in specific format.
      *
      * <pre>
      * NDate date = new NDate();
@@ -169,55 +177,45 @@ public class NDate implements Serializable {
      * date.setDate( "2011-12-24 23:10:45", "YYYY-MM-DD HH:MI:SS" );
      * </pre>
      *
-     * @param date 날짜
-     * @param format 날짜포맷 날짜포맷 [YYYY:년, MM:월, DD:일, HH:시, MI:분, SS:초 ]
+     * @param date      date
+     * @param format    date format [YYYY:year, MM:month, DD:day, HH:hour, MI:minute, SS:second, FFF:milli-second ]
      * @return self instance
-     * @throws ParseException 정의한 format 으로 날짜를 해석하지 못했을 경우
+     * @throws ParseException fail in parsing date with defined format
      */
-    public NDate setDate( String date, String format ) {
+    public NDate setDate( String date, String format ) throws ParseException {
 
         if( Strings.isEmpty(date) ) {
             setDate( new Date() );
             return this;
         }
 
-        boolean isNullFormat = Validator.isEmpty( format );
+        String pattern = toDateFormat( format, true );
+        String value   = toDateDigit( date );
 
-        String pattern = getDefaultFormat( format, isNullFormat );
-        String value   = isNullFormat ? Strings.toDigit( date ) : date;
+        int length = Math.min( pattern.length(), value.length() );
 
-        if( isNullFormat ) {
-            int maxLength = Math.min( pattern.length(), value.length() );
-            pattern   = pattern.substring( 0, maxLength );
-            value = value.substring( 0, maxLength );
-        }
+        pattern = pattern.substring( 0, length ).replaceAll( "T", "'T'" );
+        value   = value.substring( 0, length );
 
         try {
             parse( value, pattern );
             return this;
-        } catch( ParseException parseException ) {
-
-            if( ISO_8601_FORMAT.equals(pattern) ) {
-
-                String isoValue = extractIsoValue( date );
-                for( String isoFormat : ISO_8601_COMPATIBLE_FORMATS ) {
-                    try {
-                        parse( isoValue, isoFormat );
-                        return this;
-                    } catch( ParseException isoError ) {}
-                }
-
-                throw parseException;
-
-            } else {
-                throw parseException;
+        } catch( ParseException e ) {
+            for( String isoFormat : ISO_8601_COMPATIBLE_FORMATS ) {
+                try {
+                    return setDate( date, isoFormat );
+                } catch( ParseException isoError ) {}
             }
-
+            throw e;
         }
 
     }
 
-    private String extractIsoValue( String value ) {
+    private String strip( String format ) {
+        return format.replaceAll( "[^yMdTHmsSZ]", "" );
+    }
+
+    private String toDateDigit( String value ) {
         return value.replaceAll( "[^0-9T\\+]", "" );
     }
 
@@ -378,39 +376,34 @@ public class NDate implements Serializable {
         return this.currentTime.getTimeInMillis();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    @Override
     public String toString() {
-        return toString(DEFAULT_FORMAT);
+        return toString( DEFAULT_FORMAT );
     }
 
     /**
-     * 객체를 특정 포맷에 맞는 형식으로 출력한다.
+     * convert to String in specific format
      *
-     * @param format 날짜포맷 (YYYY:년, MM:월, DD:일, HH:시, MI:분, SS:초, FFF: 밀리초)
+     * @param format date format [YYYY:year, MM:month, DD:day, HH:hour, MI:minute, SS:second, FFF:milli-second ]
      * @return 포맷에 맞는 날짜 문자열
      */
     public String toString( String format ) {
-
-        String pattern = getDefaultFormat( format, false );
-
-        SimpleDateFormat sdf = new SimpleDateFormat( pattern );
-
+        SimpleDateFormat sdf = new SimpleDateFormat( toDateFormat(format,false) );
         return sdf.format( toDate() );
-
     }
 
     /**
-     * 특정 형식문자열을 제외한 나머지 문자열을 제거한 format 을 구한다.
+     * convert format to SimpleDateFormat
      *
-     * @param format 사용자가 입력한 날짜 지정형식 (YYYY:년, MM:월, DD:일, HH:시, MI:분, SS:초, FFF: 밀리초)
-     * @param stripYn yyyyMMddHHmmssSSS 이외의 문자 제외여부
-     * @return yyyyMMddHHmmssSSS 이외의 문자는 제외된 날짜형식
+     * @param format    date format [YYYY:year, MM:month, DD:day, HH:hour, MI:minute, SS:second, FFF:milli-second ]
+     * @param doStrip   strip non date-digit ( remove all except 'yyyyMMddTHHmmssSSSZZZ' )
+     * @return SimpleDateFormat
      */
-    private String getDefaultFormat( String format, boolean stripYn ) {
+    private String toDateFormat( String format, boolean doStrip ) {
 
-        if( format == null || format.length() == 0 ) return DEFAULT_INPUT_FORMAT;
+        if( Strings.isEmpty(format) ) return FULL_FORMAT;
+
+        if( ALL_FORMATS.contains(format) ) return format;
 
         format = format
         	.replaceAll( "YYYY", "yyyy" )
@@ -419,7 +412,7 @@ public class NDate implements Serializable {
             .replaceAll( "([^S])SS([^S]|$)", "$1ss$2" )
             .replaceAll( "F",    "S"    );
 
-        if( stripYn ) format = format.replaceAll( "[^y|M|d|H|m|s|S]", "" );
+        if( doStrip ) format = strip( format );
 
         return format;
 
@@ -503,7 +496,7 @@ public class NDate implements Serializable {
      * @return milli-seconds
      */
     public int getMillisecond() {
-        return currentTime.get( Calendar.MILLISECOND );
+        return currentTime.get( MILLISECOND );
     }
 
     /**
@@ -645,7 +638,7 @@ public class NDate implements Serializable {
      * @return self instance
      */
     public NDate addMillisecond( int value ) {
-        currentTime.add( Calendar.MILLISECOND, value );
+        currentTime.add( MILLISECOND, value );
         return this;
     }
 
@@ -656,7 +649,7 @@ public class NDate implements Serializable {
      * @return  self instance
      */
     public NDate setMillisecond( int value ) {
-        currentTime.set( Calendar.MILLISECOND, value );
+        currentTime.set( MILLISECOND, value );
         return this;
     }
 
@@ -676,7 +669,7 @@ public class NDate implements Serializable {
 
         Calendar newDate = Calendar.getInstance();
         newDate.set( getYear(), getMonth() - 1, 1, 0, 0, 0 );
-        newDate.set( Calendar.MILLISECOND, 0 );
+        newDate.set( MILLISECOND, 0 );
 
         return new NDate( newDate );
 
@@ -699,8 +692,8 @@ public class NDate implements Serializable {
         Calendar newDate = Calendar.getInstance();
 
         newDate.set( getYear(), getMonth(), 1, 0, 0, 0 );
-        newDate.set( Calendar.MILLISECOND, 0 );
-        newDate.add( Calendar.MILLISECOND, -1 );
+        newDate.set( MILLISECOND, 0 );
+        newDate.add( MILLISECOND, -1 );
 
         return new NDate( newDate );
 
@@ -717,7 +710,7 @@ public class NDate implements Serializable {
         Calendar c1 = new NDate( toString("YYYYMMDD" ) ).toCalendar();
         Calendar c2 = new NDate( date.toString("YYYYMMDD" ) ).toCalendar();
 
-        long diff = getDifference( c1, c2 );
+        long diff = difference( c1, c2 );
 
         return (int) ( diff / 86400000 ); // 24 * 60 * 60 * 1000
 
@@ -734,7 +727,7 @@ public class NDate implements Serializable {
         Calendar c1 = new NDate( toString("YYYYMMDDHHMISS" ) ).toCalendar();
         Calendar c2 = new NDate( date.toString("YYYYMMDDHHMISS" ) ).toCalendar();
 
-        long diff = getDifference( c1, c2 );
+        long diff = difference( c1, c2 );
 
         return (int) ( diff / 3600000 ); // 60 * 60 * 1000
 
@@ -747,14 +740,14 @@ public class NDate implements Serializable {
      * @return times difference
      */
     public long betweenTimes( NDate date ) {
-        return getDifference( this.currentTime, date.currentTime );
+        return difference( this.currentTime, date.currentTime );
     }
 
     /**
-     * 두 날짜간의 크기를 비교한다.
+     * compare NDate
      *
-     * @param   date   비교할 날짜객체
-     * @return  -1 : 현재 날짜가 비교할 날짜 이전일 경우, 0 : 두 날짜가 동일할 경우, 1 : 현재 날짜가 비교할 날짜 이후일 경우
+     * @param   date    date to compare
+     * @return  compared result (-1: lesser, 0: equal, 1: later)
      */
     public int compareTo( NDate date ) {
 
@@ -765,64 +758,62 @@ public class NDate implements Serializable {
     }
 
     /**
-     * 날짜간 크기를 비교한다.
+     * compare to be greater than other
      *
-     * @param date 비교할 날짜
-     * @return 현재 날짜가 비교할 날짜보다 클 경우 true
+     * @param date date to compare
+     * @return true if it is greater than other.
      */
     public boolean greaterThan( NDate date ) {
         return compareTo( date ) > 0 ;
     }
 
     /**
-     * 날짜간 크기를 비교한다.
+     * compare to be equal or greater than other
      *
-     * @param date 비교할 날짜
-     * @return 현재 날짜가 비교할 날짜보다 크거나 같을 경우 true
+     * @param date date to compare
+     * @return true if it is equal or greater than other.
      */
     public boolean greaterThanOrEqual( NDate date ) {
         return compareTo( date ) >= 0;
     }
 
     /**
-     * 날짜간 크기를 비교한다.
+     * compare to be less than other
      *
-     * @param date 비교할 날짜
-     * @return 현재 날짜가 비교할 날짜보다 작을 경우 true
+     * @param date date to compare
+     * @return true if it is less than other.
      */
     public boolean lessThan( NDate date ) {
         return compareTo( date ) < 0;
     }
 
     /**
-     * 날짜간 크기를 비교한다.
+     * compare to be equal or less than other
      *
-     * @param date 비교할 날짜
-     * @return 현재 날짜가 비교할 날짜보다 작거나 같을 경우 true
+     * @param date date to compare
+     * @return true if it is equal or less than other.
      */
     public boolean lessThanOrEqual( NDate date ) {
         return compareTo( date ) <= 0;
     }
 
     /**
-     * 캘린더 객체간의 시간차를 구한다.
+     * get difference milli-seconds between Calendar instances.
      *
-     * @param c1 비교할 첫번째 캘린더 객체
-     * @param c2 비교할 두번째 캘린더 객체
-     * @return 시간차 (밀리세컨드 단위)
+     * @param c1 first
+     * @param c2 second
+     * @return difference (unit:milli-second)
      */
-    private long getDifference( Calendar c1, Calendar c2 ) {
+    private long difference( Calendar c1, Calendar c2 ) {
 
-        long milis1 = c1.getTimeInMillis();
-        long milis2 = c2.getTimeInMillis();
+        long time1 = c1.getTimeInMillis();
+        long time2 = c2.getTimeInMillis();
 
-        return Math.abs( milis1 - milis2 );
+        return Math.abs( time1 - time2 );
 
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
+    @Override
     public NDate clone() {
         return new NDate( toDate() );
     }

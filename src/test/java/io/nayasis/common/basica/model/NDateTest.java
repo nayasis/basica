@@ -1,7 +1,8 @@
 package io.nayasis.common.basica.model;
 
 import io.nayasis.common.basica.file.Files;
-import io.nayasis.common.basica.reflection.Reflector;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.Assert.*;
 
@@ -21,7 +23,9 @@ public class NDateTest {
         LocalDateTime nowLocal = LocalDateTime.now();
         NDate         nowNDate = new NDate( nowLocal );
 
-        Assert.assertEquals( nowLocal.toString(), nowNDate.toString("yyyy-MM-dd'T'HH:mm:ss.SSS") );
+        String format = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+        Assert.assertEquals( nowLocal.format( DateTimeFormatter.ofPattern(format)),
+            nowNDate.toString(format) );
 
     }
 
@@ -77,62 +81,31 @@ public class NDateTest {
     @Test
     public void serializeViaFile() {
 
-        String testFile = Files.getRootPath() + "/test.serialized.obj";
+        String file = Files.getRootPath() + "/test.serialized.obj";
 
-        SampleVo sampleVo = new SampleVo( "nayasis", new NDate( "1977-01-22" ) );
+        SampleVo vo = new SampleVo( "nayasis", new NDate( "1977-01-22" ) );
 
-        String before = sampleVo.toString();
-
-        Files.writeObject( testFile, sampleVo );
-
-        sampleVo = Files.readObject( testFile );
-
-        String after = sampleVo.toString();
+        String before = vo.toString();
+        Files.writeObject( file, vo );
+        String after = Files.readObject( file ).toString();
+        Files.delete( file );
 
         Assert.assertEquals( after, before );
 
-        Files.delete( testFile );
-
     }
 
+    @Data
+    @AllArgsConstructor
     private static class SampleVo implements Serializable {
-
         private String name;
         private NDate  birth;
-
-        public SampleVo( String name, NDate birth ) {
-            this.name = name;
-            this.birth = birth;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName( String name ) {
-            this.name = name;
-        }
-
-        public NDate getBirth() {
-            return birth;
-        }
-
-        public void setBirth( NDate birth ) {
-            this.birth = birth;
-        }
-
-        public String toString() {
-            return Reflector.toJson( this );
-        }
-
     }
 
     @Test
-    public void test() {
-
-        log.debug( new NDate().toString() );
-        log.debug( new NDate().toString("YYYY-MM-DD'T'HH:MI:SS") );
-
+    public void toStringFormat() {
+        NDate date = new NDate( "2019-10-16 16:51:43" );
+        assertEquals( "2019-10-16 16:51:43", date.toString() );
+        assertEquals( "2019-10-16T16:51:43", date.toString("YYYY-MM-DD'T'HH:MI:SS") );
     }
 
     @Test

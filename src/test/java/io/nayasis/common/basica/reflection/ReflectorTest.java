@@ -1,10 +1,13 @@
 package io.nayasis.common.basica.reflection;
 
+import io.nayasis.common.basica.model.NDate;
 import io.nayasis.common.basica.validation.Validator;
 import lombok.*;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,39 +19,39 @@ public class ReflectorTest {
     @Test
     public void cloneTest() {
 
-        User user  = User.builder().name("nayasis").age(40).build();
+        User user  = new User().name("nayasis").age(40);
         User clone = Reflector.clone(user);
 
-        Assert.assertEquals( user.getName(), clone.getName() );
-        Assert.assertEquals( user.getAge(), clone.getAge() );
+        Assert.assertEquals( user.name(), clone.name() );
+        Assert.assertEquals( user.age(), clone.age() );
 
     }
 
     @Test
     public void copy() {
 
-        User user = User.builder().name("nayasis").age(40).build();
+        User user = new User().name("nayasis").age(40);
         Account account = new Account();
 
         Reflector.copy( user, account );
 
-        Assert.assertEquals( "nayasis", account.getName() );
-        Assert.assertEquals( 40, account.getAge().intValue() );
-        Assert.assertEquals( null, account.getAddress() );
-        Assert.assertEquals( null, account.getBalance() );
+        Assert.assertEquals( "nayasis", account.name() );
+        Assert.assertEquals( 40, account.age().intValue() );
+        Assert.assertEquals( null, account.address() );
+        Assert.assertEquals( null, account.balance() );
 
     }
 
     @Test
     public void toJsonJava8Date() {
 
-        Account jake = Account.builder()
+        Account jake = new Account()
             .name("jake")
             .age( 9 )
             .regDt(LocalDateTime.now())
             .address("Jeongja, Sung-Nam si")
             .balance(BigDecimal.ZERO)
-            .build();
+            ;
 
         String json = Reflector.toJson(jake);
 
@@ -60,12 +63,24 @@ public class ReflectorTest {
 
     }
 
+    @Test
+    public void convertNDate() {
+
+        String json = "{ 'name':'nayasis', 'birth':'1977-01-22'  }";
+
+        Person person = Reflector.toBeanFrom( json, Person.class );
+
+        log.debug( person.toString() );
+
+
+    }
+
 }
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Accessors(fluent=true)
 class User {
     private String name;
     private int    age;
@@ -74,11 +89,20 @@ class User {
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Accessors(fluent=true)
 class Account {
     private String        name;
     private Integer       age;
     private String        address;
     private BigDecimal    balance;
     private LocalDateTime regDt;
+}
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(fluent=true)
+class Person {
+    private String name;
+    private NDate  birth;
 }

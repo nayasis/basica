@@ -4,9 +4,12 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import io.nayasis.common.basica.exception.unchecked.ParseException;
 import io.nayasis.common.basica.model.NDate;
 
 import java.io.IOException;
+
+import static io.nayasis.common.basica.model.NDate.ISO_8601_FORMAT;
 
 public class NDateDeserializer extends JsonDeserializer<NDate> {
 
@@ -16,8 +19,12 @@ public class NDateDeserializer extends JsonDeserializer<NDate> {
 			long value = jp.getLongValue();
 			return new NDate( value );
 		} catch( JsonParseException e ) {
-			String value = jp.getValueAsString();
-			return new NDate( value, NDate.ISO_8601_FORMAT);
+			String string = jp.getValueAsString();
+			try {
+				return new NDate( string, ISO_8601_FORMAT );
+			} catch ( ParseException ex ) {
+				return new NDate( string );
+			}
 		}
     }
 
