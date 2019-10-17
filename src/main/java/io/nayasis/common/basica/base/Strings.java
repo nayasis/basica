@@ -1274,7 +1274,7 @@ public class Strings {
 	 * @param e
 	 * @return stacktrace
 	 */
-	public static String toStringFromThrowable( Throwable e ) {
+	public static String fromThrowable( Throwable e ) {
 		StringWriter writer = new StringWriter();
 		e.printStackTrace( new PrintWriter(writer) );
 		return writer.toString();
