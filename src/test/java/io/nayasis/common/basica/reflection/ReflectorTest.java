@@ -64,6 +64,17 @@ public class ReflectorTest {
     }
 
     @Test
+    public void convertMap() {
+
+        String json = "{ 'name':'nayasis', 'birth':'1977-01-22'  }";
+
+        Map person = Reflector.toMapFrom( json );
+
+        log.debug( person.toString() );
+
+    }
+
+    @Test
     public void convertNDate() {
 
         String json = "{ 'name':'nayasis', 'birth':'1977-01-22'  }";
@@ -71,7 +82,6 @@ public class ReflectorTest {
         Person person = Reflector.toBeanFrom( json, Person.class );
 
         log.debug( person.toString() );
-
 
     }
 

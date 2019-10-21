@@ -3,6 +3,7 @@ package io.nayasis.common.basica.base.format;
 import io.nayasis.common.basica.base.Characters;
 import io.nayasis.common.basica.base.Strings;
 import io.nayasis.common.basica.base.Types;
+import io.nayasis.common.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.common.basica.reflection.Reflector;
 
 import java.util.HashMap;
@@ -154,7 +155,9 @@ public class Formatter {
             if ( Types.isMap(parameters[0]) ) {
                 return (Map) parameters[0];
             } else if ( Types.isNotPrimitive(parameters[0]) ) {
-                return Reflector.toMapFrom(parameters[0]);
+                try {
+                    return Reflector.toMapFrom(parameters[0]);
+                } catch ( Exception e ) {}
             }
         }
 

@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +47,13 @@ public class StringsTest {
             private String c;
         }
 
+    }
+
+    @Test
+    public void fileParameter() {
+        File f = new File( "salamander");
+        String text = Strings.format("it is {:%15s}", f );
+        assertEquals( "it is      salamander", text );
     }
 
     @Test
