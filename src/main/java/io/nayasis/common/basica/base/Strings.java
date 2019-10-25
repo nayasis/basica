@@ -3,9 +3,20 @@ package io.nayasis.common.basica.base;
 import io.nayasis.common.basica.base.format.Formatter;
 import io.nayasis.common.basica.exception.unchecked.EncodingException;
 import io.nayasis.common.basica.exception.unchecked.UncheckedClassNotFoundException;
+import lombok.experimental.UtilityClass;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -24,11 +35,12 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author nayasis@gmail.com
  */
+@UtilityClass
 public class Strings {
 
-	private static final Pattern   PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
-	private static final Pattern   PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
-	private static final Formatter formatter     = new Formatter();
+	private final Pattern   PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
+	private final Pattern   PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
+	private final Formatter formatter     = new Formatter();
 
 	/**
 	 * get display length applying character's font width. <br>
@@ -41,7 +53,7 @@ public class Strings {
 	 * @param value value
 	 * @return total display length
 	 */
-	public static int getDisplayLength( Object value ) {
+	public int getDisplayLength( Object value ) {
 
 		if( value == null ) return 0;
 
@@ -65,7 +77,7 @@ public class Strings {
      * @param padChar	padding character
      * @return padding string value
 	 */
-	public static String dplpad( Object value, int length, char padChar ) {
+	public String dplpad( Object value, int length, char padChar ) {
 		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
 				: value.toString().length() + ( length - getDisplayLength( value ) );
 		return lpad( value, adjustLength, padChar );
@@ -79,7 +91,7 @@ public class Strings {
 	 * @param padChar	padding character
 	 * @return padding string value
 	 */
-	public static String dprpad( Object value, int length, char padChar ) {
+	public String dprpad( Object value, int length, char padChar ) {
 		int adjustLength = ( Characters.fullwidth() == 1 || value == null )	? length
 				: value.toString().length() + ( length - getDisplayLength( value ) );
 
@@ -92,7 +104,7 @@ public class Strings {
 	 * @param value value to check
 	 * @return true if string of value is empty.
 	 */
-	public static boolean isEmpty( Object value ) {
+	public boolean isEmpty( Object value ) {
 		return value == null || value.toString().length() == 0;
 	}
 
@@ -102,7 +114,7 @@ public class Strings {
 	 * @param value value to check
 	 * @return true if string of value is not empty.
 	 */
-	public static boolean isNotEmpty( Object value ) {
+	public boolean isNotEmpty( Object value ) {
 		return ! isEmpty( value );
 	}
 
@@ -113,7 +125,7 @@ public class Strings {
 	 * @param value value to check
 	 * @return true if string of value is blank.
 	 */
-	public static boolean isBlank( Object value ) {
+	public boolean isBlank( Object value ) {
 		if( value == null ) return true;
 		String val = value.toString();
 		return val.length() == 0 || val.trim().length() == 0;
@@ -125,7 +137,7 @@ public class Strings {
 	 * @param value value to check
 	 * @return true if string of value is not blank.
 	 */
-	public static boolean isNotBlank( Object value ) {
+	public boolean isNotBlank( Object value ) {
 		return ! isBlank( value );
 	}
 
@@ -134,7 +146,7 @@ public class Strings {
 	 * @param value value
 	 * @return	trimmed string
 	 */
-	public static String trim( Object value ) {
+	public String trim( Object value ) {
 		return nvl( value ).trim();
 	}
 
@@ -147,7 +159,7 @@ public class Strings {
 	 * @param other  other string to compare
 	 * @return true if each are equal.
 	 */
-	public static boolean equals( String one, String other ) {
+	public boolean equals( String one, String other ) {
 		if( one == null && other == null ) return true;
 		if( one == null && other != null ) return false;
 		if( one != null && other == null ) return false;
@@ -163,7 +175,7 @@ public class Strings {
      * @param other  other string to compare
      * @return true if each are equal.
      */
-    public static boolean equalsIgnoreCase( String one, String other ) {
+    public boolean equalsIgnoreCase( String one, String other ) {
         if( one == null && other == null ) return true;
         if( one == null && other != null ) return false;
         if( one != null && other == null ) return false;
@@ -214,7 +226,7 @@ public class Strings {
 	 * @param param  binding parameter
 	 * @return formatted string
 	 */
-	public static String format( Object format, Object... param ) {
+	public String format( Object format, Object... param ) {
 		return formatter.format( format, param );
 	}
 
@@ -230,7 +242,7 @@ public class Strings {
      * @param padChar	padding character
      * @return left padded string
      */
-    public static String lpad( Object value, int length, char padChar ) {
+    public String lpad( Object value, int length, char padChar ) {
 
         String text        = nvl( value );
         int    textCharCnt = text.length();
@@ -263,7 +275,7 @@ public class Strings {
 	 * @param padChar	padding character
      * @return right padded string
      */
-    public static String rpad( Object value, int length, char padChar ) {
+    public String rpad( Object value, int length, char padChar ) {
 
         String text  = nvl( value );
         int    index = Math.min( length, text.length() );
@@ -289,7 +301,7 @@ public class Strings {
      * @param val value to check
      * @return empty string if val is null, itself if val is not null.
      */
-    public static String nvl( Object val ) {
+    public String nvl( Object val ) {
     	return ( val == null ) ? "" : val.toString();
     }
 
@@ -300,7 +312,7 @@ public class Strings {
      * @param replaceValue	substitutive value
      * @return itself if value is not null, replace value if value is not null
      */
-    public static String nvl( Object value, Object replaceValue ) {
+    public String nvl( Object value, Object replaceValue ) {
     	return ( value == null ) ? nvl( replaceValue ) : value.toString();
     }
 
@@ -314,7 +326,7 @@ public class Strings {
      * @param text   text to convert
      * @return camel cased text
      */
-    public static String toCamel( String text ) {
+    public String toCamel( String text ) {
 
     	if( isEmpty(text) ) return "";
 
@@ -344,7 +356,7 @@ public class Strings {
      * @param text     text to convert
      * @return underscored text
      */
-    public static String toSnake( String text ) {
+    public String toSnake( String text ) {
 
         Matcher matcher = PATTERN_SNAKE.matcher( text );
         StringBuffer sb = new StringBuffer();
@@ -366,7 +378,7 @@ public class Strings {
      * @param value text
      * @return escaped string
      */
-    public static String escape( Object value ) {
+    public String escape( Object value ) {
 
     	if( isEmpty(value) ) return "";
 
@@ -415,7 +427,7 @@ public class Strings {
      * @param param 문자열
      * @return 유니코드 문자열
      */
-    public static String unescape( Object param ) {
+    public String unescape( Object param ) {
 
 		if( isEmpty(param) ) return "";
 
@@ -446,7 +458,7 @@ public class Strings {
 
     }
 
-    private static String getUnescapedUnicodeChar( String escapedString ) {
+    private String getUnescapedUnicodeChar( String escapedString ) {
     	try {
     		String hex = escapedString.substring( 2 );
     		int hexNumber = Integer.parseInt( hex, 16 );
@@ -456,7 +468,7 @@ public class Strings {
     	}
     }
 
-    private static String getUnescapedSequence( String escapedString ) {
+    private String getUnescapedSequence( String escapedString ) {
     	switch( escapedString.charAt(0) ) {
     		case 'b' : return "\b";
     		case 't' : return "\t";
@@ -480,7 +492,7 @@ public class Strings {
      * @param concater 		concatenation string
      * @return joined text
      */
-    public static String join( Collection<?> collection, String concater ) {
+    public String join( Collection<?> collection, String concater ) {
 
     	if( collection == null || collection.size() == 0 ) return "";
 
@@ -504,7 +516,7 @@ public class Strings {
 	 * @param separator	regular expression separator
 	 * @return	string array divided by regular expression matcher
 	 */
-	public static List<String> split( Object value, String separator ) {
+	public List<String> split( Object value, String separator ) {
 		return split( value, separator, false );
 	}
 
@@ -516,7 +528,7 @@ public class Strings {
 	 * @param includeSeparator	include separator in result
 	 * @return	string array divided by regular expression matcher
 	 */
-	public static List<String> split( Object value, String separator, boolean includeSeparator ) {
+	public List<String> split( Object value, String separator, boolean includeSeparator ) {
 
 		List<String> result = new ArrayList<>();
 
@@ -559,7 +571,7 @@ public class Strings {
 	 * @param separator 		separator to tokenize
 	 * @return tokenized word list
 	 */
-	public static List<String> tokenize( Object value, String separator ) {
+	public List<String> tokenize( Object value, String separator ) {
 		return tokenize( value, separator, false );
 	}
 
@@ -571,7 +583,7 @@ public class Strings {
      * @param includeSeparator	include separator in result
      * @return tokenized word list
      */
-    public static List<String> tokenize( Object value, String separator, boolean includeSeparator ) {
+    public List<String> tokenize( Object value, String separator, boolean includeSeparator ) {
 
     	List<String> result = new ArrayList<>();
 
@@ -593,7 +605,7 @@ public class Strings {
      * @param text text to change
      * @return uncapitalized text
      */
-    public static String upcapitalize( Object text ) {
+    public String upcapitalize( Object text ) {
     	if( isEmpty(text) ) return "";
     	char[] array = nvl( text ).toCharArray();
     	array[ 0 ] = Character.toLowerCase( array[0] );
@@ -606,7 +618,7 @@ public class Strings {
      * @param text text to change
      * @return capitalized text
      */
-    public static String capitalize( Object text ) {
+    public String capitalize( Object text ) {
     	if( isEmpty(text) ) return "";
     	char[] array = nvl( text ).toCharArray();
     	array[ 0 ] = Character.toUpperCase( array[0] );
@@ -627,7 +639,7 @@ public class Strings {
      * @param value text value
      * @return text with space compressed
      */
-    public static String compressSpace( Object value ) {
+    public String compressSpace( Object value ) {
     	if( isEmpty(value) ) return "";
     	return value.toString().replaceAll( "[ \t]+", " " ).trim();
     }
@@ -644,7 +656,7 @@ public class Strings {
 	 * @param value text value
 	 * @return text with space or enter compressed
 	 */
-	public static String compressBlank( Object value ) {
+	public String compressBlank( Object value ) {
 		if( isEmpty(value) ) return "";
 		return value.toString().replaceAll( "[ \t\n\r]+", " " ).trim();
 	}
@@ -659,7 +671,7 @@ public class Strings {
 	 * @param value text value
 	 * @return text with enter compressed
 	 */
-	public static String compressEnter( Object value ) {
+	public String compressEnter( Object value ) {
 		if( isEmpty(value) ) return "";
 		return value.toString().replaceAll( " *[\n\r]", "\n" ).replaceAll( "[\n\r]+", "\n" );
 	}
@@ -671,7 +683,7 @@ public class Strings {
      * @return encoded text
      * @throws UncheckedIOException if I/O exception occurs.
      */
-    public static String encode( Object value ) throws UncheckedIOException {
+    public String encode( Object value ) throws UncheckedIOException {
 
     	try (
     		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -695,7 +707,7 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
-    public static <T> T decode( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
+    public <T> T decode( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
 
         if( value == null ) return null;
 
@@ -721,7 +733,7 @@ public class Strings {
 	 * @return encoded URL
 	 * @throws EncodingException	if an encoding error occurs.
 	 */
-    public static String encodeUrl( Object uri ) throws EncodingException {
+    public String encodeUrl( Object uri ) throws EncodingException {
     	try {
 			return URLEncoder.encode( nvl(uri), "UTF-8" );
     	} catch( UnsupportedEncodingException e ) {
@@ -735,7 +747,7 @@ public class Strings {
 	 * @return decoded URL
 	 * @throws EncodingException	if an decoding error occurs.
 	 */
-    public static String decodeUrl( Object uri ) throws EncodingException {
+    public String decodeUrl( Object uri ) throws EncodingException {
     	try {
     		return URLDecoder.decode( nvl( uri ), "UTF-8" );
     	} catch( UnsupportedEncodingException e ) {
@@ -749,7 +761,7 @@ public class Strings {
 	 * @param string word
 	 * @return number characters
 	 */
-	public static String toDigit( String string ) {
+	public String toDigit( String string ) {
 		if( isEmpty( string ) ) return "";
 		return string.replaceAll( "[^0-9]", "" );
 	}
@@ -760,7 +772,7 @@ public class Strings {
 	 * @param value text to zip
 	 * @return compressed text
 	 */
-	public static String zip( String value ) {
+	public String zip( String value ) {
 		if( isEmpty(value) ) return "";
         try(
         	ByteArrayOutputStream out  = new ByteArrayOutputStream();
@@ -780,7 +792,7 @@ public class Strings {
 	 * @param value text to unzip
 	 * @return decompressed text
 	 */
-	public static String unzip( String value ) {
+	public String unzip( String value ) {
 		if( isEmpty(value) ) return "";
         try(
         	ByteArrayInputStream input        = new ByteArrayInputStream( value.getBytes( StandardCharsets.ISO_8859_1 ));
@@ -811,9 +823,9 @@ public class Strings {
 	 * @param pattern LIKE pattern ( "_" : single character, "%" : unknown string, "\\_" : '_' character, "\\%" : '%' character )
 	 * @return true if value matches with LIKE pattern.
 	 */
-	public static boolean like( Object value, String pattern ) {
+	public boolean like( Object value, String pattern ) {
 
-		pattern = escapeRegexKeyword( pattern );
+		pattern = escapeRegexp( pattern );
 
 		StringBuilder newPattern = new StringBuilder();
 
@@ -872,7 +884,7 @@ public class Strings {
 	 * @param pattern LIKE pattern ( "_" : single character, "%" : unknown string, "\\_" : '_' character, "\\%" : '%' character )
 	 * @return true if value does not match with LIKE pattern.
 	 */
-	public static boolean notLike( Object value , String pattern ) {
+	public boolean notLike( Object value , String pattern ) {
 		return ! like( value, pattern );
 	}
 
@@ -882,7 +894,7 @@ public class Strings {
 	 * @param pattern regular expression
 	 * @return  escaped pattern
 	 */
-	public static String escapeRegexKeyword( String pattern ) {
+	public String escapeRegexp( String pattern ) {
 
 		StringBuilder newPattern = new StringBuilder();
 
@@ -903,7 +915,7 @@ public class Strings {
 	 * <pre>
 	 *
 	 *  String pattern = "#\\{(.+?)}";
-	 *  List&lt;String&gt; finded = Strings.capturePatterns( "/admkr#{AAAA}note#{BBBB}ananan#{AAAA}sss", pattern );
+	 *  List&lt;String&gt; finded = Strings.capture( "/admkr#{AAAA}note#{BBBB}ananan#{AAAA}sss", pattern );
 	 *  System.out.println( finded ); -> ['AAAA','BBBB', 'AAAA']
 	 *
 	 *  ----------------------------------------------------------------
@@ -917,7 +929,7 @@ public class Strings {
 	 * @param pattern regular expression (only captured pattern (wrapped by (...)) can be extracted)
 	 * @return captured words
 	 */
-	public static List<String> capture( Object value, String pattern ) {
+	public List<String> capture( Object value, String pattern ) {
 		Pattern p = ( pattern == null ) ? null : Pattern.compile( pattern );
 		return capture( value, p );
 	}
@@ -928,7 +940,7 @@ public class Strings {
 	 * <pre>
 	 *
 	 *  String pattern = "#\\{(.+?)}";
-	 *  List&lt;String&gt; finded = Strings.capturePatterns( "/admkr#{AAAA}note#{BBBB}ananan#{AAAA}sss", pattern );
+	 *  List&lt;String&gt; finded = Strings.capture( "/admkr#{AAAA}note#{BBBB}ananan#{AAAA}sss", pattern );
 	 *  System.out.println( finded ); -> ['AAAA','BBBB', 'AAAA']
 	 *
 	 *  ----------------------------------------------------------------
@@ -942,7 +954,7 @@ public class Strings {
 	 * @param pattern regular expression (only captured pattern (wrapped by (...)) can be extracted)
 	 * @return captured words
 	 */
-	public static List<String> capture( Object value, Pattern pattern ) {
+	public List<String> capture( Object value, Pattern pattern ) {
 		List<String> result = new ArrayList<>();
 		if( isEmpty(value) || isEmpty(pattern) ) return result;
 		Matcher matcher = pattern.matcher( value.toString() );
@@ -960,7 +972,7 @@ public class Strings {
 	 * @param value value to convert
 	 * @return the String, converted to lowercase.
 	 */
-	public static String toLowerCase( Object value ) {
+	public String toLowerCase( Object value ) {
 		return nvl(value).toLowerCase();
 	}
 
@@ -970,7 +982,7 @@ public class Strings {
 	 * @param value value to convert
 	 * @return the String, converted to uppercase.
 	 */
-	public static String toUpperCase( Object value ) {
+	public String toUpperCase( Object value ) {
 		return nvl(value).toUpperCase();
 	}
 
@@ -980,7 +992,7 @@ public class Strings {
 	 * @param string word
 	 * @return upper characters
 	 */
-	public static String extractUppers( String string ) {
+	public String extractUppers( String string ) {
 		if( isEmpty( string ) ) return "";
 		return string.replaceAll( "[^A-Z]", "" );
 	}
@@ -991,7 +1003,7 @@ public class Strings {
 	 * @param string word
 	 * @return lower characters
 	 */
-	public static String extractLowers( String string ) {
+	public String extractLowers( String string ) {
 		if( isEmpty( string ) ) return "";
 		return string.replaceAll( "[^a-z]", "" );
 	}
@@ -1022,7 +1034,7 @@ public class Strings {
 	 *
 	 * @return 'Y' or 'N'
 	 */
-	public static String toYn( Object value ) {
+	public String toYn( Object value ) {
 
 		if( isEmpty(value) ) return "N";
 
@@ -1062,7 +1074,7 @@ public class Strings {
 	 *   </table>
 	 * @return true if value is positive
 	 */
-	public static boolean toBoolean( Object value ) {
+	public boolean toBoolean( Object value ) {
 		return "Y".equals( toYn( value ) );
 	}
 
@@ -1072,7 +1084,7 @@ public class Strings {
 	 * @param value target value
 	 * @return escaped string
 	 */
-	public static String clearXss( Object value ) {
+	public String clearXss( Object value ) {
 
 		if( isEmpty(value) ) return "";
 
@@ -1105,7 +1117,7 @@ public class Strings {
 	 * @param value target value
 	 * @return unescaped string
 	 */
-	public static String restoreXss( Object value ) {
+	public String restoreXss( Object value ) {
 
 		if( isEmpty(value) ) return "";
 
@@ -1173,7 +1185,7 @@ public class Strings {
 	 * @param word  word to mask
 	 * @return masked text
 	 */
-	public static String mask( String pattern, String word ) {
+	public String mask( String pattern, String word ) {
 
 		if( isEmpty(pattern) || isEmpty(word) ) return "";
 
@@ -1218,7 +1230,7 @@ public class Strings {
 	 * @param another	another string
      * @return similarity
      */
-	public static double similarity( String one, String another ) {
+	public double similarity( String one, String another ) {
 
 		String longer = nvl(one), shorter = nvl(another);
 		if( longer.length() < shorter.length() ) {
@@ -1241,7 +1253,7 @@ public class Strings {
 	 * @see <a href="http://rosettacode.org/wiki/Levenshtein_distance#Java">rosettacode</a>
 	 * @see <a href="https://en.wikipedia.org/wiki/Levenshtein_distance">wikipedia</a>
      */
-	private static int getLavenshteinDistance( String source, String target ) {
+	private int getLavenshteinDistance( String source, String target ) {
 
 		source = toLowerCase( source );
 		target = toLowerCase( target );
@@ -1274,7 +1286,7 @@ public class Strings {
 	 * @param e
 	 * @return stacktrace
 	 */
-	public static String fromThrowable( Throwable e ) {
+	public String fromThrowable( Throwable e ) {
 		StringWriter writer = new StringWriter();
 		e.printStackTrace( new PrintWriter(writer) );
 		return writer.toString();

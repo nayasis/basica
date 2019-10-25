@@ -182,8 +182,8 @@ public class StringExtension {
         return Strings.notLike( string, pattern );
     }
 
-    public static String escapeRegexKeyword( String string ) {
-        return Strings.escapeRegexKeyword( string );
+    public static String escapeRegexp( String string ) {
+        return Strings.escapeRegexp( string );
     }
 
     public static List<String> divide( String string, String regexDelimiter ) {
