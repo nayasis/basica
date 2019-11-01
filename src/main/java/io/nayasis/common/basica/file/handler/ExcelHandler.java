@@ -9,7 +9,7 @@ import io.nayasis.common.basica.exception.unchecked.ParseException;
 import io.nayasis.common.basica.file.Files;
 import io.nayasis.common.basica.model.NList;
 import io.nayasis.common.basica.model.NMap;
-import io.nayasis.common.basica.reflection.mapper.NObjectMapper;
+import io.nayasis.common.basica.reflection.helper.mapper.NObjectMapper;
 
 import java.io.*;
 import java.util.*;

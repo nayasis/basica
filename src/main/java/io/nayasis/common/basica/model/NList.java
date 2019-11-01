@@ -6,7 +6,7 @@ import io.nayasis.common.basica.base.Types;
 import io.nayasis.common.basica.validation.Validator;
 import io.nayasis.common.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.common.basica.reflection.Reflector;
-import io.nayasis.common.basica.reflection.serializer.simple.SimpleNListSerializer;
+import io.nayasis.common.basica.reflection.serializer.SimpleNListSerializer;
 
 import java.io.Serializable;
 import java.util.*;

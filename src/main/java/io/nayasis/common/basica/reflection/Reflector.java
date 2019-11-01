@@ -10,12 +10,17 @@ import io.nayasis.common.basica.model.NList;
 import io.nayasis.common.basica.reflection.core.BeanMerger;
 import io.nayasis.common.basica.reflection.core.ClassReflector;
 import io.nayasis.common.basica.reflection.core.JsonConverter;
-import io.nayasis.common.basica.reflection.mapper.Invocator;
-import io.nayasis.common.basica.reflection.mapper.MethodInvoker;
-import io.nayasis.common.basica.reflection.mapper.NObjectMapper;
+import io.nayasis.common.basica.reflection.helper.invoker.Invoker;
+import io.nayasis.common.basica.reflection.helper.invoker.MethodInvoker;
+import io.nayasis.common.basica.reflection.helper.mapper.NObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -31,10 +36,10 @@ import java.util.Map;
 @Slf4j
 public class Reflector {
 
-	private static JsonConverter jsonConverterNullable         = new JsonConverter( new NObjectMapper(false,false) );
-	private static JsonConverter jsonConverterNotNull          = new JsonConverter( new NObjectMapper(false,true) );
-	private static JsonConverter jsonConverterSortableNullable = new JsonConverter( new NObjectMapper(true,false) );
-	private static JsonConverter jsonConverterSortableNotNull  = new JsonConverter( new NObjectMapper(true,true) );
+	private static JsonConverter jsonConverterNullable         = new JsonConverter( new NObjectMapper(false,false,false) );
+	private static JsonConverter jsonConverterNotNull          = new JsonConverter( new NObjectMapper(false,true,false) );
+	private static JsonConverter jsonConverterSortableNullable = new JsonConverter( new NObjectMapper(true,false,false) );
+	private static JsonConverter jsonConverterSortableNotNull  = new JsonConverter( new NObjectMapper(true,true,false) );
 	private static Cloner        cloner                        = new Cloner();
 
 	/**
@@ -377,7 +382,7 @@ public class Reflector {
 	 * @return	proxy bean to wrap
 	 */
     public static <T> T wrapProxy( T bean, Class<?>[] interfaces, MethodInvoker methodInvoker ) {
-    	return (T) Proxy.newProxyInstance( bean.getClass().getClassLoader(), interfaces, new Invocator<>( bean, methodInvoker ) );
+    	return (T) Proxy.newProxyInstance( bean.getClass().getClassLoader(), interfaces, new Invoker<>( bean, methodInvoker ) );
     }
 
 	/**
@@ -392,8 +397,8 @@ public class Reflector {
 			return bean;
 		}
 		InvocationHandler invocationHandler = Proxy.getInvocationHandler( bean );
-		if( invocationHandler instanceof Invocator ) {
-			return (T) ((Invocator<Object>) invocationHandler).getOriginalInstance();
+		if( invocationHandler instanceof Invoker ) {
+			return (T) ((Invoker<Object>) invocationHandler).getOriginalInstance();
 		} else {
 			log.warn( "only bean proxied by [{}.wrapProxy] can be unwrapped.", Reflector.class.getName() );
 			return bean;

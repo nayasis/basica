@@ -1,18 +1,18 @@
-package io.nayasis.common.basica.reflection.mapper;
+package io.nayasis.common.basica.reflection.helper.invoker;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 
-public class Invocator<T> implements InvocationHandler {
+public class Invoker<T> implements InvocationHandler {
 
     private T             originalInstance;
-    private MethodInvoker methodInvocator;
+    private MethodInvoker methodInvoker;
 
-    public Invocator( T instance, MethodInvoker methodInvocator  ) {
+    public Invoker( T instance, MethodInvoker methodInvoker ) {
         this.originalInstance = instance;
-        this.methodInvocator  = methodInvocator;
+        this.methodInvoker = methodInvoker;
     }
 
     public T getOriginalInstance() {
@@ -22,7 +22,7 @@ public class Invocator<T> implements InvocationHandler {
     @Override
     public Object invoke( Object proxy, Method method, Object[] arguments ) throws Throwable {
         try {
-            return methodInvocator.invoke( proxy, method, arguments );
+            return methodInvoker.invoke( proxy, method, arguments );
         } catch ( Throwable e ) {
             throw unwrapInvokeThrowable( e );
         }

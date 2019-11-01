@@ -1,4 +1,4 @@
-package io.nayasis.common.basica.reflection.mapper;
+package io.nayasis.common.basica.reflection.helper.mapper;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -22,16 +22,16 @@ import static com.fasterxml.jackson.annotation.PropertyAccessor.FIELD;
 public class NObjectMapper extends ObjectMapper {
 
 	public NObjectMapper() {
-		this( false, false );
+		this( false, false, false );
 	}
 
-	public NObjectMapper( boolean sort, boolean ignoreNull ) {
-		init( sort, ignoreNull );
+	public NObjectMapper( boolean sort, boolean ignoreNull, boolean notJsonIgnore ) {
+		init( sort, ignoreNull, notJsonIgnore );
 		setDefaultFilter();
 		setCustomDeserializer();
 	}
 
-	protected void init( boolean sort, boolean ignoreNull ) {
+	protected void init( boolean sort, boolean ignoreNull, boolean notJsonIgnore ) {
 
 		configure( JsonParser.Feature.ALLOW_SINGLE_QUOTES,                true  ); // 문자열 구분기호를 " 뿐만 아니라 ' 도 허용
 		configure( SerializationFeature.FAIL_ON_EMPTY_BEANS,              false ); // Bean 이 null 일 경우 허용
@@ -51,9 +51,14 @@ public class NObjectMapper extends ObjectMapper {
 			configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true );
 		}
 
+		if( notJsonIgnore ) {
+			setAnnotationIntrospector( new NotJsonIgnoreInspector() );
+		}
+
 		// java 8 date & time
 		configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false ).registerModule( new JavaTimeModule() );
 
+		// only convert by Class' field.
 		setVisibility( ALL,   NONE );
 		setVisibility( FIELD, ANY  );
 

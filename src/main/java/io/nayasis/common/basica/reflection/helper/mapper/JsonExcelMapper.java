@@ -1,8 +1,8 @@
-package io.nayasis.common.basica.reflection.mapper;
+package io.nayasis.common.basica.reflection.helper.mapper;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.nayasis.common.basica.reflection.deserializer.SimpleDateDeserializer;
-import io.nayasis.common.basica.reflection.serializer.simple.SimpleDateSerializer;
+import io.nayasis.common.basica.reflection.serializer.SimpleDateSerializer;
 
 import java.util.Date;
 

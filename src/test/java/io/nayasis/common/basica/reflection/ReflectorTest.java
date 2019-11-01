@@ -2,15 +2,18 @@ package io.nayasis.common.basica.reflection;
 
 import io.nayasis.common.basica.model.NDate;
 import io.nayasis.common.basica.validation.Validator;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 @Slf4j
@@ -24,6 +27,21 @@ public class ReflectorTest {
 
         Assert.assertEquals( user.name(), clone.name() );
         Assert.assertEquals( user.age(), clone.age() );
+
+        clone.age( 9 );
+
+        Assert.assertEquals( user.age(), 40 );
+
+    }
+
+    @Test
+    public void arrayCloneTest() {
+
+        Collection<User> users  = Arrays.asList( new User("nayasis",40), new User("jake",40) );
+        Collection<User> clones = Reflector.clone( users );
+
+        log.debug( users.toString() );
+        log.debug( clones.toString() );
 
     }
 

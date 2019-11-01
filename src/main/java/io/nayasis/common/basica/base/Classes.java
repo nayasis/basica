@@ -45,9 +45,9 @@ import java.util.jar.JarFile;
 @UtilityClass
 public class Classes {
 
-	private static LruCache<Class<?>,Set<Class<?>>> CACHE_CONTAINED_PARENT = new LruCache<>( 256 );
+	private LruCache<Class<?>,Set<Class<?>>> CACHE_CONTAINED_PARENT = new LruCache<>( 256 );
 
-	private static Objenesis factory = new ObjenesisStd();
+	private Objenesis factory = new ObjenesisStd();
 
 	/**
 	 * Get class for name
@@ -56,7 +56,7 @@ public class Classes {
 	 * @throws ClassNotFoundException if class is not founded in class loader.
 	 * @return class for name
 	 */
-	public static Class<?> getClass( String className ) throws ClassNotFoundException {
+	public Class<?> getClass( String className ) throws ClassNotFoundException {
 
 		if( Strings.isEmpty(className) ) throw new ClassNotFoundException( String.format( "Expected class name is [%s].", className ) );
 
@@ -81,7 +81,7 @@ public class Classes {
 	 *
 	 * @return get class loader in current thread.
 	 */
-	public static ClassLoader getClassLoader() {
+	public ClassLoader getClassLoader() {
 
 		try {
 			return Thread.currentThread().getContextClassLoader();
@@ -116,7 +116,7 @@ public class Classes {
 	 * @return class by generic type
 	 * @throws ClassNotFoundException if class is not founded in class loader.
 	 */
-	public static Class<?> getClass( Type type ) throws ClassNotFoundException {
+	public Class<?> getClass( Type type ) throws ClassNotFoundException {
 
 		if( type == null ) return Object.class;
 
@@ -153,7 +153,7 @@ public class Classes {
 	 * @param klass class to inspect
 	 * @return generic class of klass
      */
-	public static Class getGenericClass( Class klass ) {
+	public Class getGenericClass( Class klass ) {
 		if( klass == null ) return null;
 		try {
 			Type genericSuperclass = klass.getGenericSuperclass();
@@ -164,11 +164,11 @@ public class Classes {
 		}
 	}
 
-	public static Class<?> getClass( Object object ) {
+	public Class<?> getClass( Object object ) {
 		return ( object == null ) ? null : object.getClass();
 	}
 
-	public static Set<Class<?>> findParents( Class<?> klass ) {
+	public Set<Class<?>> findParents( Class<?> klass ) {
 
 		if( CACHE_CONTAINED_PARENT.contains( klass ) )
 			return CACHE_CONTAINED_PARENT.get( klass );
@@ -181,7 +181,7 @@ public class Classes {
 
 	}
 
-	private static void findParents( Class<?> klass, Set<Class<?>> set ) {
+	private void findParents( Class<?> klass, Set<Class<?>> set ) {
 		Class<?> superclass = klass.getSuperclass();
 		if( superclass != null && superclass != Object.class && ! set.contains(superclass) ) {
 			set.add( superclass );
@@ -196,7 +196,7 @@ public class Classes {
 		}
 	}
 
-	public static <T> T createInstance( Class<T> klass ) throws UncheckedClassCastException {
+	public <T> T createInstance( Class<T> klass ) throws UncheckedClassCastException {
 		try {
 			return klass.newInstance();
 		} catch( Exception e ) {
@@ -208,7 +208,7 @@ public class Classes {
         }
 	}
 
-    public static <T> T createInstance( Type type ) throws ClassNotFoundException {
+    public <T> T createInstance( Type type ) throws ClassNotFoundException {
 		return (T) createInstance( getClass(type) );
 	}
 
@@ -219,7 +219,7 @@ public class Classes {
 	 * @param extendKlass	class to be extended in inspect class
 	 * @return true if inspect class is extended of implemented by found class
 	 */
-	public static boolean isExtendedBy( Class<?> klass, Class<?>... extendKlass ) {
+	public boolean isExtendedBy( Class<?> klass, Class<?>... extendKlass ) {
 		if( klass == null || extendKlass.length == 0 ) return false;
 		Set<Class<?>> parents = findParents( klass );
 		for( Class<?> target : extendKlass ) {
@@ -237,7 +237,7 @@ public class Classes {
 	 * @param extendKlass	class to be extended in inspect class
 	 * @return true if inspect class is extended of implemented by found class
 	 */
-	public static boolean isExtendedBy( Class<?> klass, Collection<Class<?>> extendKlass ) {
+	public boolean isExtendedBy( Class<?> klass, Collection<Class<?>> extendKlass ) {
 		if( klass == null || Validator.isEmpty(extendKlass) ) return false;
 		Set<Class<?>> parents = findParents( klass );
 		for( Class<?> target : extendKlass ) {
@@ -255,7 +255,7 @@ public class Classes {
 	 * @param extendKlass	   class to be extended in inspect instance
 	 * @return true if inspect instance is extended of implemented by found class
 	 */
-	public static boolean isExtendedBy( Object instance, Class<?>... extendKlass ) {
+	public boolean isExtendedBy( Object instance, Class<?>... extendKlass ) {
 		return instance != null && isExtendedBy( instance.getClass(), extendKlass );
 	}
 
@@ -266,7 +266,7 @@ public class Classes {
 	 * @param extendKlass	   class to be extended in inspect instance
 	 * @return true if inspect instance is extended of implemented by found class
 	 */
-	public static boolean isExtendedBy( Object instance, Collection<Class<?>> extendKlass ) {
+	public boolean isExtendedBy( Object instance, Collection<Class<?>> extendKlass ) {
 		return instance != null && isExtendedBy( instance.getClass(), extendKlass );
 	}
 
@@ -275,7 +275,7 @@ public class Classes {
 	 * @param name resource name
 	 * @return true if resource is exist in class path.
 	 */
-	public static boolean isResourceExisted( String name ) {
+	public boolean isResourceExisted( String name ) {
 		return getClassLoader().getResource( refineResourceName(name) ) != null;
 	}
 
@@ -285,7 +285,7 @@ public class Classes {
 	 * @param name	resource name
 	 * @return resource input stream
 	 */
-	public static InputStream getResourceAsStream( String name ) {
+	public InputStream getResourceAsStream( String name ) {
 		return getClassLoader().getResourceAsStream( refineResourceName(name) );
 	}
 
@@ -295,7 +295,7 @@ public class Classes {
 	 * @param name resource name
 	 * @return refined resource name
 	 */
-	private static String refineResourceName( String name ) {
+	private String refineResourceName( String name ) {
 		return Strings.nvl( name ).replaceFirst( "^/", "" );
 	}
 
@@ -326,7 +326,7 @@ public class Classes {
 	 * </pre>
 	 * @return found resource names
 	 */
-	public static List<String> findResources( String... pattern ) {
+	public List<String> findResources( String... pattern ) {
 
 		Set<String> resourcesInJar        = new HashSet<>();
 		Set<String> resourcesInFileSystem = new HashSet<>();
@@ -398,14 +398,14 @@ public class Classes {
 	 *
 	 * @return true if it is running in jar.
 	 */
-	public static boolean isRunningInJar() {
+	public boolean isRunningInJar() {
 		URL root = getClassLoader().getResource( "" );
 		if( root == null ) return true;
 		String file = root.getFile();
 		return Validator.isMatched( root.toString(), "(?i)^(jar|war):.*$" );
 	}
 
-	private static String[] toFilePattern( String[] pattern ) {
+	private String[] toFilePattern( String[] pattern ) {
 		String[] result = new String[ pattern.length ];
 		String rootPath = Files.getRootPath();
 		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
@@ -418,7 +418,7 @@ public class Classes {
 		return result;
 	}
 
-	private static String[] toJarPattern( String[] pattern ) {
+	private String[] toJarPattern( String[] pattern ) {
 		String[] result = new String[ pattern.length ];
 		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
 			result[ i ] = pattern[ i ].replaceAll( "//", "/" ).replaceFirst( "^/", "" );
@@ -426,7 +426,7 @@ public class Classes {
 		return result;
 	}
 
-	private static JarFile getJarFile( URL url ) {
+	private JarFile getJarFile( URL url ) {
 		try {
 			String filePath = new File( url.toURI().getSchemeSpecificPart() ).getPath();
 			filePath = Files.normalizeSeparator( filePath )
