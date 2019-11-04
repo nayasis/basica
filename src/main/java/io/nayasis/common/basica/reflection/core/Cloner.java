@@ -34,35 +34,29 @@ import java.util.regex.Pattern;
 @Slf4j
 public class Cloner {
 
-    private JsonConverter           jsonCloner = new JsonConverter( new NObjectMapper(true,true,true) );
-    private com.rits.cloning.Cloner cloner     = new com.rits.cloning.Cloner();
+    private JsonConverter jsonCloner = new JsonConverter( new NObjectMapper(true,true,true) );
 
-    private final Set<Class<?>> immutable = new HashSet<Class<?>>();
-
-    private final ConcurrentHashMap<Class<?>, List<Field>> fieldsCache = new ConcurrentHashMap<Class<?>, List<Field>>();
-
-    private Set<Class<?>> PRIMITIVE = new HashSet() {{
-        add( void.class ); add( Void.class );
-        add( char.class ); add( Character.class );
-        add( boolean.class ); add( Boolean.class );
-        add( byte.class ); add( Byte.class );
-        add( short.class ); add( Short.class );
-        add( int.class ); add( Integer.class );
-        add( long.class ); add( Long.class );
-        add( float.class ); add( Float.class );
-        add( double.class ); add( Double.class );
+    private final Set<Class<?>> immutable = new HashSet() {{
+        add( void.class );       add( Void.class );
+        add( char.class );       add( Character.class );
+        add( boolean.class );    add( Boolean.class );
+        add( byte.class );       add( Byte.class );
+        add( short.class );      add( Short.class );
+        add( int.class );        add( Integer.class );
+        add( long.class );       add( Long.class );
+        add( float.class );      add( Float.class );
+        add( double.class );     add( Double.class );
+        add( BigDecimal.class ); add( BigInteger.class );
+        add( LocalDate.class );  add( LocalDateTime.class );
         add( String.class );
-        add( StringBuilder.class );
-        add( StringBuffer.class );
-        add( BigDecimal.class );
-        add( BigInteger.class );
-        add( LocalDate.class );
-        add( LocalDateTime.class );
         add( URI.class );
         add( URL.class );
         add( UUID.class );
         add( Pattern.class );
+        add( Class.class );
     }};
+
+    private final ConcurrentHashMap<Class<?>,List<Field>> fieldsCache = new ConcurrentHashMap<Class<?>, List<Field>>();
 
     /**
      * creates and returns a copy of object
@@ -74,14 +68,14 @@ public class Cloner {
 
         if( object == null ) return null;
 
-        if( Types.isArray(object) ) {
-            return cloneArray( object );
-        } else if( Types.isCollection(object) ) {
-            return cloneCollection( object );
-        }
+        Class<?> klass = object.getClass();
 
-        if( immutable.contains(object.getClass()) ) {
+        if( immutable.contains( klass ) ) {
             return object;
+        } else if( Types.isArray(klass) ) {
+            return cloneArray( object );
+        } else if( Types.isCollection(klass) ) {
+            return cloneCollection( object );
         }
 
         if( object instanceof Serializable ) {
@@ -91,10 +85,9 @@ public class Cloner {
         }
 
         ObjectMapper mapper = jsonCloner.getObjectMapper();
-
         try {
             String json = mapper.writeValueAsString( object );
-            return (T) mapper.readValue( json, object.getClass() );
+            return (T) mapper.readValue( json, klass );
         } catch ( IOException e ) {
             throw new UncheckedIOException( e );
         }
@@ -165,59 +158,41 @@ public class Cloner {
 
     }
 
-    protected void registerKnownJdkImmutableClasses() {
-
-        immutable.add( String.class );
-        immutable.add( Integer.class );
-        immutable.add( Long.class );
-        immutable.add( Boolean.class );
-        immutable.add( Class.class );
-        immutable.add( Float.class );
-        immutable.add( Double.class );
-        immutable.add( Character.class );
-        immutable.add( Byte.class );
-        immutable.add( Short.class );
-        immutable.add( Void.class );
-
-        immutable.add( BigDecimal.class );
-        immutable.add( BigInteger.class );
-        immutable.add( URI.class );
-        immutable.add( URL.class );
-        immutable.add( UUID.class );
-        immutable.add( Pattern.class );
-
-    }
-
     /**
-     * copies all properties from src to dest. Src and dest can be of different class, provided they contain same field names/types
+     * copies all properties from source to target. source and target can be of different class, provided they contain same field names/types
      *
-     * @param src  the source object
-     * @param dest the destination object which must contain as minimum all the fields of src
+     * @param source  the source object
+     * @param target  the destination object which must contain as minimum all the fields of source
      */
-    public <T, E extends T> void copyPropertiesOfInheritedClass(final T src, final E dest) {
-        if (src == null) throw new IllegalArgumentException("src can't be null");
-        if (dest == null) throw new IllegalArgumentException("dest can't be null");
-        final Class<? extends Object> srcClz = src.getClass();
-        final Class<? extends Object> destClz = dest.getClass();
-        if (srcClz.isArray()) {
-            if (!destClz.isArray())
-                throw new IllegalArgumentException("can't copy from array to non-array class " + destClz);
-            final int length = Array.getLength(src);
+    public <T, E extends T> void copyProperties( final T source, final E target ) {
+
+        if (source == null) throw new IllegalArgumentException( "source can't be null" );
+        if (target == null) throw new IllegalArgumentException( "target can't be null" );
+
+        final Class<? extends Object> klassSrc = source.getClass();
+        final Class<? extends Object> klassTrg = target.getClass();
+
+        if ( klassSrc.isArray() ) {
+            if ( ! klassTrg.isArray() )
+                throw new IllegalArgumentException("can't copy from array to non-array class " + klassTrg);
+            final int length = Array.getLength( source );
             for (int i = 0; i < length; i++) {
-                final Object v = Array.get(src, i);
-                Array.set(dest, i, v);
+                final Object v = Array.get( source, i );
+                Array.set( target, i, v );
             }
             return;
         }
-        final List<Field> fields = allFields(srcClz);
-        final List<Field> destFields = allFields(dest.getClass());
-        for (final Field field : fields) {
-            if (!Modifier.isStatic(field.getModifiers())) {
+
+        final List<Field> fields     = allFields(klassSrc);
+        final List<Field> destFields = allFields(target.getClass());
+
+        for ( final Field field : fields ) {
+            if( ! Modifier.isStatic(field.getModifiers())) {
                 try {
-                    final Object fieldObject = field.get(src);
+                    final Object fieldObject = field.get(source);
                     field.setAccessible(true);
                     if (destFields.contains(field)) {
-                        field.set(dest, fieldObject);
+                        field.set(target, fieldObject);
                     }
                 } catch (final IllegalArgumentException e) {
                     throw new RuntimeException(e);
@@ -226,35 +201,29 @@ public class Cloner {
                 }
             }
         }
+
     }
 
-    /**
-     * reflection utils, override this to choose which fields to clone
-     */
-    protected List<Field> allFields(final Class<?> c) {
-        List<Field> l = fieldsCache.get(c);
-        if (l == null) {
-            l = new LinkedList<Field>();
-            final Field[] fields = c.getDeclaredFields();
-            addAll(l, fields);
-            Class<?> sc = c;
-            while ((sc = sc.getSuperclass()) != Object.class && sc != null) {
-                addAll(l, sc.getDeclaredFields());
+    protected List<Field> allFields( Class<?> klass ) {
+        List<Field> fields = fieldsCache.get(klass);
+        if( fields == null ) {
+            fields = new LinkedList<>();
+            addAll( fields, klass.getDeclaredFields() );
+            Class<?> parent = klass;
+            while ( (parent = parent.getSuperclass()) != Object.class && parent != null ) {
+                addAll( fields, parent.getDeclaredFields() );
             }
-            fieldsCache.putIfAbsent(c, l);
+            fieldsCache.putIfAbsent( klass, fields );
         }
-        return l;
+        return fields;
     }
 
-    /**
-     * reflection utils
-     */
-    private void addAll(final List<Field> l, final Field[] fields) {
-        for (final Field field : fields) {
-            if (!field.isAccessible()) {
+    private void addAll( List<Field> list, Field[] fields ) {
+        for ( Field field : fields ) {
+            if ( !field.isAccessible() ) {
                 field.setAccessible(true);
             }
-            l.add(field);
+            list.add(field);
         }
     }
 
