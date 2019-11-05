@@ -70,6 +70,88 @@ public class ReflectorTest {
     }
 
     @Test
+    public void copyPrimitiveArray() {
+
+        int[] source = { 1,2,3,4 };
+        BigDecimal[] target = new BigDecimal[ 4 ];
+
+        Reflector.copy( source, target );
+
+        log.debug( Arrays.toString(source) );
+        log.debug( Arrays.toString(target) );
+
+    }
+
+    @Test
+    public void copyArray() {
+
+        User[] source = {
+            new User().name("a").age(1),
+            new User().name("b").age(2),
+            new User().name("c").age(3),
+            new User().name("d").age(4),
+        };
+
+        Account[] target = new Account[ 4 ];
+
+        Reflector.copy( source, target );
+
+        log.debug( Arrays.toString(source) );
+        log.debug( Arrays.toString(target) );
+
+        for( int i=0; i < source.length; i++ ) {
+            User    src = source[ i ];
+            Account trg = target[ i ];
+            Assert.assertEquals( src.name(), trg.name() );
+            Assert.assertEquals( src.age(),  trg.age().intValue() );
+        }
+
+    }
+
+    @Test
+    public void copyMultiDimensionArray() {
+
+        User[][] source = {
+            {
+                new User().name("a").age(1),
+                new User().name("b").age(2),
+                new User().name("c").age(3),
+                new User().name("d").age(4)
+            },
+            {
+                new User().name("e").age(5),
+                new User().name("f").age(6)
+            },
+            {
+                new User().name("g").age(7),
+                new User().name("h").age(8),
+                new User().name("i").age(9)
+            }
+        };
+
+        Account[][] target = new Account[3][];
+
+        Reflector.copy( source, target );
+
+        for( int i=0; i < source.length; i++ ) {
+
+            User[]    childSource = source[ i ];
+            Account[] childTarget = target[ i ];
+
+            for( int j=0; j < childSource.length; j++ ) {
+                User    src = source[i][j];
+                Account trg = target[i][j];
+                Assert.assertEquals( src.name(), trg.name() );
+                Assert.assertEquals( src.age(),  trg.age().intValue() );
+            }
+        }
+
+        log.debug( Arrays.toString(source) );
+        log.debug( Arrays.toString(target) );
+
+    }
+
+    @Test
     public void toJsonJava8Date() {
 
         Account jake = new Account()

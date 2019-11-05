@@ -170,10 +170,28 @@ public class Cloner {
         if ( Types.isArray(source) ) {
             if ( ! Types.isArray(target) )
                 throw new IllegalArgumentException( String.format("can not copy array to non-array class(%s)", target.getClass()) );
-            int length = Array.getLength( source );
-            for ( int i = 0; i < length; i++ ) {
-                Object val = Array.get( source, i );
-                Array.set( target, i, val );
+
+            Class srcType = source.getClass().getComponentType();
+            Class trgType = target.getClass().getComponentType();
+
+            boolean isSameType = srcType == trgType;
+
+            for ( int i = 0, iCnt=Array.getLength(source); i < iCnt; i++ ) {
+                Object srcVal = Array.get( source, i );
+                if( isSameType ) {
+                    Array.set( target, i, srcVal );
+                } else {
+                    Object trgVal = Array.get( target, i );
+                    if( trgVal == null ) {
+                        if( Types.isArray(srcVal) ) {
+                            trgVal = Array.newInstance( trgType.getComponentType(), Array.getLength(srcVal) );
+                        } else {
+                            trgVal = Classes.createInstance( trgType );
+                        }
+                    }
+                    copyProperties( srcVal, trgVal );
+                    Array.set( target, i, trgVal );
+                }
             }
             return;
         }
