@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 @Slf4j
@@ -37,11 +38,19 @@ public class ReflectorTest {
     @Test
     public void arrayCloneTest() {
 
-        Collection<User> users  = Arrays.asList( new User("nayasis",40), new User("jake",40) );
-        Collection<User> clones = Reflector.clone( users );
+        Collection<User> users = Arrays.asList( new User("nayasis",40), new User("jake",40) );
+        Collection<User> clone = Reflector.clone( users );
 
-        log.debug( users.toString() );
-        log.debug( clones.toString() );
+        Assert.assertEquals( users.toString(), clone.toString() );
+
+        Iterator<User> iteratorUsers = users.iterator();
+        Iterator<User> iteratorClone = clone.iterator();
+
+        while( iteratorUsers.hasNext() ) {
+            User a = iteratorUsers.next();
+            User b = iteratorClone.next();
+            Assert.assertTrue( a.equals(b) );
+        }
 
     }
 
@@ -49,14 +58,14 @@ public class ReflectorTest {
     public void copy() {
 
         User user = new User().name("nayasis").age(40);
-        Account account = new Account();
+        Account account = new Account().address( "jongja-dong" ).balance( new BigDecimal(1000) );
 
         Reflector.copy( user, account );
 
         Assert.assertEquals( "nayasis", account.name() );
         Assert.assertEquals( 40, account.age().intValue() );
-        Assert.assertEquals( null, account.address() );
-        Assert.assertEquals( null, account.balance() );
+        Assert.assertEquals( "jongja-dong", account.address() );
+        Assert.assertEquals( new BigDecimal(1000), account.balance() );
 
     }
 

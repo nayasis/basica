@@ -1,26 +1,19 @@
 package io.nayasis.common.basica.reflection;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.rits.cloning.Cloner;
-import io.nayasis.common.basica.base.Classes;
 import io.nayasis.common.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.common.basica.exception.unchecked.UncheckedClassCastException;
-import io.nayasis.common.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.common.basica.model.NList;
 import io.nayasis.common.basica.reflection.core.BeanMerger;
 import io.nayasis.common.basica.reflection.core.ClassReflector;
+import io.nayasis.common.basica.reflection.core.Cloner;
 import io.nayasis.common.basica.reflection.core.JsonConverter;
 import io.nayasis.common.basica.reflection.helper.invoker.Invoker;
 import io.nayasis.common.basica.reflection.helper.invoker.MethodInvoker;
 import io.nayasis.common.basica.reflection.helper.mapper.NObjectMapper;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -33,14 +26,15 @@ import java.util.Map;
  * @author nayasis@gmail.com
  *
  */
+@UtilityClass
 @Slf4j
 public class Reflector {
 
-	private static JsonConverter jsonConverterNullable         = new JsonConverter( new NObjectMapper(false,false,false) );
-	private static JsonConverter jsonConverterNotNull          = new JsonConverter( new NObjectMapper(false,true,false) );
-	private static JsonConverter jsonConverterSortableNullable = new JsonConverter( new NObjectMapper(true,false,false) );
-	private static JsonConverter jsonConverterSortableNotNull  = new JsonConverter( new NObjectMapper(true,true,false) );
-	private static Cloner        cloner                        = new Cloner();
+	private JsonConverter mapperNullable         = new JsonConverter( new NObjectMapper() );
+	private JsonConverter mapperNotNull          = new JsonConverter( new NObjectMapper().ignoreNull(true) );
+	private JsonConverter mapperSortableNullable = new JsonConverter( new NObjectMapper().serializeSortable(true) );
+	private JsonConverter mapperSortableNotNull  = new JsonConverter( new NObjectMapper().serializeSortable(true).ignoreNull(true) );
+	private Cloner        cloner                 = new Cloner();
 
 	/**
 	 * creates and returns a copy of object
@@ -50,91 +44,35 @@ public class Reflector {
 	 * @return a clone of object
 	 */
     @SuppressWarnings( "unchecked" )
-    public static <T> T clone( T object ) {
-		return clone( object, true );
+    public <T> T clone( T object ) {
+    	return cloner.clone( object );
     }
 
 	/**
-	 * creates and returns a copy of object
+	 * copy properties from source to target.
 	 *
-	 * @param object 	object to clone
-	 * @param deepClone if true, clone all elements in object's Map or Collection
-	 * @param <T> object's generic type
-	 * @return a clone of object
+	 * @param source  source object
+	 * @param target  target object
 	 */
-	@SuppressWarnings( "unchecked" )
-	public static <T> T clone( T object, boolean deepClone ) {
-		if( deepClone ) {
-			if( object instanceof Serializable ) {
-				try {
-					return cloneSerializable( object );
-				} finally {}
-			}
-			return cloner.deepClone( object );
-		} else {
-			return cloner.shallowClone( object );
-		}
-	}
-
-	private static <T> T cloneSerializable( T obj ) throws UncheckedIOException {
-
-		if( obj == null ) return null;
-
-		ObjectOutputStream oos  = null;
-		ObjectInputStream  ois  = null;
-
-		try {
-
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			oos = new ObjectOutputStream( bos );
-			oos.writeObject( obj );
-			oos.flush();
-
-			ois = new ObjectInputStream( new ByteArrayInputStream( bos.toByteArray() ) );
-
-			return (T) ois.readObject();
-
-		} catch ( IOException | ClassNotFoundException e ) {
-			throw new UncheckedIOException( e );
-		} finally {
-			try { ois.close(); } catch (Exception e) {}
-			try { oos.close(); } catch (Exception e) {}
-		}
-
-	}
-
-	/**
-	 * Copy data in instance
-	 *
-	 * @param source	bean as source
-	 * @param target	bean as target
-	 */
-    public static void copy( Object source, Object target ) {
+    public void copy( Object source, Object target ) {
 		if( source == null || target == null ) return;
-		Class<?> targetClass = target.getClass();
-		Class<?> sourceClass = source.getClass();
-		if( Classes.isExtendedBy(targetClass, sourceClass) || Classes.isExtendedBy(sourceClass, targetClass) ) {
-    		cloner.copyPropertiesOfInheritedClass( source, target );
-		} else {
-			Object typeCastedSource = toBeanFrom( source, targetClass );
-			cloner.copyPropertiesOfInheritedClass( typeCastedSource, target );
-		}
+		cloner.copyProperties( source, target );
     }
 
 	/**
-	 * Merge data in instance
+	 * merge properties
 	 *
      * @param source    source containing additional properties to merge in
      * @param target    target object to extend. it will receive the new properties
 	 * @param <T> target's generic type
 	 * @return merged Map
 	 */
-    public static <T> T merge( Object source, T target ) {
+    public <T> T merge( Object source, T target ) {
 		return merge( source, target, true );
 	}
 
 	/**
-	 * Merge data in instance
+	 * Merge properties
 	 *
      * @param source    source containing additional properties to merge in
      * @param target    target object to extend. it will receive the new properties
@@ -142,7 +80,7 @@ public class Reflector {
 	 * @param <T> source's generic type
 	 * @return merged Map
 	 */
-    public static <T> T merge( Object source, T target, boolean skipEmpty ) {
+    public <T> T merge( Object source, T target, boolean skipEmpty ) {
         return new BeanMerger().merge( source, target, skipEmpty );
     }
 
@@ -152,7 +90,7 @@ public class Reflector {
 	 * @param bean    instance to inspect
 	 * @return report of fields' value
 	 */
-    public static String toString( Object bean ) {
+    public String toString( Object bean ) {
     	NList result = new NList();
         for( Field field : ClassReflector.getFields(bean) ) {
         	if( ! field.isAccessible() ) field.setAccessible( true );
@@ -183,7 +121,7 @@ public class Reflector {
 	 * @param sort			whether or not to sort key of json
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort ) throws JsonMappingException {
+	public String toJson( Object fromBean, boolean prettyPrint, boolean sort ) throws JsonMappingException {
 		return toJson( fromBean, prettyPrint, sort, true, null );
 	}
 
@@ -197,12 +135,12 @@ public class Reflector {
 	 * @param view	        json view class
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull, Class view ) throws JsonMappingException {
+	public String toJson( Object fromBean, boolean prettyPrint, boolean sort, boolean ignoreNull, Class view ) throws JsonMappingException {
 		JsonConverter converter;
 		if( sort ) {
-			converter = ignoreNull ? jsonConverterNotNull : jsonConverterNullable;
+			converter = ignoreNull ? mapperNotNull : mapperNullable;
 		} else {
-			converter = ignoreNull ? jsonConverterSortableNotNull : jsonConverterSortableNullable;
+			converter = ignoreNull ? mapperSortableNotNull : mapperSortableNullable;
 		}
 		return converter.toJson( fromBean, prettyPrint, view );
 	}
@@ -214,7 +152,7 @@ public class Reflector {
 	 * @param prettyPrint	whether or not to make json text pretty
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
+	public String toJson( Object fromBean, boolean prettyPrint ) throws JsonMappingException {
 		return toJson( fromBean, prettyPrint, false );
 	}
 
@@ -226,7 +164,7 @@ public class Reflector {
 	 * @param view	        json view class
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonMappingException {
+	public String toJson( Object fromBean, boolean prettyPrint, Class view ) throws JsonMappingException {
 		return toJson( fromBean, prettyPrint, false, true, view );
 	}
 
@@ -236,7 +174,7 @@ public class Reflector {
 	 * @param fromBean		instance to convert as json data
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean ) throws JsonMappingException {
+	public String toJson( Object fromBean ) throws JsonMappingException {
 		return toJson( fromBean, false );
 	}
 
@@ -247,7 +185,7 @@ public class Reflector {
 	 * @param view	        json view class
 	 * @return json text
 	 */
-	public static String toJson( Object fromBean, Class view ) throws JsonMappingException {
+	public String toJson( Object fromBean, Class view ) throws JsonMappingException {
 		return toJson( fromBean, false, view );
 	}
 
@@ -273,8 +211,8 @@ public class Reflector {
 	 * @param object	json string, Map or bean
 	 * @return map with flattern key
 	 */
-	public static Map<String, Object> toFlattenMap( Object object ) throws JsonMappingException {
-		return jsonConverterNullable.toFlattenMap( object );
+	public Map<String, Object> toFlattenMap( Object object ) throws JsonMappingException {
+		return mapperNullable.toFlattenMap( object );
 	}
 
 	/**
@@ -299,8 +237,8 @@ public class Reflector {
 	 * @param object	json string, Map or bean
 	 * @return map with flattern key
 	 */
-	public static Map<String, Object> toUnflattenMap( Object object ) throws JsonMappingException {
-		return jsonConverterNullable.toUnflattenMap( object );
+	public Map<String, Object> toUnflattenMap( Object object ) throws JsonMappingException {
+		return mapperNullable.toUnflattenMap( object );
 	}
 
 	/**
@@ -309,8 +247,8 @@ public class Reflector {
 	 * @param json	json text
 	 * @return valid or not
 	 */
-	public static boolean isJson( String json ) {
-		return jsonConverterNullable.isJson( json );
+	public boolean isJson( String json ) {
+		return mapperNullable.isJson( json );
 	}
 
 	/**
@@ -320,8 +258,8 @@ public class Reflector {
 	 * @param <T>		return type
 	 * @return	bean filled by object's value
 	 */
-	public static <T> T toBeanFrom( Object object, Class<T> toClass ) throws JsonMappingException {
-		return jsonConverterNullable.toBeanFrom( object, toClass );
+	public <T> T toBeanFrom( Object object, Class<T> toClass ) throws JsonMappingException {
+		return mapperNullable.toBeanFrom( object, toClass );
 	}
 
 	/**
@@ -337,8 +275,8 @@ public class Reflector {
 	 * @param <T>		return type
 	 * @return	bean filled by object's value
 	 */
-	public static <T> T toBeanFrom( Object object, TypeReference<T> typeReference ) throws JsonMappingException {
-		return jsonConverterNullable.toBeanFrom( object, typeReference );
+	public <T> T toBeanFrom( Object object, TypeReference<T> typeReference ) throws JsonMappingException {
+		return mapperNullable.toBeanFrom( object, typeReference );
 	}
 
 	/**
@@ -349,8 +287,8 @@ public class Reflector {
 	 * @param <T> generic type
      * @return list
      */
-	public static <T> List<T> toListFrom( Object json, Class<T> generic ) throws JsonMappingException {
-		return jsonConverterNullable.toListFrom( json, generic );
+	public <T> List<T> toListFrom( Object json, Class<T> generic ) throws JsonMappingException {
+		return mapperNullable.toListFrom( json, generic );
 	}
 
 	/**
@@ -359,7 +297,7 @@ public class Reflector {
 	 * @param json json text or collection
 	 * @return List
 	 */
-	public static List toListFrom( Object json ) throws JsonMappingException {
+	public List toListFrom( Object json ) throws JsonMappingException {
 		return toListFrom( json, Object.class );
 	}
 
@@ -368,8 +306,8 @@ public class Reflector {
 	 * @param object	json text (type can be String, StringBuffer, StringBuilder), Map or bean to convert
 	 * @return	Map filled by object's value
 	 */
-	public static Map toMapFrom( Object object ) throws JsonMappingException {
-		return jsonConverterNullable.toMapFrom( object );
+	public Map toMapFrom( Object object ) throws JsonMappingException {
+		return mapperNullable.toMapFrom( object );
 	}
 
 	/**
@@ -381,7 +319,7 @@ public class Reflector {
 	 * @param <T> 			expected class of return
 	 * @return	proxy bean to wrap
 	 */
-    public static <T> T wrapProxy( T bean, Class<?>[] interfaces, MethodInvoker methodInvoker ) {
+    public <T> T wrapProxy( T bean, Class<?>[] interfaces, MethodInvoker methodInvoker ) {
     	return (T) Proxy.newProxyInstance( bean.getClass().getClassLoader(), interfaces, new Invoker<>( bean, methodInvoker ) );
     }
 
@@ -392,7 +330,7 @@ public class Reflector {
 	 * @return	original bean
 	 * @throws UncheckedClassCastException if bean is not proxy bean.
 	 */
-	public static <T> T unwrapProxy( T bean ) {
+	public <T> T unwrapProxy( T bean ) {
 		if( bean == null || ! Proxy.isProxyClass( bean.getClass() ) ) {
 			return bean;
 		}

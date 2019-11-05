@@ -1,10 +1,9 @@
 package io.nayasis.common.basica.reflection.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nayasis.common.basica.base.Classes;
 import io.nayasis.common.basica.base.Types;
 import io.nayasis.common.basica.exception.unchecked.UncheckedIOException;
-import io.nayasis.common.basica.reflection.helper.mapper.NObjectMapper;
+import io.nayasis.common.basica.reflection.Reflector;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
@@ -12,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -22,19 +20,15 @@ import java.net.URI;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class Cloner {
-
-    private JsonConverter jsonCloner = new JsonConverter( new NObjectMapper(true,true,true) );
 
     private final Set<Class<?>> immutable = new HashSet() {{
         add( void.class );       add( Void.class );
@@ -56,8 +50,6 @@ public class Cloner {
         add( Class.class );
     }};
 
-    private final ConcurrentHashMap<Class<?>,List<Field>> fieldsCache = new ConcurrentHashMap<Class<?>, List<Field>>();
-
     /**
      * creates and returns a copy of object
      *
@@ -65,73 +57,76 @@ public class Cloner {
      * @return cloned object
      */
     public <T> T clone( T object ) {
+        return cloneObject( object, new HashMap<>() );
+    }
+
+    private <T> T cloneObject( T object, Map<Object,Object> cloned ) {
 
         if( object == null ) return null;
+        if( cloned.containsKey(object) ) return (T) cloned.get( object );
 
         Class<?> klass = object.getClass();
 
-        if( immutable.contains( klass ) ) {
+        if( immutable.contains(klass) ) {
             return object;
         } else if( Types.isArray(klass) ) {
-            return cloneArray( object );
-        } else if( Types.isCollection(klass) ) {
-            return cloneCollection( object );
+            return cloneArray( object, cloned );
         }
 
-        if( object instanceof Serializable ) {
+        Object clone = Classes.createInstance( klass );
+        cloned.put( object, clone );
+
+        for( Field field : ClassReflector.getFields(klass) ) {
+
+            int modifiers = field.getModifiers();
+
+            if( Modifier.isStatic(modifiers) ) continue;
+            if( Modifier.isTransient(modifiers) ) continue;
+
+            boolean prevAccessible = field.isAccessible();
             try {
-                return cloneSerializable( object );
-            } catch ( Throwable e ) {}
+                field.setAccessible(true);
+                Object val = field.get( object );
+                Object clonedVal = cloneObject( val, cloned );
+                field.set( clone, clonedVal );
+            } catch ( IllegalArgumentException | IllegalAccessException e ) {
+                throw new RuntimeException(e);
+            } finally {
+                field.setAccessible( prevAccessible );
+            }
+
         }
 
-        ObjectMapper mapper = jsonCloner.getObjectMapper();
-        try {
-            String json = mapper.writeValueAsString( object );
-            return (T) mapper.readValue( json, klass );
-        } catch ( IOException e ) {
-            throw new UncheckedIOException( e );
-        }
+        return (T) clone;
 
     }
 
-    private <T> T cloneCollection( T object ) {
-
-        Collection source = (Collection) object;
-        Collection target = (Collection) Classes.createInstance( object.getClass() );
-
-        source.forEach( e -> {
-            target.add( clone(e) );
-        });
-
-        return (T) target;
-
-    }
-
-    private <T> T cloneArray( T object ) {
+    private <T> T cloneArray( T object, Map<Object,Object> cloned ) {
 
         Class<?> klass   = object.getClass();
         Class<?> generic = klass.getComponentType();
 
         int length = Array.getLength( object );
 
-        T target = (T) Array.newInstance( generic, length );
+        Object target = Array.newInstance( generic, length );
 
-        if( length == 0 ) return target;
-
-        if( generic.isPrimitive() || immutable.contains(generic) ) {
-            System.arraycopy( object, 0, target, 0, length );
-        } else {
-            for( int i = 0; i < length; i++ ) {
-                Object e = Array.get( object, i );
-                Array.set( target, i, clone(e) );
+        if( length > 0 ) {
+            if( immutable.contains(generic) ) {
+                System.arraycopy( object, 0, target, 0, length );
+            } else {
+                for( int i = 0; i < length; i++ ) {
+                    Object e = Array.get( object, i );
+                    Array.set( target, i, cloneObject(e,cloned) );
+                }
             }
         }
 
-        return target;
+        cloned.put( object, target );
+        return (T) target;
 
     }
 
-    private <T> T cloneSerializable( T obj ) throws UncheckedIOException {
+    public <T> T cloneSerializable( T obj ) throws UncheckedIOException {
 
         if( obj == null ) return null;
 
@@ -158,73 +153,61 @@ public class Cloner {
 
     }
 
+    private boolean isAnonymousParent( Field field ) {
+        return "this$0".equals(field.getName());
+    }
+
     /**
-     * copies all properties from source to target. source and target can be of different class, provided they contain same field names/types
+     * copy properties from source to target.
      *
-     * @param source  the source object
-     * @param target  the destination object which must contain as minimum all the fields of source
+     * @param source  source object
+     * @param target  target object
      */
-    public <T, E extends T> void copyProperties( final T source, final E target ) {
+    public void copyProperties( Object source, Object target ) {
 
-        if (source == null) throw new IllegalArgumentException( "source can't be null" );
-        if (target == null) throw new IllegalArgumentException( "target can't be null" );
+        if( source == null || target == null ) return;
 
-        final Class<? extends Object> klassSrc = source.getClass();
-        final Class<? extends Object> klassTrg = target.getClass();
-
-        if ( klassSrc.isArray() ) {
-            if ( ! klassTrg.isArray() )
-                throw new IllegalArgumentException("can't copy from array to non-array class " + klassTrg);
-            final int length = Array.getLength( source );
-            for (int i = 0; i < length; i++) {
-                final Object v = Array.get( source, i );
-                Array.set( target, i, v );
+        if ( Types.isArray(source) ) {
+            if ( ! Types.isArray(target) )
+                throw new IllegalArgumentException( String.format("can not copy array to non-array class(%s)", target.getClass()) );
+            int length = Array.getLength( source );
+            for ( int i = 0; i < length; i++ ) {
+                Object val = Array.get( source, i );
+                Array.set( target, i, val );
             }
             return;
         }
 
-        final List<Field> fields     = allFields(klassSrc);
-        final List<Field> destFields = allFields(target.getClass());
+        Object  castedSource = castedSource( source, target );
+        boolean casted       = source != castedSource;
 
-        for ( final Field field : fields ) {
-            if( ! Modifier.isStatic(field.getModifiers())) {
-                try {
-                    final Object fieldObject = field.get(source);
-                    field.setAccessible(true);
-                    if (destFields.contains(field)) {
-                        field.set(target, fieldObject);
-                    }
-                } catch (final IllegalArgumentException e) {
-                    throw new RuntimeException(e);
-                } catch (final IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        Map<String,Field> srcFields = new HashMap<>();
+        ClassReflector.getFields(source).forEach( field -> {
+            srcFields.put( field.getName(), field );
+        });
+
+        for ( Field trgField : ClassReflector.getFields(target) ) {
+
+            Field srcField = srcFields.get( trgField.getName() );
+
+            if( srcField == null ) continue;;
+            if( srcField == trgField && ClassReflector.isStatic(srcField) ) continue;
+
+            Object val = ClassReflector.getValue( castedSource, casted ? trgField : srcField );
+            ClassReflector.setValue( target, trgField, val );
+
         }
 
     }
 
-    protected List<Field> allFields( Class<?> klass ) {
-        List<Field> fields = fieldsCache.get(klass);
-        if( fields == null ) {
-            fields = new LinkedList<>();
-            addAll( fields, klass.getDeclaredFields() );
-            Class<?> parent = klass;
-            while ( (parent = parent.getSuperclass()) != Object.class && parent != null ) {
-                addAll( fields, parent.getDeclaredFields() );
-            }
-            fieldsCache.putIfAbsent( klass, fields );
-        }
-        return fields;
-    }
-
-    private void addAll( List<Field> list, Field[] fields ) {
-        for ( Field field : fields ) {
-            if ( !field.isAccessible() ) {
-                field.setAccessible(true);
-            }
-            list.add(field);
-        }
+    private Object castedSource( Object source, Object target ) {
+		Class<?> sourceClass = source.getClass();
+		Class<?> targetClass = target.getClass();
+		if( Classes.isExtendedBy(targetClass,sourceClass) || Classes.isExtendedBy(sourceClass,targetClass) ) {
+		    return source;
+		} else {
+			return Reflector.toBeanFrom( source, targetClass );
+		}
     }
 
 }

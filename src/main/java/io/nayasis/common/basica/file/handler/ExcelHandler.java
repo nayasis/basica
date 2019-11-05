@@ -3,16 +3,27 @@ package io.nayasis.common.basica.file.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import io.nayasis.common.basica.base.Types;
-import io.nayasis.common.basica.validation.Validator;
 import io.nayasis.common.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.common.basica.exception.unchecked.ParseException;
 import io.nayasis.common.basica.file.Files;
 import io.nayasis.common.basica.model.NList;
 import io.nayasis.common.basica.model.NMap;
 import io.nayasis.common.basica.reflection.helper.mapper.NObjectMapper;
+import io.nayasis.common.basica.validation.Validator;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract Excel Writer
@@ -344,9 +355,7 @@ public abstract class ExcelHandler {
 
 
 	protected NList toExcelNListFromBean( List<?> fromList ) throws JsonMappingException {
-
 		NList result = new NList();
-
 		if( hasRow(fromList) ) {
 			ObjectWriter writer = excelMapper.writer();
 			try {
@@ -357,34 +366,23 @@ public abstract class ExcelHandler {
 				throw new JsonMappingException( e );
 			}
 		}
-
 		return result;
-
 	}
 
 	protected <T> List<T> toBeanFromExcelNList( NList fromList, Class<T> toClass ) throws JsonMappingException {
-
 		List<T> list = new ArrayList<>();
-
-		if( fromList == null || fromList.size() == 0 ) return list;
-
-		for( NMap map : fromList ) {
-
-			String json = map.toJson();
-
-			try {
-
-				T bean = excelMapper.readValue( json, toClass );
-				list.add( bean );
-
-			} catch( IOException e ) {
-				throw new ParseException( e, "JsonParseException : {}\n\t- json string :\n{}\n\t- target class : {}", e.getMessage(), json, toClass );
+		if( Validator.isNotEmpty(fromList) ) {
+			for( NMap map : fromList ) {
+				String json = map.toJson();
+				try {
+					T bean = excelMapper.readValue( json, toClass );
+					list.add( bean );
+				} catch( IOException e ) {
+					throw new ParseException( e, "JsonParseException : {}\n\t- json string :\n{}\n\t- target class : {}", e.getMessage(), json, toClass );
+				}
 			}
-
 		}
-
 		return list;
-
 	}
 
 	private boolean hasRow( List<?> list ) {
@@ -403,11 +401,8 @@ public abstract class ExcelHandler {
 
 		if( Validator.isNotEmpty(data) ) {
 			for( String sheetName : data.keySet() ) {
-
 				Object sheet = data.get( sheetName );
-
 				if( sheet == null ) continue;
-
 				if( sheet instanceof NList ) {
 					sheets.put( sheetName, (NList) sheet );
 				} else if( sheet instanceof List ) {
@@ -415,7 +410,6 @@ public abstract class ExcelHandler {
 				} else if( Types.isArray( sheet ) || Types.isCollection( sheet ) ) {
 					sheets.put( sheetName, toExcelNListFromBean( Types.toList(sheet) ) );
 				}
-
 			}
 		}
 
@@ -432,20 +426,16 @@ public abstract class ExcelHandler {
 	 * @return data as toClass generic type
 	 */
 	public <T> Map<String, List<T>> toBeanList( Map<String, NList> data, Class<T> toClass ) {
-
 		Map<String, List<T>> sheets = new LinkedHashMap<>();
-
 		if( Validator.isNotEmpty(data) ) {
 			for( String sheet : data.keySet() ) {
 				sheets.put( sheet, toBeanFromExcelNList(data.get( sheet ), toClass ) );
 			}
 		}
-
 		return sheets;
-
 	}
 
-	//----------- annonymous interface
+	//----------- anonymous interface
 
 	private Object read( File excelFile, Reader reader ) {
 
