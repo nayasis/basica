@@ -293,7 +293,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
         } else if( Types.isArray(value) ) {
             _addRows( index, Types.toList( value ), syncronizeHeaderData );
 
-        } else if( Types.isString( value ) ) {
+        } else if( Types.isStringLike( value ) ) {
 
             String json = value.toString();
 

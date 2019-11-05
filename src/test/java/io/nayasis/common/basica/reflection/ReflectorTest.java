@@ -80,6 +80,11 @@ public class ReflectorTest {
         log.debug( Arrays.toString(source) );
         log.debug( Arrays.toString(target) );
 
+        Assert.assertEquals(
+            Arrays.toString(source),
+            Arrays.toString(target)
+        );
+
     }
 
     @Test
