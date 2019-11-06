@@ -12,7 +12,7 @@ public class NMapTest {
 
         NMap map = new NMap();
 
-        map.put( "controller", "io.nayasis.common.model.NMapTest.printString()" );
+        map.put( "controller", "io.nayasis.model.NMapTest.printString()" );
 
         log.debug( "\n" + map.toString( false, false ) );
 

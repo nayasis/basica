@@ -178,7 +178,7 @@
             <configuration>
               <archive combine.children="append">
                 <manifestEntries>
-                  <Automatic-Module-Name>io.nayasis.common.basica</Automatic-Module-Name>
+                  <Automatic-Module-Name>io.nayasis.basica</Automatic-Module-Name>
                 </manifestEntries>
               </archive>
             </configuration>

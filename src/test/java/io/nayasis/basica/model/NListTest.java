@@ -12,7 +12,7 @@ public class NListTest {
         NList list = new NList();
 
         list.add( "key", "controller" );
-        list.add( "val", "io.nayasis.common.model.NMapTest.printString()" );
+        list.add( "val", "io.nayasis.model.NMapTest.printString()" );
 
         log.debug( "\n" + list.toString( false, false ) );
 
