@@ -53,19 +53,10 @@ public class Cloner {
             int modifiers = field.getModifiers();
 
             if( Modifier.isStatic(modifiers) ) continue;
-            if( Modifier.isTransient(modifiers) ) continue;
 
-            boolean prevAccessible = field.isAccessible();
-            try {
-                field.setAccessible(true);
-                Object val = field.get( object );
-                Object clonedVal = cloneObject( val, cloned );
-                field.set( clone, clonedVal );
-            } catch ( IllegalArgumentException | IllegalAccessException e ) {
-                throw new RuntimeException(e);
-            } finally {
-                field.setAccessible( prevAccessible );
-            }
+            Object val      = ClassReflector.getValue( object, field );
+            Object cloneVal = cloneObject( val, cloned );
+            ClassReflector.setValue( clone, field, cloneVal );
 
         }
 
