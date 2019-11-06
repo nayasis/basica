@@ -434,17 +434,12 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @return values corresponding key
      */
     public <T> List<T> toList( String key ) {
-
     	List result = new ArrayList<>();
-
     	if( ! containsKey( key ) ) return result;
-
     	for( Map row : body ) {
-    		result.add(row.get( key ) );
+    		result.add(row.get(key) );
     	}
-
     	return result;
-
     }
 
     /**

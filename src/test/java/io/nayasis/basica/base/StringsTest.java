@@ -21,14 +21,14 @@ public class StringsTest {
     @Test
     public void format() {
 
-        NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
+        assertEquals( "{ name : merong, age : 2 }", Strings.format( "{ name : {}, age : {} }", "merong", 2 ) );
+        assertEquals( "5K\nUtil\ndesc", Strings.format("{}\n{}\n{}", "5K", "Util", "desc") );
 
+        NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
         assertEquals( "PRE 2 POST", Strings.format( "PRE {age} POST", parameter ) );
         assertEquals( "PRE {age} POST", Strings.format( "PRE \\{age} POST", parameter ) );
         assertEquals( "abc PRE 2 POST", Strings.format( "{name} PRE {age} POST", parameter ) );
         assertEquals( "abc PRE   2 POST", Strings.format( "{name} PRE {age:%3d} POST", parameter ) );
-
-        assertEquals( "5K\nUtil\ndesc", Strings.format("{}\n{}\n{}", "5K", "Util", "desc") );
 
     }
 

@@ -170,7 +170,7 @@ public abstract class ExcelHandler {
 	 *                  value type is allowed only List or NList.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( File excelFile, Map<String, ?> data ) throws UncheckedIOException {
+	public void writeTo( File excelFile, Map<String,?> data ) throws UncheckedIOException {
 		write( excelFile, outputStream -> writeNListTo( outputStream, toNList( data ), isXlsx( excelFile ) ) );
 	}
 
@@ -233,8 +233,8 @@ public abstract class ExcelHandler {
 	 * @return key is sheetName and value is grid data.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public Map<String, NList> readFrom( File excelFile ) throws UncheckedIOException {
-		return (Map<String, NList>) read( excelFile, inputStream -> readFrom( inputStream ) );
+	public Map<String,NList> readFrom( File excelFile ) throws UncheckedIOException {
+		return (Map<String,NList>) read( excelFile, inputStream -> readFrom( inputStream ) );
 	}
 
 	/**
@@ -247,7 +247,7 @@ public abstract class ExcelHandler {
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
 	public <T> Map<String, List<T>> readFrom( File excelFile, Class<T> toClass ) throws UncheckedIOException {
-		Map<String, NList> sheets = readFrom( excelFile );
+		Map<String,NList> sheets = readFrom( excelFile );
 		return toBeanList( sheets, toClass );
 	}
 
@@ -306,7 +306,7 @@ public abstract class ExcelHandler {
 	 * @return key is sheetName and value is grid data.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public abstract Map<String, NList> readFrom( InputStream inputStream ) throws UncheckedIOException;
+	public abstract Map<String,NList> readFrom( InputStream inputStream ) throws UncheckedIOException;
 
 	/**
 	 * Read all sheet from input stream
@@ -438,15 +438,12 @@ public abstract class ExcelHandler {
 	//----------- anonymous interface
 
 	private Object read( File excelFile, Reader reader ) {
-
 		FileInputStream inputStream = getInputStream( excelFile );
-
 		try {
 			return reader.read( inputStream );
 		} catch( UncheckedIOException e ) {
 			throw new UncheckedIOException( String.format("Error on reading excel file(%s)", excelFile),  e.getCause() );
 		}
-
 	}
 
 	private interface Reader {
