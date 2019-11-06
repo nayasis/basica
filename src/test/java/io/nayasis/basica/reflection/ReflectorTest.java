@@ -1,8 +1,8 @@
-package io.nayasis.common.basica.reflection;
+package io.nayasis.basica.reflection;
 
-import io.nayasis.common.basica.base.Strings;
-import io.nayasis.common.basica.model.NDate;
-import io.nayasis.common.basica.validation.Validator;
+import io.nayasis.basica.base.Strings;
+import io.nayasis.basica.model.NDate;
+import io.nayasis.basica.validation.Validator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
