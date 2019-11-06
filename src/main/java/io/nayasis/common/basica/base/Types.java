@@ -1,6 +1,5 @@
 package io.nayasis.common.basica.base;
 
-import io.nayasis.common.basica.model.NDate;
 import io.nayasis.common.basica.model.NList;
 import lombok.experimental.UtilityClass;
 
@@ -14,9 +13,7 @@ import java.time.LocalDateTime;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import static java.math.BigDecimal.ONE;
 
 /**
  * Type Check Utility
@@ -34,30 +33,24 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class Types {
 
-    private Set<Class<?>> PRIMITIVE = new HashSet() {{
-        add( void.class ); add( Void.class );
-        add( char.class ); add( Character.class );
-        add( boolean.class ); add( Boolean.class );
-        add( byte.class ); add( Byte.class );
-        add( short.class ); add( Short.class );
-        add( int.class ); add( Integer.class );
-        add( long.class ); add( Long.class );
-        add( float.class ); add( Float.class );
-        add( double.class ); add( Double.class );
+    private final static Set<Class<?>> IMMUTABLE = new HashSet() {{
+        add( void.class );       add( Void.class );
+        add( char.class );       add( Character.class );
+        add( boolean.class );    add( Boolean.class );
+        add( byte.class );       add( Byte.class );
+        add( short.class );      add( Short.class );
+        add( int.class );        add( Integer.class );
+        add( long.class );       add( Long.class );
+        add( float.class );      add( Float.class );
+        add( double.class );     add( Double.class );
+        add( BigDecimal.class ); add( BigInteger.class );
+        add( LocalDate.class );  add( LocalDateTime.class );
         add( String.class );
-        add( StringBuilder.class );
-        add( StringBuffer.class );
-        add( BigDecimal.class );
-        add( BigInteger.class );
-        add( Date.class );
-        add( Calendar.class );
-        add( LocalDate.class );
-        add( LocalDateTime.class );
-        add( NDate.class );
         add( URI.class );
         add( URL.class );
         add( UUID.class );
         add( Pattern.class );
+        add( Class.class );
     }};
 
     private boolean isEmpty( Class klass ) {
@@ -77,10 +70,10 @@ public class Types {
         return false;
     }
 
-    private boolean checkEqual( Class<?> klass, Class<?>... checkTargets ) {
+    private boolean checkType( Class<?> klass, Class<?>... types ) {
         if( isEmpty(klass) ) return false;
-        for( Class<?> target : checkTargets ) {
-            if( klass == target ) return true;
+        for( Class type : types ) {
+            if( klass == type ) return true;
         }
         return false;
     }
@@ -122,11 +115,11 @@ public class Types {
     }
 
     public boolean isBoolean( Class klass ) {
-        return checkEqual( klass, Boolean.class, boolean.class );
+        return checkType( klass, Boolean.class, boolean.class );
     }
 
     public boolean isInt( Class klass ) {
-        return checkEqual( klass, Integer.class, int.class );
+        return checkType( klass, Integer.class, int.class );
     }
 
     public boolean isInt( Object instance ) {
@@ -134,7 +127,7 @@ public class Types {
     }
 
     public boolean isShort( Class klass ) {
-        return checkEqual( klass, Short.class, short.class );
+        return checkType( klass, Short.class, short.class );
     }
 
     public boolean isShort( Object instance ) {
@@ -142,7 +135,7 @@ public class Types {
     }
 
     public boolean isByte( Class klass ) {
-        return checkEqual( klass, Byte.class, byte.class );
+        return checkType( klass, Byte.class, byte.class );
     }
 
     public boolean isByte( Object instance ) {
@@ -160,7 +153,7 @@ public class Types {
 
     public boolean isInt( String value ) {
         try {
-            return new BigDecimal( value ).remainder( BigDecimal.ONE )
+            return new BigDecimal( value ).remainder( ONE )
                 .compareTo( BigDecimal.ZERO ) == 0;
         } catch( Exception e ) {
             return false;
@@ -171,14 +164,14 @@ public class Types {
         try {
             BigDecimal number = new BigDecimal( value );
             if( number.compareTo( BigDecimal.ZERO ) <= 0 ) return false;
-            return number.remainder( BigDecimal.ONE ).compareTo( BigDecimal.ZERO ) == 0;
+            return number.remainder( ONE ).compareTo( BigDecimal.ZERO ) == 0;
         } catch( Exception e ) {
             return false;
         }
     }
 
     public boolean isLong( Class klass ) {
-        return checkEqual( klass, Long.class, long.class );
+        return checkType( klass, Long.class, long.class );
     }
 
     public boolean isLong( Object instance ) {
@@ -186,7 +179,7 @@ public class Types {
     }
 
     public boolean isFloat( Class klass ) {
-        return checkEqual( klass, Float.class, float.class );
+        return checkType( klass, Float.class, float.class );
     }
 
     public boolean isFloat( Object instance ) {
@@ -194,7 +187,7 @@ public class Types {
     }
 
     public boolean isDouble( Class klass ) {
-        return checkEqual( klass, Double.class, double.class );
+        return checkType( klass, Double.class, double.class );
     }
 
     public boolean isDouble( Object instance ) {
@@ -202,7 +195,7 @@ public class Types {
     }
 
     public boolean isBigDecimal( Class klass ) {
-        return checkEqual( klass, BigDecimal.class );
+        return checkType( klass, BigDecimal.class );
     }
 
     public boolean isBigDecimal( Object instance ) {
@@ -210,7 +203,7 @@ public class Types {
     }
 
     public boolean isBigInteger( Class klass ) {
-        return checkEqual( klass, BigInteger.class );
+        return checkType( klass, BigInteger.class );
     }
 
     public boolean isBigInteger( Object instance ) {
@@ -218,19 +211,27 @@ public class Types {
     }
 
     public boolean isChar( Class klass ) {
-        return checkEqual( klass, Characters.class, char.class );
+        return checkType( klass, Characters.class, char.class );
     }
 
     public boolean isChar( Object instance ) {
         return instance != null && isChar( instance.getClass() );
     }
 
+    public boolean isStringLike( Class klass ) {
+        return checkType( klass, String.class, StringBuffer.class, StringBuilder.class );
+    }
+
+    public boolean isStringLike( Object instance ) {
+        return instance != null && isStringLike( instance.getClass() );
+    }
+
     public boolean isString( Class klass ) {
-        return checkEqual( klass, String.class, StringBuffer.class, StringBuilder.class );
+        return checkType( klass, String.class );
     }
 
     public boolean isString( Object instance ) {
-        return instance != null && isString( instance.getClass() );
+        return instance != null && isStringLike( instance.getClass() );
     }
 
     public boolean isNumeric( Class klass ) {
@@ -250,8 +251,16 @@ public class Types {
         }
     }
 
+    public boolean isImmutable( Class klass ) {
+        return klass != null && IMMUTABLE.contains( klass );
+    }
+
+    public boolean isImmutable( Object object ) {
+        return object != null && IMMUTABLE.contains( object.getClass() );
+    }
+
     public boolean isPrimitive( Class klass ) {
-        return PRIMITIVE.contains( klass );
+        return klass != null && klass.isPrimitive();
     }
 
     public boolean isPrimitive( Object instance ) {
@@ -264,10 +273,6 @@ public class Types {
 
     public boolean isEnum( Object instance ) {
         return instance != null && isEnum( instance.getClass() );
-    }
-
-    public boolean isNotPrimitive( Object instance ) {
-        return ! isPrimitive( instance );
     }
 
     public List toList( Object instance ) {
@@ -309,7 +314,16 @@ public class Types {
 
     public Integer toInt( Object value ) throws NumberFormatException {
         if( value == null ) return null;
-        if( isInt(value) || isShort(value) || isByte(value) ) return (Integer) value;
+        if( isInt(value)        ) return (Integer)value;
+        if( isLong(value)       ) return ((Long)value).intValue();
+        if( isShort(value)      ) return ((Short)value).intValue();
+        if( isByte(value)       ) return ((Byte)value).intValue();
+        if( isChar(value)       ) return Integer.valueOf(((Character)value).charValue());
+        if( isFloat(value)      ) return ((Float)value).intValue();
+        if( isDouble(value)     ) return ((Double)value).intValue();
+        if( isBigDecimal(value) ) return ((BigDecimal)value).intValue();
+        if( isBigInteger(value) ) return ((BigInteger)value).intValue();
+        if( isBoolean(value)    ) return toBoolean(value) ? 1 : 0;
         try {
             return Integer.parseInt( value.toString() );
         } catch ( NumberFormatException e ) {
@@ -319,7 +333,16 @@ public class Types {
 
     public Long toLong( Object value ) throws NumberFormatException {
         if( value == null ) return null;
-        if( isLong(value)|| isInt(value) || isShort(value) || isByte(value) ) return (Long) value;
+        if( isInt(value)        ) return ((Integer)value).longValue();
+        if( isLong(value)       ) return (Long)value;
+        if( isShort(value)      ) return ((Short)value).longValue();
+        if( isByte(value)       ) return ((Byte)value).longValue();
+        if( isChar(value)       ) return Long.valueOf(((Character)value).charValue());
+        if( isFloat(value)      ) return ((Float)value).longValue();
+        if( isDouble(value)     ) return ((Double)value).longValue();
+        if( isBigDecimal(value) ) return ((BigDecimal)value).longValue();
+        if( isBigInteger(value) ) return ((BigInteger)value).longValue();
+        if( isBoolean(value)    ) return toBoolean(value) ? 1L : 0;
         try {
             return Long.parseLong( value.toString() );
         } catch ( NumberFormatException e ) {
@@ -329,7 +352,16 @@ public class Types {
 
     public Float toFloat( Object value ) throws NumberFormatException {
         if( value == null ) return null;
-        if( isFloat(value) || isDouble(value) ) return (Float) value;
+        if( isInt(value)        ) return ((Integer)value).floatValue();
+        if( isLong(value)       ) return ((Long)value).floatValue();
+        if( isShort(value)      ) return ((Short)value).floatValue();
+        if( isByte(value)       ) return ((Byte)value).floatValue();
+        if( isChar(value)       ) return Float.valueOf(((Character)value).charValue());
+        if( isFloat(value)      ) return (Float)value;
+        if( isDouble(value)     ) return ((Double)value).floatValue();
+        if( isBigDecimal(value) ) return ((BigDecimal)value).floatValue();
+        if( isBigInteger(value) ) return ((BigInteger)value).floatValue();
+        if( isBoolean(value)    ) return toBoolean(value) ? 1F : 0;
         try {
             return Float.parseFloat( value.toString() );
         } catch ( NumberFormatException e ) {
@@ -339,7 +371,16 @@ public class Types {
 
     public Double toDouble( Object value ) throws NumberFormatException {
         if( value == null ) return null;
-        if( isDouble(value) || isFloat(value) ) return (Double) value;
+        if( isInt(value)        ) return ((Integer)value).doubleValue();
+        if( isLong(value)       ) return ((Long)value).doubleValue();
+        if( isShort(value)      ) return ((Short)value).doubleValue();
+        if( isByte(value)       ) return ((Byte)value).doubleValue();
+        if( isChar(value)       ) return Double.valueOf(((Character)value).charValue());
+        if( isDouble(value)     ) return (Double)value;
+        if( isFloat(value)      ) return ((Float)value).doubleValue();
+        if( isBigDecimal(value) ) return ((BigDecimal)value).doubleValue();
+        if( isBigInteger(value) ) return ((BigInteger)value).doubleValue();
+        if( isBoolean(value)    ) return toBoolean(value) ? 1D : 0;
         try {
             return Double.parseDouble( value.toString() );
         } catch ( NumberFormatException e ) {
@@ -347,14 +388,18 @@ public class Types {
         }
     }
 
-    public Boolean toBoolean( Object value ) throws NumberFormatException {
-        if( isBoolean(value) ) return (Boolean) value;
-        return Strings.toBoolean( value );
-    }
-
     public Byte toByte( Object value ) throws NumberFormatException {
         if( value == null ) return null;
-        if( isByte(value) ) return (Byte) value;
+        if( isInt(value)        ) return ((Integer)value).byteValue();
+        if( isLong(value)       ) return ((Long)value).byteValue();
+        if( isShort(value)      ) return ((Short)value).byteValue();
+        if( isByte(value)       ) return (Byte)value;
+        if( isChar(value)       ) return Byte.valueOf((byte)((Character)value).charValue());
+        if( isDouble(value)     ) return ((Double)value).byteValue();
+        if( isFloat(value)      ) return ((Float)value).byteValue();
+        if( isBigDecimal(value) ) return ((BigDecimal)value).byteValue();
+        if( isBigInteger(value) ) return ((BigInteger)value).byteValue();
+        if( isBoolean(value)    ) return toInt(value).byteValue();
         try {
             return Byte.parseByte( value.toString() );
         } catch ( NumberFormatException e ) {
@@ -364,7 +409,16 @@ public class Types {
 
     public Short toShort( Object value ) throws NumberFormatException {
         if( value == null ) return null;
-        if( isShort(value) || isByte(value) ) return (Short) value;
+        if( isInt(value)        ) return ((Integer)value).shortValue();
+        if( isLong(value)       ) return ((Long)value).shortValue();
+        if( isShort(value)      ) return (Short)value;
+        if( isByte(value)       ) return ((Byte)value).shortValue();
+        if( isChar(value)       ) return Short.valueOf((short) ((Character)value).charValue());
+        if( isDouble(value)     ) return ((Double)value).shortValue();
+        if( isFloat(value)      ) return ((Float)value).shortValue();
+        if( isBigDecimal(value) ) return ((BigDecimal)value).shortValue();
+        if( isBigInteger(value) ) return ((BigInteger)value).shortValue();
+        if( isBoolean(value)    ) return toInt(value).shortValue();
         try {
             return Short.parseShort( value.toString() );
         } catch ( NumberFormatException e ) {
@@ -374,9 +428,112 @@ public class Types {
 
     public Character toChar( Object value ) {
         if( value == null ) return null;
-        if( isChar(value) ) return (Character) value;
+        if( isInt(value)        ) return Character.valueOf((char)((Integer)value).intValue());
+        if( isLong(value)       ) return Character.valueOf((char)((Long)value).intValue());
+        if( isShort(value)      ) return Character.valueOf((char)((Short)value).intValue());
+        if( isByte(value)       ) return Character.valueOf((char)((Byte)value).intValue());
+        if( isChar(value)       ) return (Character)value;
+        if( isDouble(value)     ) return Character.valueOf((char)((Double)value).intValue());
+        if( isFloat(value)      ) return Character.valueOf((char)((Float)value).intValue());
+        if( isBigDecimal(value) ) return Character.valueOf((char)((BigDecimal)value).intValue());
+        if( isBigInteger(value) ) return Character.valueOf((char)((BigInteger)value).intValue());
+        if( isBoolean(value)    ) return Character.valueOf((char)(toInt(value).intValue()));
         String string = value.toString();
-        return  string.isEmpty() ? null : string.charAt( 0 );
+        return  string.isEmpty() ? null : string.charAt(0);
+    }
+
+    public BigDecimal toBigDecimal( Object value ) {
+        if( value == null ) return null;
+        if( isInt(value)        ) return new BigDecimal((Integer)value);
+        if( isLong(value)       ) return new BigDecimal((Long)value);
+        if( isShort(value)      ) return new BigDecimal((Short)value);
+        if( isByte(value)       ) return new BigDecimal((Byte)value);
+        if( isChar(value)       ) return new BigDecimal((Character)value);
+        if( isDouble(value)     ) return new BigDecimal((Double)value);
+        if( isFloat(value)      ) return new BigDecimal((Float)value);
+        if( isBigDecimal(value) ) return (BigDecimal)value;
+        if( isBigInteger(value) ) return new BigDecimal((BigInteger)value);
+        if( isBoolean(value)    ) return new BigDecimal(toInt(value));
+        try {
+            return new BigDecimal( value.toString() );
+        } catch( Exception e ) {
+            return null;
+        }
+    }
+
+    public BigInteger toBigInteger( Object value ) {
+        if( value == null ) return null;
+        if( isNumeric(value) ) return BigInteger.valueOf( toLong(value) );
+        try {
+            return new BigInteger( value.toString() );
+        } catch( Exception e ) {
+            return null;
+        }
+    }
+
+    public Boolean toBoolean( Object value ) throws NumberFormatException {
+        if( isBoolean(value) ) return (Boolean) value;
+        if( isIntLike(value) || isBigInteger(value) ) return toInt(value) == 1;
+        if( isFloat(value) ) return toFloat(value) == 1;
+        if( isDouble(value) ) return toDouble(value) == 1;
+        if( isBigDecimal(value) ) return toBigDecimal(value).compareTo(ONE) == 0;
+        return Strings.toBoolean( value );
+    }
+
+    public Object castPrimitive( Object val, Class castType ) {
+
+        if( isString(castType) ) {
+            return val.toString();
+        } else if( isBoolean(castType) ) {
+            return toBoolean(val);
+        } else if( isInt(castType) ) {
+            return toInt(val);
+        } else if( isLong(castType) ) {
+            return toLong(val);
+        } else if( isShort(castType) ) {
+            return toShort(val);
+        } else if( isByte(castType) ) {
+            return toByte(val);
+        } else if( isChar(castType) ) {
+            return toChar(val);
+        } else if( isDouble(castType) ) {
+            return toDouble(val);
+        } else if( isFloat(castType) ) {
+            return toFloat(val);
+        } else if( isBigDecimal(castType) ) {
+            return toBigDecimal(val);
+        } else if( isBigInteger(castType) ) {
+            return toBigInteger(val);
+        } else {
+            return val;
+        }
+
+    }
+
+    public <T> Class<T> wrap( Class<T> type ) {
+        if (type == int.class)     return (Class<T>) Integer.class;
+        if (type == long.class)    return (Class<T>) Long.class;
+        if (type == byte.class)    return (Class<T>) Byte.class;
+        if (type == boolean.class) return (Class<T>) Boolean.class;
+        if (type == double.class)  return (Class<T>) Double.class;
+        if (type == char.class)    return (Class<T>) Character.class;
+        if (type == float.class)   return (Class<T>) Float.class;
+        if (type == short.class)   return (Class<T>) Short.class;
+        if (type == void.class)    return (Class<T>) Void.class;
+        return type;
+    }
+
+    public static <T> Class<T> unwrap( Class<T> type ) {
+        if (type == Integer.class)   return (Class<T>) int.class;
+        if (type == Long.class)      return (Class<T>) long.class;
+        if (type == Byte.class)      return (Class<T>) byte.class;
+        if (type == Boolean.class)   return (Class<T>) boolean.class;
+        if (type == Double.class)    return (Class<T>) double.class;
+        if (type == Float.class)     return (Class<T>) float.class;
+        if (type == Character.class) return (Class<T>) char.class;
+        if (type == Short.class)     return (Class<T>) short.class;
+        if (type == Void.class)      return (Class<T>) void.class;
+        return type;
     }
 
 }

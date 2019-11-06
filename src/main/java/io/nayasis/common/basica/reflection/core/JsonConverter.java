@@ -297,7 +297,7 @@ public class JsonConverter {
      * @return	bean filled by object's value
      */
     public <T> T toBeanFrom( Object object, Class<T> toClass ) throws io.nayasis.common.basica.exception.unchecked.JsonMappingException {
-        if( Types.isString( object ) ) {
+        if( Types.isStringLike( object ) ) {
             String json = getContent( object.toString() );
             try {
                 return objectMapper.readValue( json, toClass );
@@ -325,7 +325,7 @@ public class JsonConverter {
      * @return	bean filled by object's value
      */
     public <T> T toBeanFrom( Object object, TypeReference<T> typeReference ) throws io.nayasis.common.basica.exception.unchecked.JsonMappingException {
-        if( Types.isString(object) ) {
+        if( Types.isStringLike(object) ) {
             String json = getContent( object.toString() );
             try {
                 return objectMapper.readValue( json, typeReference );
@@ -366,7 +366,7 @@ public class JsonConverter {
 
         CollectionType type = getTypeFactory().constructCollectionType( returnType, genericType );
 
-        if( Types.isString(source) ) {
+        if( Types.isStringLike(source) ) {
             String json = getCollectionLikeContent( source.toString() );
             try {
                 return objectMapper.readValue( json, type );
@@ -399,7 +399,7 @@ public class JsonConverter {
 
         MapLikeType type = getTypeFactory().constructMapLikeType( returnType, keyType, valueType );
 
-        if( Types.isString(source) ) {
+        if( Types.isStringLike(source) ) {
             String json = getContent( source.toString() );
             try {
                 return objectMapper.readValue( json, type );

@@ -153,7 +153,7 @@ public class Formatter {
         if( parameters.length == 1 ) {
             if ( Types.isMap(parameters[0]) ) {
                 return (Map) parameters[0];
-            } else if ( Types.isNotPrimitive(parameters[0]) ) {
+            } else if ( ! Types.isImmutable(parameters[0]) ) {
                 try {
                     return Reflector.toMapFrom(parameters[0]);
                 } catch ( Exception e ) {}

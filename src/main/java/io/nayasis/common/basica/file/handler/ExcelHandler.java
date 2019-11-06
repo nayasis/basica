@@ -386,7 +386,7 @@ public abstract class ExcelHandler {
 	}
 
 	private boolean hasRow( List<?> list ) {
-		return Validator.isNotEmpty( list ) && Types.isNotPrimitive( list.get(0) );
+		return Validator.isNotEmpty( list ) && ! Types.isImmutable( list.get(0) );
 	}
 
 	/**

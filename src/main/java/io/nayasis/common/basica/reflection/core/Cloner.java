@@ -14,41 +14,11 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
-import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class Cloner {
-
-    private final Set<Class<?>> immutable = new HashSet() {{
-        add( void.class );       add( Void.class );
-        add( char.class );       add( Character.class );
-        add( boolean.class );    add( Boolean.class );
-        add( byte.class );       add( Byte.class );
-        add( short.class );      add( Short.class );
-        add( int.class );        add( Integer.class );
-        add( long.class );       add( Long.class );
-        add( float.class );      add( Float.class );
-        add( double.class );     add( Double.class );
-        add( BigDecimal.class ); add( BigInteger.class );
-        add( LocalDate.class );  add( LocalDateTime.class );
-        add( String.class );
-        add( URI.class );
-        add( URL.class );
-        add( UUID.class );
-        add( Pattern.class );
-        add( Class.class );
-    }};
 
     /**
      * creates and returns a copy of object
@@ -67,7 +37,9 @@ public class Cloner {
 
         Class<?> klass = object.getClass();
 
-        if( immutable.contains(klass) ) {
+        if( Types.isImmutable(klass) ) {
+            return object;
+        } else if( Types.isEnum(klass) ) {
             return object;
         } else if( Types.isArray(klass) ) {
             return cloneArray( object, cloned );
@@ -111,7 +83,7 @@ public class Cloner {
         Object target = Array.newInstance( generic, length );
 
         if( length > 0 ) {
-            if( immutable.contains(generic) ) {
+            if( Types.isImmutable(generic) ) {
                 System.arraycopy( object, 0, target, 0, length );
             } else {
                 for( int i = 0; i < length; i++ ) {
@@ -153,10 +125,6 @@ public class Cloner {
 
     }
 
-    private boolean isAnonymousParent( Field field ) {
-        return "this$0".equals(field.getName());
-    }
-
     /**
      * copy properties from source to target.
      *
@@ -168,31 +136,7 @@ public class Cloner {
         if( source == null || target == null ) return;
 
         if ( Types.isArray(source) ) {
-            if ( ! Types.isArray(target) )
-                throw new IllegalArgumentException( String.format("can not copy array to non-array class(%s)", target.getClass()) );
-
-            Class srcType = source.getClass().getComponentType();
-            Class trgType = target.getClass().getComponentType();
-
-            boolean isSameType = srcType == trgType;
-
-            for ( int i = 0, iCnt=Array.getLength(source); i < iCnt; i++ ) {
-                Object srcVal = Array.get( source, i );
-                if( isSameType ) {
-                    Array.set( target, i, srcVal );
-                } else {
-                    Object trgVal = Array.get( target, i );
-                    if( trgVal == null ) {
-                        if( Types.isArray(srcVal) ) {
-                            trgVal = Array.newInstance( trgType.getComponentType(), Array.getLength(srcVal) );
-                        } else {
-                            trgVal = Classes.createInstance( trgType );
-                        }
-                    }
-                    copyProperties( srcVal, trgVal );
-                    Array.set( target, i, trgVal );
-                }
-            }
+            copyArray(source, target);
             return;
         }
 
@@ -216,6 +160,46 @@ public class Cloner {
 
         }
 
+    }
+
+    private void copyArray( Object source, Object target ) {
+
+        if ( ! Types.isArray(target) )
+            throw new IllegalArgumentException( String.format("can not copy array to non-array class(%s)", target.getClass()) );
+
+        Class srcType = source.getClass().getComponentType();
+        Class trgType = target.getClass().getComponentType();
+
+        for (int i = 0, iCnt = Array.getLength(source); i < iCnt; i++ ) {
+
+            Object srcVal = Array.get( source, i );
+
+            if( srcVal == null ) {
+                continue;
+            } else if( srcType == trgType ) {
+                Array.set( target, i, srcVal );
+            } else {
+
+                Object trgVal;
+
+                if( Types.isImmutable(srcVal) ) {
+                    trgVal = Types.castPrimitive( srcVal, trgType );
+                } else {
+                    trgVal = Array.get( target, i );
+                    if( trgVal == null ) {
+                        if( Types.isArray(srcVal) ) {
+                            trgVal = Array.newInstance( trgType.getComponentType(), Array.getLength(srcVal) );
+                        } else {
+                            trgVal = Classes.createInstance( trgType );
+                        }
+                    }
+                    copyProperties( srcVal, trgVal );
+                }
+
+                Array.set( target, i, trgVal );
+
+            }
+        }
     }
 
     private Object castedSource( Object source, Object target ) {
