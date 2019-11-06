@@ -3,7 +3,6 @@ package io.nayasis.common.basica.base.format;
 import io.nayasis.common.basica.base.Characters;
 import io.nayasis.common.basica.base.Strings;
 import io.nayasis.common.basica.base.Types;
-import io.nayasis.common.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.common.basica.reflection.Reflector;
 
 import java.util.HashMap;
@@ -15,9 +14,9 @@ import java.util.regex.Matcher;
  */
 public class Formatter {
 
-    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{(.*?)(|[^\\\\])\\}",    new int[]{2,3}, "\\\\(\\{|\\})",     "$1" );
-    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{(.*?)(|[^\\\\])\\}",   new int[]{2,3}, "\\\\(#|\\{|\\})",   "$1" );
-    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{(.*?)(|[^\\\\])\\}", new int[]{2,3}, "\\\\(\\$|\\{|\\})", "$1" );
+    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{([^\\s]*?)(|[^\\\\])\\}",    new int[]{2,3}, "\\\\(\\{|\\})",     "$1" );
+    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{([^\\s]*?)(|[^\\\\])\\}",   new int[]{2,3}, "\\\\(#|\\{|\\})",   "$1" );
+    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{([^\\s]*?)(|[^\\\\])\\}", new int[]{2,3}, "\\\\(\\$|\\{|\\})", "$1" );
 
     protected static final String FORMAT_INDEX = "_{{%d}}";
 
@@ -154,7 +153,7 @@ public class Formatter {
         if( parameters.length == 1 ) {
             if ( Types.isMap(parameters[0]) ) {
                 return (Map) parameters[0];
-            } else if ( Types.isNotPrimitive(parameters[0]) ) {
+            } else if ( ! Types.isImmutable(parameters[0]) ) {
                 try {
                     return Reflector.toMapFrom(parameters[0]);
                 } catch ( Exception e ) {}

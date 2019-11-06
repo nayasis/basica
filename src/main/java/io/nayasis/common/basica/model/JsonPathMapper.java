@@ -38,8 +38,8 @@ public class JsonPathMapper {
 
     private Object convertValue( Object value ) {
 
-        if( value == null || Types.isPrimitive(value) ) return value;
-        if( Types.isString(value) ) return value.toString();
+        if( value == null || Types.isImmutable(value) ) return value;
+        if( Types.isStringLike(value) ) return value.toString();
         if( Types.isMap(value) ) return toJsonPath( (Map) value );
 
         Class klass = value.getClass();

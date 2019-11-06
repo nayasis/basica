@@ -6,7 +6,7 @@ import io.nayasis.common.basica.base.Types;
 import io.nayasis.common.basica.validation.Validator;
 import io.nayasis.common.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.common.basica.reflection.Reflector;
-import io.nayasis.common.basica.reflection.serializer.simple.SimpleNListSerializer;
+import io.nayasis.common.basica.reflection.serializer.SimpleNListSerializer;
 
 import java.io.Serializable;
 import java.util.*;
@@ -293,7 +293,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
         } else if( Types.isArray(value) ) {
             _addRows( index, Types.toList( value ), syncronizeHeaderData );
 
-        } else if( Types.isString( value ) ) {
+        } else if( Types.isStringLike( value ) ) {
 
             String json = value.toString();
 

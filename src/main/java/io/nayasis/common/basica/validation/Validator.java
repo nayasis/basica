@@ -4,6 +4,7 @@ import io.nayasis.common.basica.base.Strings;
 import io.nayasis.common.basica.base.Types;
 import io.nayasis.common.basica.exception.unchecked.ParseException;
 import io.nayasis.common.basica.model.NDate;
+import io.nayasis.common.basica.model.NList;
 import io.nayasis.common.basica.reflection.Reflector;
 
 import java.io.IOException;
@@ -116,6 +117,8 @@ public class Validator {
             try {
                 return ((InputStream) value ).available() == 0;
             } catch( IOException e ) {}
+        } else if( value instanceof NList ) {
+            return ((NList) value).size() == 0;
         }
 
         return false;

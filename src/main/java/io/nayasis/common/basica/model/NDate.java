@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.nayasis.common.basica.base.Strings;
 import io.nayasis.common.basica.exception.unchecked.ParseException;
 import io.nayasis.common.basica.reflection.deserializer.NDateDeserializer;
-import io.nayasis.common.basica.reflection.serializer.simple.SimpleNDateSerializer;
+import io.nayasis.common.basica.reflection.serializer.SimpleNDateSerializer;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;

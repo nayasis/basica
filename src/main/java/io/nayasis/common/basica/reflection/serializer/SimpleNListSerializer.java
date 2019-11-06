@@ -1,4 +1,4 @@
-package io.nayasis.common.basica.reflection.serializer.simple;
+package io.nayasis.common.basica.reflection.serializer;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

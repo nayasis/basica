@@ -72,7 +72,7 @@ public class BeanMerger {
     }
 
     /**
-     * Merge map contents.<br><br>
+     * merge map contents.<br><br>
      *
      * It supposes that map contains no Pojo and only be consist with primitive value, Map and collection ( like JSON structure )
      *
