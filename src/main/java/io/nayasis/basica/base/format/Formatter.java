@@ -1,9 +1,9 @@
-package io.nayasis.common.basica.base.format;
+package io.nayasis.basica.base.format;
 
-import io.nayasis.common.basica.base.Characters;
-import io.nayasis.common.basica.base.Strings;
-import io.nayasis.common.basica.base.Types;
-import io.nayasis.common.basica.reflection.Reflector;
+import io.nayasis.basica.base.Characters;
+import io.nayasis.basica.base.Strings;
+import io.nayasis.basica.base.Types;
+import io.nayasis.basica.reflection.Reflector;
 
 import java.util.HashMap;
 import java.util.Map;
