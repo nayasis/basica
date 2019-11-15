@@ -17,7 +17,7 @@ public class RsaEncrypterTest {
 
     @Test
     public void longText() {
-        checkValidation( "basica 정화수 鄭柱虎 merong GTA VI ファイナルファンタジー 1234567890 maxbyte 53 is possible to encrypt." );
+        checkValidation( "basica 한글 鄭柱虎 merong GTA VI ファイナルファンタジー 1234567890 maxbyte 53 is possible to encrypt." );
     }
 
     private void printLine() {

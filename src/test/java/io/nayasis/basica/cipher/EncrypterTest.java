@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 @Slf4j
 public class EncrypterTest {
 
-    private String originMessage = "정화수가 만들었어요. password 漢文";
+    private String originMessage = "한글입니다. password 漢文 ファイナル";
 
     private Encrypter encrypter = new Encrypter();
 
