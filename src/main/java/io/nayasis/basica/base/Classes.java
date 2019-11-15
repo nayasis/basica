@@ -272,31 +272,41 @@ public class Classes {
 
 	/**
 	 * Check resource exists
-	 * @param name resource name
+	 * @param path resource path
 	 * @return true if resource is exist in class path.
 	 */
-	public boolean isResourceExisted( String name ) {
-		return getClassLoader().getResource( refineResourceName(name) ) != null;
+	public boolean isResourceExisted( String path ) {
+		return getClassLoader().getResource( refineResourceName(path) ) != null;
 	}
 
 	/**
 	 * Get resource as stream
 	 *
-	 * @param name	resource name
+	 * @param path	resource path
 	 * @return resource input stream
 	 */
-	public InputStream getResourceAsStream( String name ) {
-		return getClassLoader().getResourceAsStream( refineResourceName(name) );
+	public InputStream getResourceAsStream( String path ) {
+		return getClassLoader().getResourceAsStream( refineResourceName(path) );
 	}
 
 	/**
-	 * revmoe first "/" character in resource name
+	 * get resource
+	 *
+	 * @param path	resource path
+	 * @return
+	 */
+	public URL getResource( String path ) {
+		return getClassLoader().getResource( refineResourceName(path) );
+	}
+
+	/**
+	 * remove first "/" character in resource name
 	 *
 	 * @param name resource name
 	 * @return refined resource name
 	 */
 	private String refineResourceName( String name ) {
-		return Strings.nvl( name ).replaceFirst( "^/", "" );
+		return Strings.nvl(name).replaceFirst( "^/", "" );
 	}
 
 	/**
