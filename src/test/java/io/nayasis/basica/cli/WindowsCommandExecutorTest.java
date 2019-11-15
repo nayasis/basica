@@ -9,6 +9,7 @@ import io.nayasis.basica.file.worker.LineReader;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
+@Ignore
 public class WindowsCommandExecutorTest {
 
     @Before
@@ -102,8 +104,7 @@ public class WindowsCommandExecutorTest {
 
         String path = "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE";
         if( Files.notExists(path) ) {
-            log.warn( "can not test" );
-            return;
+            throw new CommandLineException( "can not test" );
         }
 
         // 하나의 CommandExecutor로 동시에 2개의 Command를 실행하지 못해야 한다.
