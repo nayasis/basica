@@ -25,7 +25,7 @@ public class StopWatch implements Serializable {
 
 	public StopWatch start( String taskName ) throws IllegalStateException {
 		if ( this.taskName != null ) {
-			throw new IllegalStateException( String.format("Task[%s] is already running", this.taskName) );
+			this.stop();
 		}
 		this.taskName = taskName;
 		this.startTime = System.nanoTime();
