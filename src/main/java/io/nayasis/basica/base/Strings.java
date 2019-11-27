@@ -496,14 +496,12 @@ public class Strings {
 
     	if( collection == null || collection.size() == 0 ) return "";
 
-    	StringBuilder sb    = new StringBuilder();
-    	int           index = collection.size();
+    	StringBuilder sb = new StringBuilder();
 
     	for( Object e : collection ) {
-    		index--;
-    		if( e == null ) continue;
+    		if( isEmpty(e) ) continue;
+    		if( sb.length() > 0 ) sb.append( concater );
     		sb.append( e.toString() );
-    		if( index > 0 ) sb.append( concater );
     	}
     	return sb.toString();
 
