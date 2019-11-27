@@ -1,5 +1,7 @@
 package io.nayasis.basica.base;
 
+import lombok.experimental.UtilityClass;
+
 import java.lang.Character.UnicodeBlock;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,9 +10,10 @@ import java.util.Set;
  * Character Utility
  * 
  */
+@UtilityClass
 public class Characters {
 
-	private static Set<UnicodeBlock> CHINESE = new HashSet<UnicodeBlock>() {{
+	private Set<UnicodeBlock> CHINESE = new HashSet<UnicodeBlock>() {{
 		add( UnicodeBlock.CJK_COMPATIBILITY );
 		add( UnicodeBlock.CJK_COMPATIBILITY_FORMS );
 		add( UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS );
@@ -26,7 +29,7 @@ public class Characters {
 		add( UnicodeBlock.IDEOGRAPHIC_DESCRIPTION_CHARACTERS );
 	}};
 
-	private static Set<UnicodeBlock> KOREAN = new HashSet<UnicodeBlock>() {{
+	private Set<UnicodeBlock> KOREAN = new HashSet<UnicodeBlock>() {{
 		add( UnicodeBlock.HANGUL_COMPATIBILITY_JAMO );
 		add( UnicodeBlock.HANGUL_JAMO );
 		add( UnicodeBlock.HANGUL_JAMO_EXTENDED_A );
@@ -34,44 +37,44 @@ public class Characters {
 		add( UnicodeBlock.HANGUL_SYLLABLES );
 	}};
 
-	private static Set<UnicodeBlock> JAPANESE = new HashSet<UnicodeBlock>() {{
+	private Set<UnicodeBlock> JAPANESE = new HashSet<UnicodeBlock>() {{
 		add( UnicodeBlock.HIRAGANA );
 		add( UnicodeBlock.KATAKANA );
 		add( UnicodeBlock.KATAKANA_PHONETIC_EXTENSIONS );
 		add( UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION );
 	}};
 
-	private static Set<UnicodeBlock> CJK = new HashSet<UnicodeBlock>() {{
+	private Set<UnicodeBlock> CJK = new HashSet<UnicodeBlock>() {{
 		addAll( CHINESE  );
 		addAll( KOREAN   );
 		addAll( JAPANESE );
 		add( UnicodeBlock.ENCLOSED_CJK_LETTERS_AND_MONTHS );
 	}};
 
-	public static char NULL_CHAR = '\0';
+	public char NULL_CHAR = '\0';
 
 	/** Hangul Chosung */
-	private static char[] HANGUL_1ST = new char[] { 'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
+	private char[] HANGUL_1ST = new char[] { 'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
 
 	/** Hangul Joongsung */
-	private static char[] HANGUL_2ND = new char[] { 'ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ' };
+	private char[] HANGUL_2ND = new char[] { 'ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ' };
 
 	/** Hangul Jongsung */
-	private static char[] HANGUL_3RD = new char[] { NULL_CHAR,'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
+	private char[] HANGUL_3RD = new char[] { NULL_CHAR,'ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ' };
 
 
 	/** font width of Full-width character */
-	private static double fullwidth = 1;
+	private double fullwidth = 1;
 
 	/** font width of Half-width character */
-	private static double halfwidth = 1;
+	private double halfwidth = 1;
 
 	/**
 	 * set font width of Full-width character
 	 * 
 	 * @param width console font width to print
 	 */
-	public static void fullwidth( double width ) {
+	public void fullwidth( double width ) {
 		fullwidth = width;
 	}
 
@@ -80,7 +83,7 @@ public class Characters {
 	 * 
 	 * @return console font width to print
 	 */
-	public static double fullwidth() {
+	public double fullwidth() {
 		return fullwidth;
 	}
 
@@ -89,7 +92,7 @@ public class Characters {
 	 *
 	 * @param width console font width to print
 	 */
-	public static void halfwidth( double width ) {
+	public void halfwidth( double width ) {
 		halfwidth = width;
 	}
 
@@ -98,11 +101,11 @@ public class Characters {
 	 *
 	 * @return console font width to print
 	 */
-	public static double halfwidth() {
+	public double halfwidth() {
 		return halfwidth;
 	}
 
-	public static boolean isFontWidthModified() {
+	public boolean isFontWidthModified() {
 		return fullwidth != 1.0 || halfwidth != 1.0;
 	}
 
@@ -118,7 +121,7 @@ public class Characters {
 	 * @param ch character to resolve
 	 * @return resolved character array (null if it can not be resolved.)
 	 */
-	public static char[] resolveKorean(char ch ) {
+	public char[] resolveKorean(char ch ) {
 		
 		// if it can not be resolved
 		if( ch < 0xAC00 || ch > 0xD79F ) return null;
@@ -151,7 +154,7 @@ public class Characters {
 	 * @param ch character to check
 	 * @return true if character has Hangul Jonsung.
 	 */
-	public static boolean hasHangulJongsung( char ch ) {
+	public boolean hasHangulJongsung( char ch ) {
 		
 		char[] result = resolveKorean( ch );
 		
@@ -171,7 +174,7 @@ public class Characters {
 	 * @see <a href="http://unicode.org/charts/PDF/UFF00.pdf">http://unicode.org/charts/PDF/UFF00.pdf</a>
 	 *
 	 */
-	public static boolean isHalfWidth( char ch ) {
+	public boolean isHalfWidth( char ch ) {
 
 		if( ch < 0x0020 ) return true;  // special character
 
@@ -195,7 +198,7 @@ public class Characters {
 	 * @param ch character to check
 	 * @return font width to print
 	 */
-	public static double getFontWidth( char ch ) {
+	public double getFontWidth( char ch ) {
 		if( isHalfWidth( ch ) ) return halfwidth;
 		if( isCJK( ch ) ) return fullwidth;
 		return 1;
@@ -207,7 +210,7 @@ public class Characters {
 	 * @param ch character
 	 * @return true if character is korean
 	 */
-	public static boolean isKorean( char ch ) {
+	public boolean isKorean( char ch ) {
 		if( KOREAN.contains(UnicodeBlock.of(ch)) ) return true;
 		return 0xFFA0 <= ch && ch <= 0xFFDC;
 
@@ -219,7 +222,7 @@ public class Characters {
 	 * @param ch character
 	 * @return true if character is japanese
 	 */
-	public static boolean isJapanese( char ch ) {
+	public boolean isJapanese( char ch ) {
 		if( JAPANESE.contains(UnicodeBlock.of(ch)) ) return true;
 		return 0xFF65 <= ch && ch <= 0xFF9F;
 
@@ -231,7 +234,7 @@ public class Characters {
 	 * @param ch character
 	 * @return true if character is chinese
 	 */
-	public static boolean isChinese( char ch ) {
+	public boolean isChinese( char ch ) {
 		if( CHINESE.contains(UnicodeBlock.of(ch)) ) return true;
 		return 0xFF65 <= ch && ch <= 0xFF9F;
 	}
@@ -242,7 +245,7 @@ public class Characters {
 	 * @param ch character
 	 * @return true if character is chinese or japanese or korean
 	 */
-	public static boolean isCJK( char ch ) {
+	public boolean isCJK( char ch ) {
 		return CJK.contains( UnicodeBlock.of(ch) );
 	}
 

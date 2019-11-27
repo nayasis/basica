@@ -1292,4 +1292,18 @@ public class Strings {
 		return writer.toString();
 	}
 
+	/**
+	 * check if CJK (Chinese, Japanese, Korean) character exists in text.
+	 *
+	 * @param text text to check
+	 * @return true if CJK character exists.
+	 */
+	public boolean hasCjkCharacter( String text ) {
+		if( isNotEmpty(text) ) {
+			for( char c : text.toCharArray() )
+				if( Characters.isCJK(c) ) return true;
+		}
+		return false;
+	}
+
 }
