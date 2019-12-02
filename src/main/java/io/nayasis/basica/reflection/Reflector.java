@@ -1,13 +1,13 @@
 package io.nayasis.basica.reflection;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.nayasis.basica.reflection.core.BeanMerger;
-import io.nayasis.basica.reflection.core.ClassReflector;
-import io.nayasis.basica.reflection.core.Cloner;
-import io.nayasis.basica.reflection.core.JsonConverter;
 import io.nayasis.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.basica.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.basica.model.NList;
+import io.nayasis.basica.reflection.core.BeanMerger;
+import io.nayasis.basica.reflection.core.ClassReflector;
+import io.nayasis.basica.reflection.core.JsonConverter;
+import io.nayasis.basica.reflection.core.KryoCloner;
 import io.nayasis.basica.reflection.helper.invoker.Invoker;
 import io.nayasis.basica.reflection.helper.invoker.MethodInvoker;
 import io.nayasis.basica.reflection.helper.mapper.NObjectMapper;
@@ -34,10 +34,10 @@ public class Reflector {
 	private JsonConverter mapperNotNull          = new JsonConverter( new NObjectMapper().ignoreNull(true) );
 	private JsonConverter mapperSortableNullable = new JsonConverter( new NObjectMapper().serializeSortable(true) );
 	private JsonConverter mapperSortableNotNull  = new JsonConverter( new NObjectMapper().serializeSortable(true).ignoreNull(true) );
-	private Cloner cloner                 = new Cloner();
+	private KryoCloner    cloner                 = new KryoCloner();
 
 	/**
-	 * creates and returns a copy of object
+	 * clone object in deep copy mode.
 	 *
 	 * @param object object to clone
 	 * @param <T> object's generic type
@@ -45,18 +45,29 @@ public class Reflector {
 	 */
     @SuppressWarnings( "unchecked" )
     public <T> T clone( T object ) {
-    	return cloner.clone( object );
+    	return cloner.cloneDeep( object );
     }
 
 	/**
-	 * copy properties from source to target.
+	 * clone object in shallow copy mode.
+	 *
+	 * @param object object to clone
+	 * @param <T> object's generic type
+	 * @return a clone of object
+	 */
+	public <T> T cloneShallow( T object ) {
+		return cloner.cloneShallow( object );
+	}
+
+	/**
+	 * copy properties.
 	 *
 	 * @param source  source object
 	 * @param target  target object
 	 */
     public void copy( Object source, Object target ) {
 		if( source == null || target == null ) return;
-		cloner.copyProperties( source, target );
+		cloner.copy( source, target );
     }
 
 	/**

@@ -9,7 +9,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 /**
- * Map merge util
+ * Map merging utility
  *
  * @author nayasis@gmail.com
  * @since 2017-03-30
@@ -63,11 +63,7 @@ public class BeanMerger {
         Map targetMap = toModifiableMap( target );
         targetMap = merge( sourceMap, targetMap );
 
-        Object mergedBean = Reflector.toBeanFrom( targetMap, targetClass );
-
-        Reflector.copy( mergedBean, target );
-
-        return target;
+        return (T) Reflector.toBeanFrom( targetMap, targetClass );
 
     }
 
