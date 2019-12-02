@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class KryoClonerTest {
+public class ClonerTest {
 
-    private KryoCloner cloner = new KryoCloner();
+    private Cloner cloner = new Cloner();
 
     @Test
     public void encode() {
@@ -32,6 +32,22 @@ public class KryoClonerTest {
         Assert.assertEquals( "AVABbmF5YXNp8w==", encoded );
 
         User clone = cloner.decodeFromString( encoded, User.class );
+
+        Assert.assertEquals( user.age(), clone.age() );
+        Assert.assertEquals( user.name(), clone.name() );
+
+    }
+
+    @Test
+    public void encodeFromStrings() {
+
+        User user = new User().name("nayasis").age(40);
+
+        String encoded = Strings.encode( user );
+
+        log.debug( "{}", encoded );
+
+        User clone = (User) Strings.decode( encoded );
 
         Assert.assertEquals( user.age(), clone.age() );
         Assert.assertEquals( user.name(), clone.name() );

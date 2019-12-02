@@ -126,8 +126,8 @@ public class StringExtension {
         return Strings.encode( string );
     }
 
-    public static String decode( String string ) {
-        return Strings.decode( string );
+    public static <T> T decode( String string, Class<T> returnType ) {
+        return Strings.decode( string, returnType );
     }
 
     public static String encodeUrl( String string ) {

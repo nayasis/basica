@@ -3,16 +3,14 @@ package io.nayasis.basica.base;
 import io.nayasis.basica.base.format.Formatter;
 import io.nayasis.basica.exception.unchecked.EncodingException;
 import io.nayasis.basica.exception.unchecked.UncheckedClassNotFoundException;
+import io.nayasis.basica.reflection.core.Cloner;
 import lombok.experimental.UtilityClass;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
@@ -682,19 +680,7 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      */
     public String encode( Object value ) throws UncheckedIOException {
-
-    	try (
-    		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    		ObjectOutputStream    oos = new ObjectOutputStream( bos )
-		) {
-    		oos.writeObject( value );
-    		oos.close();
-    		return DatatypeConverter.printBase64Binary( bos.toByteArray() );
-
-    	} catch ( IOException e ) {
-    		throw new UncheckedIOException( e );
-		}
-
+        return Cloner.encodeToString( value );
     }
 
     /**
@@ -705,24 +691,8 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
-    public <T> T decode( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
-
-        if( value == null ) return null;
-
-    	byte o[] = DatatypeConverter.parseBase64Binary( nvl(value) );
-
-    	try (
-    		ByteArrayInputStream bis = new ByteArrayInputStream( o );
-    		ObjectInputStream    ois = new ObjectInputStream( bis )
-		) {
-    		return (T) ois.readObject();
-
-    	} catch (IOException e) {
-    		throw new UncheckedIOException( e );
-		} catch ( ClassNotFoundException e) {
-			throw new UncheckedClassNotFoundException( e );
-		}
-
+    public <T> T decode( String value, Class<T> returnType ) throws UncheckedIOException {
+        return Cloner.decodeFromString( value, returnType );
     }
 
 	/**
