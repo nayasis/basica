@@ -18,20 +18,18 @@ import java.util.List;
 @Slf4j
 public class ClonerTest {
 
-    private Cloner cloner = new Cloner();
-
     @Test
     public void encode() {
 
         User user = new User().name("nayasis").age(40);
 
-        String encoded = cloner.encodeToString( user );
+        String encoded = Cloner.encodeToString( user );
 
         log.debug( "{}", encoded );
 
         Assert.assertEquals( "AVABbmF5YXNp8w==", encoded );
 
-        User clone = cloner.decodeFromString( encoded, User.class );
+        User clone = Cloner.decodeFromString( encoded, User.class );
 
         Assert.assertEquals( user.age(), clone.age() );
         Assert.assertEquals( user.name(), clone.name() );
@@ -47,7 +45,7 @@ public class ClonerTest {
 
         log.debug( "{}", encoded );
 
-        User clone = (User) Strings.decode( encoded );
+        User clone = Strings.decode( encoded, User.class );
 
         Assert.assertEquals( user.age(), clone.age() );
         Assert.assertEquals( user.name(), clone.name() );
@@ -58,7 +56,7 @@ public class ClonerTest {
     public void cloneTest() {
 
         User user  = new User().name("nayasis").age(40);
-        User clone = cloner.cloneDeep( user );
+        User clone = Cloner.cloneDeep( user );
 
         Assert.assertEquals( user.age(), clone.age() );
         Assert.assertEquals( user.name(), clone.name() );

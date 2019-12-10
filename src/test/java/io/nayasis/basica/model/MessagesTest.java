@@ -2,8 +2,6 @@ package io.nayasis.basica.model;
 
 import io.nayasis.basica.file.Files;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Locale;
 
