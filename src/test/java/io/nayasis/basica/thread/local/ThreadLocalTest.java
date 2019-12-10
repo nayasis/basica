@@ -1,11 +1,12 @@
 package io.nayasis.basica.thread.local;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class ThreadLocalTest {
@@ -23,8 +24,8 @@ public class ThreadLocalTest {
 
         Thread.sleep( 1_000 );
 
-        Assert.assertEquals( 10, (int) result.get( "A-10" ) );
-        Assert.assertEquals(  5, (int) result.get( "A-5"  ) );
+        assertEquals( 10, (int) result.get( "A-10" ) );
+        assertEquals(  5, (int) result.get( "A-5"  ) );
 
         log.debug( result.toString() );
 

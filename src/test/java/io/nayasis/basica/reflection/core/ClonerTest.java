@@ -7,13 +7,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @Slf4j
 public class ClonerTest {
@@ -27,12 +29,12 @@ public class ClonerTest {
 
         log.debug( "{}", encoded );
 
-        Assert.assertEquals( "AVABbmF5YXNp8w==", encoded );
+        assertEquals( "AVABbmF5YXNp8w==", encoded );
 
         User clone = Cloner.decodeFromString( encoded, User.class );
 
-        Assert.assertEquals( user.age(), clone.age() );
-        Assert.assertEquals( user.name(), clone.name() );
+        assertEquals( user.age(), clone.age() );
+        assertEquals( user.name(), clone.name() );
 
     }
 
@@ -47,8 +49,8 @@ public class ClonerTest {
 
         User clone = Strings.decode( encoded, User.class );
 
-        Assert.assertEquals( user.age(), clone.age() );
-        Assert.assertEquals( user.name(), clone.name() );
+        assertEquals( user.age(), clone.age() );
+        assertEquals( user.name(), clone.name() );
 
     }
 
@@ -58,14 +60,14 @@ public class ClonerTest {
         User user  = new User().name("nayasis").age(40);
         User clone = Cloner.cloneDeep( user );
 
-        Assert.assertEquals( user.age(), clone.age() );
-        Assert.assertEquals( user.name(), clone.name() );
+        assertEquals( user.age(), clone.age() );
+        assertEquals( user.name(), clone.name() );
 
         clone.name( "changed" );
         clone.age( 50 );
 
-        Assert.assertNotEquals( user.name(), clone.name() );
-        Assert.assertNotEquals( user.age(), clone.age() );
+        assertNotEquals( user.name(), clone.name() );
+        assertNotEquals( user.age(), clone.age() );
 
     }
 

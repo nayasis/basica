@@ -1,7 +1,7 @@
 package io.nayasis.basica.base;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CharactersTest {
 
@@ -36,15 +36,15 @@ public class CharactersTest {
 
     @Test
     public void isJapanese() {
-        Assert.assertTrue( Characters.isJapanese('か') );
-        Assert.assertTrue( Characters.isJapanese('フ') );
-        Assert.assertTrue( Characters.isJapanese('ﾌ') );
-        Assert.assertTrue( ! Characters.isJapanese('！') );
-        Assert.assertTrue( Characters.isJapanese('。') );
-        Assert.assertTrue( ! Characters.isJapanese('A') );
-        Assert.assertTrue( ! Characters.isJapanese('정') );
-        Assert.assertTrue( ! Characters.isJapanese('ㄱ') );
-        Assert.assertTrue( ! Characters.isJapanese('鄭') );
+        Assertions.assertTrue( Characters.isJapanese('か') );
+        Assertions.assertTrue( Characters.isJapanese('フ') );
+        Assertions.assertTrue( Characters.isJapanese('ﾌ') );
+        Assertions.assertTrue( ! Characters.isJapanese('！') );
+        Assertions.assertTrue( Characters.isJapanese('。') );
+        Assertions.assertTrue( ! Characters.isJapanese('A') );
+        Assertions.assertTrue( ! Characters.isJapanese('정') );
+        Assertions.assertTrue( ! Characters.isJapanese('ㄱ') );
+        Assertions.assertTrue( ! Characters.isJapanese('鄭') );
     }
 
     @Test

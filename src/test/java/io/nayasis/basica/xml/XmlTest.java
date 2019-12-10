@@ -5,13 +5,13 @@ import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
 import io.nayasis.basica.xml.node.Node;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @Slf4j
 public class XmlTest {
@@ -166,26 +166,26 @@ public class XmlTest {
         Xml xml = new Xml();
 
         xml.getRoot().addElementFromXml( nodeString );
-        Assert.assertEquals( 0, xml.getRoot().getChildNodes().size() );
+        assertEquals( 0, xml.getRoot().getChildNodes().size() );
 
         xml.createRoot( "root" );
         xml.getRoot().addElementFromXml( nodeString );
-        Assert.assertEquals( 1, xml.getRoot().getChildNodes().size() );
+        assertEquals( 1, xml.getRoot().getChildNodes().size() );
 
         xml.createRoot( "merong" );
         xml.getRoot().addElementFromXml( nodeString );
-        Assert.assertEquals( 1, xml.getRoot().getChildNodes().size() );
+        assertEquals( 1, xml.getRoot().getChildNodes().size() );
 
         xml.renameRoot( "merong" );
         xml.getRoot().addElementFromXml( nodeString );
-        Assert.assertEquals( 2, xml.getRoot().getChildNodes().size() );
+        assertEquals( 2, xml.getRoot().getChildNodes().size() );
 
     }
 
     @Test
     public void readXmlTolerantly() throws UncheckedIOException, ParseException {
         Xml xml = new XmlDeformed( Paths.get( Files.getRootPath(), "/xml/Grammer.xml") );
-        Assert.assertTrue( ! xml.toString().isEmpty() );
+        assertTrue( ! xml.toString().isEmpty() );
     }
 
     private String getSampleTreeXml() {

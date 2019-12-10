@@ -4,8 +4,7 @@ import io.nayasis.basica.file.Files;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static io.nayasis.basica.model.NDate.ISO_8601_FORMAT;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class NDateTest {
@@ -92,7 +91,7 @@ public class NDateTest {
         String after = Files.readObject( file ).toString();
         Files.delete( file );
 
-        Assert.assertEquals( after, before );
+        assertEquals( after, before );
 
     }
 

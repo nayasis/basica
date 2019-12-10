@@ -4,8 +4,8 @@ import io.nayasis.basica.model.NMap;
 import io.nayasis.basica.reflection.Reflector;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class StringsTest {
@@ -115,13 +115,13 @@ public class StringsTest {
     @Test
     public void likeTest() {
 
-        Assert.assertTrue( Strings.like( "ABCD", "_B%" ) );
-        Assert.assertFalse( Strings.like( "ABCD", "_F%" ) );
-        Assert.assertTrue( Strings.like( "[A]B_D", "[_]%" ) );
-        Assert.assertFalse( Strings.like( "A\\ACD", "A\\%" ) );
-        Assert.assertTrue( Strings.like( "A%ACD", "A\\%%" ) );
-        Assert.assertTrue( Strings.like( "AB_D", "%\\_%" ) );
-        Assert.assertTrue( Strings.like( "AB_D", "%_%_%" ) );
+        Assertions.assertTrue( Strings.like( "ABCD", "_B%" ) );
+        Assertions.assertFalse( Strings.like( "ABCD", "_F%" ) );
+        Assertions.assertTrue( Strings.like( "[A]B_D", "[_]%" ) );
+        Assertions.assertFalse( Strings.like( "A\\ACD", "A\\%" ) );
+        Assertions.assertTrue( Strings.like( "A%ACD", "A\\%%" ) );
+        Assertions.assertTrue( Strings.like( "AB_D", "%\\_%" ) );
+        Assertions.assertTrue( Strings.like( "AB_D", "%_%_%" ) );
 
     }
 

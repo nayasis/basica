@@ -2,8 +2,8 @@ package io.nayasis.basica.file;
 
 import io.nayasis.basica.base.Classes;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -19,9 +19,9 @@ public class FilesTest {
         String txt1 = Files.readFrom( path, "UTF-8" );
         String txt2 = Files.readFrom( path );
 
-        Assert.assertFalse( txt1.isEmpty() );
-        Assert.assertFalse( txt2.isEmpty() );
-        Assert.assertEquals( txt1, txt2 );
+        Assertions.assertFalse( txt1.isEmpty() );
+        Assertions.assertFalse( txt2.isEmpty() );
+        Assertions.assertEquals( txt1, txt2 );
 
     }
 
@@ -33,9 +33,9 @@ public class FilesTest {
         String txt1 = Files.readFrom( path, "UTF-8" );
         String txt2 = Files.readFrom( path );
 
-        Assert.assertFalse( txt1.isEmpty() );
-        Assert.assertFalse( txt2.isEmpty() );
-        Assert.assertEquals( txt1, txt2 );
+        Assertions.assertFalse( txt1.isEmpty() );
+        Assertions.assertFalse( txt2.isEmpty() );
+        Assertions.assertEquals( txt1, txt2 );
 
     }
 

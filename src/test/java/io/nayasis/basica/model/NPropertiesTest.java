@@ -2,8 +2,9 @@ package io.nayasis.basica.model;
 
 import io.nayasis.basica.file.Files;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class NPropertiesTest {
@@ -17,8 +18,8 @@ public class NPropertiesTest {
 
         log.debug( properties.toString() );
 
-        Assert.assertEquals( "SELECT * FROM MY_TABLE", properties.get("sql") );
-        Assert.assertEquals( "merong", properties.get("granada") );
+        assertEquals( "SELECT * FROM MY_TABLE", properties.get("sql") );
+        assertEquals( "merong", properties.get("granada") );
 
     }
 

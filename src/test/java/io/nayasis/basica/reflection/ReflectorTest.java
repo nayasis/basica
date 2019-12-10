@@ -8,8 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,6 +19,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Slf4j
 public class ReflectorTest {
 
@@ -29,12 +31,12 @@ public class ReflectorTest {
         User user  = new User().name("nayasis").age(40);
         User clone = Reflector.clone(user);
 
-        Assert.assertEquals( user.name(), clone.name() );
-        Assert.assertEquals( user.age(), clone.age() );
+        assertEquals( user.name(), clone.name() );
+        assertEquals( user.age(), clone.age() );
 
         clone.age( 9 );
 
-        Assert.assertEquals( user.age(), 40 );
+        assertEquals( user.age(), 40 );
 
     }
 
@@ -48,11 +50,11 @@ public class ReflectorTest {
 
         log.debug( clone.toString() );
 
-        Assert.assertEquals( person.name(), clone.name() );
-        Assert.assertEquals( person.birth().toTime(), clone.birth().toTime() );
-        Assert.assertEquals( person.children().size(), clone.children().size() );
-        Assert.assertEquals( clone.children().get(0).name(), clone.name() );
-        Assert.assertEquals( clone.children().get(0).birth(), clone.birth() );
+        assertEquals( person.name(), clone.name() );
+        assertEquals( person.birth().toTime(), clone.birth().toTime() );
+        assertEquals( person.children().size(), clone.children().size() );
+        assertEquals( clone.children().get(0).name(), clone.name() );
+        assertEquals( clone.children().get(0).birth(), clone.birth() );
 
     }
 
@@ -62,7 +64,7 @@ public class ReflectorTest {
         Collection<User> users = Arrays.asList( new User("nayasis",40), new User("jake",40) );
         Collection<User> clone = Reflector.clone( users );
 
-        Assert.assertEquals( users.toString(), clone.toString() );
+        assertEquals( users.toString(), clone.toString() );
 
         Iterator<User> iteratorUsers = users.iterator();
         Iterator<User> iteratorClone = clone.iterator();
@@ -70,7 +72,7 @@ public class ReflectorTest {
         while( iteratorUsers.hasNext() ) {
             User a = iteratorUsers.next();
             User b = iteratorClone.next();
-            Assert.assertTrue( a.equals(b) );
+            assertTrue( a.equals(b) );
         }
 
     }
@@ -83,10 +85,10 @@ public class ReflectorTest {
 
         Reflector.copy( user, account );
 
-        Assert.assertEquals( "nayasis", account.name() );
-        Assert.assertEquals( 40, account.age().intValue() );
-        Assert.assertEquals( "jongja-dong", account.address() );
-        Assert.assertEquals( new BigDecimal(1000), account.balance() );
+        assertEquals( "nayasis", account.name() );
+        assertEquals( 40, account.age().intValue() );
+        assertEquals( "jongja-dong", account.address() );
+        assertEquals( new BigDecimal(1000), account.balance() );
 
     }
 
@@ -101,11 +103,11 @@ public class ReflectorTest {
 
         log.debug( another.toString() );
 
-        Assert.assertEquals( person.name(), another.name() );
-        Assert.assertEquals( person.birth().toTime(), another.birth().toTime() );
-        Assert.assertEquals( person.children().size(), another.children().size() );
-        Assert.assertEquals( another.children().get(0).name(), another.name() );
-        Assert.assertEquals( another.children().get(0).birth(), another.birth() );
+        assertEquals( person.name(), another.name() );
+        assertEquals( person.birth().toTime(), another.birth().toTime() );
+        assertEquals( person.children().size(), another.children().size() );
+        assertEquals( another.children().get(0).name(), another.name() );
+        assertEquals( another.children().get(0).birth(), another.birth() );
 
     }
 
@@ -120,7 +122,7 @@ public class ReflectorTest {
         log.debug( Arrays.toString(source) );
         log.debug( Arrays.toString(target) );
 
-        Assert.assertEquals(
+        assertEquals(
             Arrays.toString(source),
             Arrays.toString(target)
         );
@@ -147,8 +149,8 @@ public class ReflectorTest {
         for( int i=0; i < source.length; i++ ) {
             User    src = source[ i ];
             Account trg = target[ i ];
-            Assert.assertEquals( src.name(), trg.name() );
-            Assert.assertEquals( src.age(),  trg.age().intValue() );
+            assertEquals( src.name(), trg.name() );
+            assertEquals( src.age(),  trg.age().intValue() );
         }
 
     }
@@ -186,8 +188,8 @@ public class ReflectorTest {
             for( int j=0; j < childSource.length; j++ ) {
                 User    src = childSource[j];
                 Account trg = childTarget[j];
-                Assert.assertEquals( src.name(), trg.name() );
-                Assert.assertEquals( src.age(),  trg.age().intValue() );
+                assertEquals( src.name(), trg.name() );
+                assertEquals( src.age(),  trg.age().intValue() );
             }
         }
 
@@ -213,7 +215,7 @@ public class ReflectorTest {
 
         String regDt = (String) map.get("regDt");
 
-        Assert.assertTrue( Validator.isMatched(regDt, "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}"));
+        assertTrue( Validator.isMatched(regDt, "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}"));
 
     }
 
