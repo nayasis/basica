@@ -29,7 +29,7 @@ import java.util.zip.GZIPOutputStream;
 
 
 /**
- * String Hadling Utility
+ * String Handling Utility
  *
  * @author nayasis@gmail.com
  */
