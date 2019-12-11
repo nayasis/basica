@@ -18,10 +18,32 @@ import de.javakaffee.kryoserializers.GregorianCalendarSerializer;
 import de.javakaffee.kryoserializers.JdkProxySerializer;
 import de.javakaffee.kryoserializers.SynchronizedCollectionsSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
+import de.javakaffee.kryoserializers.dexx.ListSerializer;
+import de.javakaffee.kryoserializers.dexx.MapSerializer;
+import de.javakaffee.kryoserializers.dexx.SetSerializer;
+import de.javakaffee.kryoserializers.guava.ArrayListMultimapSerializer;
+import de.javakaffee.kryoserializers.guava.ArrayTableSerializer;
+import de.javakaffee.kryoserializers.guava.HashBasedTableSerializer;
+import de.javakaffee.kryoserializers.guava.HashMultimapSerializer;
+import de.javakaffee.kryoserializers.guava.ImmutableListSerializer;
+import de.javakaffee.kryoserializers.guava.ImmutableMapSerializer;
+import de.javakaffee.kryoserializers.guava.ImmutableMultimapSerializer;
+import de.javakaffee.kryoserializers.guava.ImmutableSetSerializer;
+import de.javakaffee.kryoserializers.guava.ImmutableTableSerializer;
+import de.javakaffee.kryoserializers.guava.LinkedHashMultimapSerializer;
+import de.javakaffee.kryoserializers.guava.LinkedListMultimapSerializer;
+import de.javakaffee.kryoserializers.guava.ReverseListSerializer;
+import de.javakaffee.kryoserializers.guava.TreeBasedTableSerializer;
+import de.javakaffee.kryoserializers.guava.TreeMultimapSerializer;
+import de.javakaffee.kryoserializers.guava.UnmodifiableNavigableSetSerializer;
+import de.javakaffee.kryoserializers.jodatime.JodaDateTimeSerializer;
+import de.javakaffee.kryoserializers.jodatime.JodaLocalDateSerializer;
+import de.javakaffee.kryoserializers.jodatime.JodaLocalDateTimeSerializer;
+import de.javakaffee.kryoserializers.jodatime.JodaLocalTimeSerializer;
 import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Types;
 import io.nayasis.basica.reflection.Reflector;
-import lombok.experimental.UtilityClass;
+import jxl.write.DateTime;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
 import javax.xml.bind.DatatypeConverter;
@@ -32,16 +54,25 @@ import java.io.UncheckedIOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
-@UtilityClass
 public class Cloner {
 
-    private KryoPool pool = createPool();
+    private KryoPool pool = null;
+
+    public Cloner( KryoFactory factory ) {
+        setPool( factory );
+    }
+
+    public Cloner() {
+        setPool( getDefaultFactory() );
+    }
 
     public byte[] encode( Object source ) {
         if( source == null ) return null;
@@ -91,8 +122,13 @@ public class Cloner {
         return decode( DatatypeConverter.parseBase64Binary(encoded), type );
     }
 
-    private KryoPool createPool() {
-        KryoFactory factory = () -> {
+    private Cloner setPool( KryoFactory factory ) {
+        pool = new KryoPool.Builder(factory).softReferences().build();
+        return this;
+    }
+
+    private KryoFactory getDefaultFactory() {
+        return () -> {
 
             Kryo kryo = new Kryo();
 
@@ -103,17 +139,46 @@ public class Cloner {
             kryo.register( Collections.EMPTY_LIST.getClass(), new CollectionsEmptyListSerializer() );
             kryo.register( Collections.EMPTY_MAP.getClass(), new CollectionsEmptyMapSerializer() );
             kryo.register( Collections.EMPTY_SET.getClass(), new CollectionsEmptySetSerializer() );
-            kryo.register( Collections.singletonList( "" ).getClass(), new CollectionsSingletonListSerializer() );
-            kryo.register( Collections.singleton( "" ).getClass(), new CollectionsSingletonSetSerializer() );
-            kryo.register( Collections.singletonMap( "", "" ).getClass(), new CollectionsSingletonMapSerializer() );
+            kryo.register( Collections.singletonList("").getClass(), new CollectionsSingletonListSerializer() );
+            kryo.register( Collections.singleton("").getClass(), new CollectionsSingletonSetSerializer() );
+            kryo.register( Collections.singletonMap("","").getClass(), new CollectionsSingletonMapSerializer() );
             kryo.register( GregorianCalendar.class, new GregorianCalendarSerializer() );
             kryo.register( InvocationHandler.class, new JdkProxySerializer() );
             UnmodifiableCollectionsSerializer.registerSerializers( kryo );
             SynchronizedCollectionsSerializer.registerSerializers( kryo );
 
+            // dexx
+            ListSerializer.registerSerializers( kryo );
+            MapSerializer.registerSerializers( kryo );
+            SetSerializer.registerSerializers( kryo );
+
+            // joda DateTime, LocalDate, LocalDateTime and LocalTime
+            kryo.register( DateTime.class, new JodaDateTimeSerializer() );
+            kryo.register( LocalDate.class, new JodaLocalDateSerializer() );
+            kryo.register( LocalDateTime.class, new JodaLocalDateTimeSerializer() );
+            kryo.register( LocalDateTime.class, new JodaLocalTimeSerializer() );
+
+            // guava
+            ImmutableListSerializer.registerSerializers( kryo );
+            ImmutableSetSerializer.registerSerializers( kryo );
+            ImmutableMapSerializer.registerSerializers( kryo );
+            ImmutableMultimapSerializer.registerSerializers( kryo );
+            ImmutableTableSerializer.registerSerializers( kryo );
+            ReverseListSerializer.registerSerializers( kryo );
+            UnmodifiableNavigableSetSerializer.registerSerializers( kryo );
+            ArrayListMultimapSerializer.registerSerializers( kryo );
+            HashMultimapSerializer.registerSerializers( kryo );
+            LinkedHashMultimapSerializer.registerSerializers( kryo );
+            LinkedListMultimapSerializer.registerSerializers( kryo );
+            TreeMultimapSerializer.registerSerializers( kryo );
+            ArrayTableSerializer.registerSerializers( kryo );
+            HashBasedTableSerializer.registerSerializers( kryo );
+            TreeBasedTableSerializer.registerSerializers( kryo );
+
             return kryo;
+
         };
-        return new KryoPool.Builder(factory).softReferences().build();
+
     }
 
     /**
