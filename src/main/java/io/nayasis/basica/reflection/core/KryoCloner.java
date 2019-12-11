@@ -40,9 +40,6 @@ import de.javakaffee.kryoserializers.jodatime.JodaDateTimeSerializer;
 import de.javakaffee.kryoserializers.jodatime.JodaLocalDateSerializer;
 import de.javakaffee.kryoserializers.jodatime.JodaLocalDateTimeSerializer;
 import de.javakaffee.kryoserializers.jodatime.JodaLocalTimeSerializer;
-import io.nayasis.basica.base.Classes;
-import io.nayasis.basica.base.Types;
-import io.nayasis.basica.reflection.Reflector;
 import jxl.write.DateTime;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
@@ -51,26 +48,22 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
 
-public class Cloner {
+public class KryoCloner {
 
     private KryoPool pool = null;
 
-    public Cloner( KryoFactory factory ) {
+    public KryoCloner( KryoFactory factory ) {
         setPool( factory );
     }
 
-    public Cloner() {
+    public KryoCloner() {
         setPool( getDefaultFactory() );
     }
 
@@ -122,7 +115,7 @@ public class Cloner {
         return decode( DatatypeConverter.parseBase64Binary(encoded), type );
     }
 
-    private Cloner setPool( KryoFactory factory ) {
+    private KryoCloner setPool( KryoFactory factory ) {
         pool = new KryoPool.Builder(factory).softReferences().build();
         return this;
     }
@@ -148,124 +141,42 @@ public class Cloner {
             SynchronizedCollectionsSerializer.registerSerializers( kryo );
 
             // dexx
-            ListSerializer.registerSerializers( kryo );
-            MapSerializer.registerSerializers( kryo );
-            SetSerializer.registerSerializers( kryo );
+            try {
+                ListSerializer.registerSerializers( kryo );
+                MapSerializer.registerSerializers( kryo );
+                SetSerializer.registerSerializers( kryo );
+            } catch ( Throwable e ) {}
 
             // joda DateTime, LocalDate, LocalDateTime and LocalTime
-            kryo.register( DateTime.class, new JodaDateTimeSerializer() );
-            kryo.register( LocalDate.class, new JodaLocalDateSerializer() );
-            kryo.register( LocalDateTime.class, new JodaLocalDateTimeSerializer() );
-            kryo.register( LocalDateTime.class, new JodaLocalTimeSerializer() );
+            try {
+                kryo.register( DateTime.class, new JodaDateTimeSerializer() );
+                kryo.register( LocalDate.class, new JodaLocalDateSerializer() );
+                kryo.register( LocalDateTime.class, new JodaLocalDateTimeSerializer() );
+                kryo.register( LocalDateTime.class, new JodaLocalTimeSerializer() );
+            } catch ( Throwable e ) {}
 
             // guava
-            ImmutableListSerializer.registerSerializers( kryo );
-            ImmutableSetSerializer.registerSerializers( kryo );
-            ImmutableMapSerializer.registerSerializers( kryo );
-            ImmutableMultimapSerializer.registerSerializers( kryo );
-            ImmutableTableSerializer.registerSerializers( kryo );
-            ReverseListSerializer.registerSerializers( kryo );
-            UnmodifiableNavigableSetSerializer.registerSerializers( kryo );
-            ArrayListMultimapSerializer.registerSerializers( kryo );
-            HashMultimapSerializer.registerSerializers( kryo );
-            LinkedHashMultimapSerializer.registerSerializers( kryo );
-            LinkedListMultimapSerializer.registerSerializers( kryo );
-            TreeMultimapSerializer.registerSerializers( kryo );
-            ArrayTableSerializer.registerSerializers( kryo );
-            HashBasedTableSerializer.registerSerializers( kryo );
-            TreeBasedTableSerializer.registerSerializers( kryo );
+            try {
+                ImmutableListSerializer.registerSerializers( kryo );
+                ImmutableSetSerializer.registerSerializers( kryo );
+                ImmutableMapSerializer.registerSerializers( kryo );
+                ImmutableMultimapSerializer.registerSerializers( kryo );
+                ImmutableTableSerializer.registerSerializers( kryo );
+                ReverseListSerializer.registerSerializers( kryo );
+                UnmodifiableNavigableSetSerializer.registerSerializers( kryo );
+                ArrayListMultimapSerializer.registerSerializers( kryo );
+                HashMultimapSerializer.registerSerializers( kryo );
+                LinkedHashMultimapSerializer.registerSerializers( kryo );
+                LinkedListMultimapSerializer.registerSerializers( kryo );
+                TreeMultimapSerializer.registerSerializers( kryo );
+                ArrayTableSerializer.registerSerializers( kryo );
+                HashBasedTableSerializer.registerSerializers( kryo );
+                TreeBasedTableSerializer.registerSerializers( kryo );
+            } catch ( Throwable e ) {}
 
             return kryo;
 
         };
-
-    }
-
-    /**
-     * copy properties from source to target.
-     *
-     * @param source  source object
-     * @param target  target object
-     */
-    public void copy( Object source, Object target ) {
-
-        if( source == null || target == null ) return;
-
-        if ( Types.isArray(source) ) {
-            copyArray(source, target);
-            return;
-        }
-
-        Object  castedSource = castedSource( source, target );
-        boolean casted       = source != castedSource;
-
-        Map<String, Field> srcFields = new HashMap<>();
-        ClassReflector.getFields(source).forEach( field -> {
-            srcFields.put( field.getName(), field );
-        });
-
-        for ( Field trgField : ClassReflector.getFields(target) ) {
-
-            Field srcField = srcFields.get( trgField.getName() );
-
-            if( srcField == null ) continue;;
-            if( srcField == trgField && ClassReflector.isStatic(srcField) ) continue;
-
-            Object val = ClassReflector.getValue( castedSource, casted ? trgField : srcField );
-            ClassReflector.setValue( target, trgField, val );
-
-        }
-
-    }
-
-    private void copyArray( Object source, Object target ) {
-
-        if ( ! Types.isArray(target) )
-            throw new IllegalArgumentException( String.format("can not copy array to non-array class(%s)", target.getClass()) );
-
-        Class srcType = source.getClass().getComponentType();
-        Class trgType = target.getClass().getComponentType();
-
-        for ( int i = 0, iCnt = Array.getLength(source); i < iCnt; i++ ) {
-
-            Object srcVal = Array.get( source, i );
-
-            if( srcVal == null ) {
-                continue;
-            } else if( srcType == trgType ) {
-                Array.set( target, i, srcVal );
-            } else {
-
-                Object trgVal;
-
-                if( Types.isImmutable(srcVal) ) {
-                    trgVal = Types.castPrimitive( srcVal, trgType );
-                } else {
-                    trgVal = Array.get( target, i );
-                    if( trgVal == null ) {
-                        if( Types.isArray(srcVal) ) {
-                            trgVal = Array.newInstance( trgType.getComponentType(), Array.getLength(srcVal) );
-                        } else {
-                            trgVal = Classes.createInstance( trgType );
-                        }
-                    }
-                    copy( srcVal, trgVal );
-                }
-
-                Array.set( target, i, trgVal );
-
-            }
-        }
-    }
-
-    private Object castedSource( Object source, Object target ) {
-        Class<?> sourceClass = source.getClass();
-        Class<?> targetClass = target.getClass();
-        if( Classes.isExtendedBy(targetClass,sourceClass) || Classes.isExtendedBy(sourceClass,targetClass) ) {
-            return source;
-        } else {
-            return Reflector.toBeanFrom( source, targetClass );
-        }
     }
 
 }

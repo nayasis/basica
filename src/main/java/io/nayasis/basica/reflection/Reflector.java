@@ -4,10 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.nayasis.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.basica.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.basica.model.NList;
+import io.nayasis.basica.reflection.core.BeanCopier;
 import io.nayasis.basica.reflection.core.BeanMerger;
 import io.nayasis.basica.reflection.core.ClassReflector;
 import io.nayasis.basica.reflection.core.JsonConverter;
-import io.nayasis.basica.reflection.core.Cloner;
+import io.nayasis.basica.reflection.core.KryoCloner;
 import io.nayasis.basica.reflection.helper.invoker.Invoker;
 import io.nayasis.basica.reflection.helper.invoker.MethodInvoker;
 import io.nayasis.basica.reflection.helper.mapper.NObjectMapper;
@@ -34,6 +35,7 @@ public class Reflector {
 	private JsonConverter mapperNotNull          = new JsonConverter( new NObjectMapper().ignoreNull(true) );
 	private JsonConverter mapperSortableNullable = new JsonConverter( new NObjectMapper().serializeSortable(true) );
 	private JsonConverter mapperSortableNotNull  = new JsonConverter( new NObjectMapper().serializeSortable(true).ignoreNull(true) );
+	private KryoCloner    cloner                 = new KryoCloner();
 
 	/**
 	 * clone object in deep copy mode.
@@ -44,7 +46,7 @@ public class Reflector {
 	 */
     @SuppressWarnings( "unchecked" )
     public <T> T clone( T object ) {
-    	return Cloner.cloneDeep( object );
+    	return cloner.cloneDeep( object );
     }
 
 	/**
@@ -55,7 +57,7 @@ public class Reflector {
 	 * @return a clone of object
 	 */
 	public <T> T cloneShallow( T object ) {
-		return Cloner.cloneShallow( object );
+		return cloner.cloneShallow( object );
 	}
 
 	/**
@@ -66,7 +68,7 @@ public class Reflector {
 	 */
     public void copy( Object source, Object target ) {
 		if( source == null || target == null ) return;
-		Cloner.copy( source, target );
+		BeanCopier.copy( source, target );
     }
 
 	/**

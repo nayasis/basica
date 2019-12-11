@@ -3,7 +3,7 @@ package io.nayasis.basica.base;
 import io.nayasis.basica.base.format.Formatter;
 import io.nayasis.basica.exception.unchecked.EncodingException;
 import io.nayasis.basica.exception.unchecked.UncheckedClassNotFoundException;
-import io.nayasis.basica.reflection.core.Cloner;
+import io.nayasis.basica.reflection.core.KryoCloner;
 import lombok.experimental.UtilityClass;
 
 import java.io.BufferedReader;
@@ -36,9 +36,10 @@ import java.util.zip.GZIPOutputStream;
 @UtilityClass
 public class Strings {
 
-	private final Pattern   PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
-	private final Pattern   PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
-	private final Formatter formatter     = new Formatter();
+	private Pattern    PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
+	private Pattern    PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
+	private Formatter  formatter     = new Formatter();
+	private KryoCloner cloner        = new KryoCloner();
 
 	/**
 	 * get display length applying character's font width. <br>
@@ -680,7 +681,7 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      */
     public String encode( Object value ) throws UncheckedIOException {
-        return Cloner.encodeToString( value );
+        return cloner.encodeToString( value );
     }
 
     /**
@@ -692,7 +693,7 @@ public class Strings {
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
     public <T> T decode( String value, Class<T> returnType ) throws UncheckedIOException {
-        return Cloner.decodeFromString( value, returnType );
+        return cloner.decodeFromString( value, returnType );
     }
 
 	/**

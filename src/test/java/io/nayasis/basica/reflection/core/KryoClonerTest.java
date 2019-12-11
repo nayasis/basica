@@ -18,20 +18,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @Slf4j
-public class ClonerTest {
+public class KryoClonerTest {
+
+    private KryoCloner cloner = new KryoCloner();
 
     @Test
     public void encode() {
 
         User user = new User().name("nayasis").age(40);
 
-        String encoded = Cloner.encodeToString( user );
+        String encoded = cloner.encodeToString( user );
 
         log.debug( "{}", encoded );
 
         assertEquals( "AVABbmF5YXNp8w==", encoded );
 
-        User clone = Cloner.decodeFromString( encoded, User.class );
+        User clone = cloner.decodeFromString( encoded, User.class );
 
         assertEquals( user.age(), clone.age() );
         assertEquals( user.name(), clone.name() );
@@ -58,7 +60,7 @@ public class ClonerTest {
     public void cloneTest() {
 
         User user  = new User().name("nayasis").age(40);
-        User clone = Cloner.cloneDeep( user );
+        User clone = cloner.cloneDeep( user );
 
         assertEquals( user.age(), clone.age() );
         assertEquals( user.name(), clone.name() );
