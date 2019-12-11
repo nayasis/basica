@@ -241,45 +241,45 @@ public class ReflectorTest {
 
     }
 
-}
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Accessors(fluent=true)
-class User {
-    private String name;
-    private int    age;
-}
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Accessors(fluent=true)
-class Account {
-    private String        name;
-    private Integer       age;
-    private String        address;
-    private BigDecimal    balance;
-    private LocalDateTime regDt;
-}
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Accessors(fluent=true)
-class Person {
-
-    private String name;
-    private NDate  birth;
-    private List<Person> children = new ArrayList<>();
-
-    public int hashCode() {
-        return (int)(name.hashCode() + birth.toTime() + children.size() );
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Accessors(fluent=true)
+    static class User {
+        private String name;
+        private int    age;
     }
 
-    public String toString() {
-        return Strings.format( "{ name : {}, birth : {}, children count : {} }", name, birth, children.size() );
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Accessors(fluent=true)
+    static class Account {
+        private String        name;
+        private Integer       age;
+        private String        address;
+        private BigDecimal    balance;
+        private LocalDateTime regDt;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Accessors(fluent=true)
+    static class Person {
+
+        private String name;
+        private NDate  birth;
+        private List<Person> children = new ArrayList<>();
+
+        public int hashCode() {
+            return (int)(name.hashCode() + birth.toTime() + children.size() );
+        }
+
+        public String toString() {
+            return Strings.format( "{ name : {}, birth : {}, children count : {} }", name, birth, children.size() );
+        }
+
     }
 
 }
