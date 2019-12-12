@@ -59,7 +59,7 @@ public class ReflectorTest {
     }
 
     @Test
-    public void arrayCloneTest() {
+    public void arrayAsListCloneTest() {
 
         Collection<User> users = Arrays.asList( new User("nayasis",40), new User("jake",40) );
         Collection<User> clone = Reflector.clone( users );
