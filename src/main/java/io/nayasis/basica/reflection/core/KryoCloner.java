@@ -1,12 +1,13 @@
 package io.nayasis.basica.reflection.core;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoCallback;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
-import com.esotericsoftware.kryo.serializers.EnumNameSerializer;
+import com.google.protobuf.GeneratedMessage;
 import de.javakaffee.kryoserializers.ArraysAsListSerializer;
 import de.javakaffee.kryoserializers.CollectionsEmptyListSerializer;
 import de.javakaffee.kryoserializers.CollectionsEmptyMapSerializer;
@@ -16,8 +17,10 @@ import de.javakaffee.kryoserializers.CollectionsSingletonMapSerializer;
 import de.javakaffee.kryoserializers.CollectionsSingletonSetSerializer;
 import de.javakaffee.kryoserializers.GregorianCalendarSerializer;
 import de.javakaffee.kryoserializers.JdkProxySerializer;
+import de.javakaffee.kryoserializers.KryoReflectionFactorySupport;
 import de.javakaffee.kryoserializers.SynchronizedCollectionsSerializer;
 import de.javakaffee.kryoserializers.UnmodifiableCollectionsSerializer;
+import de.javakaffee.kryoserializers.cglib.CGLibProxySerializer;
 import de.javakaffee.kryoserializers.dexx.ListSerializer;
 import de.javakaffee.kryoserializers.dexx.MapSerializer;
 import de.javakaffee.kryoserializers.dexx.SetSerializer;
@@ -40,6 +43,7 @@ import de.javakaffee.kryoserializers.jodatime.JodaDateTimeSerializer;
 import de.javakaffee.kryoserializers.jodatime.JodaLocalDateSerializer;
 import de.javakaffee.kryoserializers.jodatime.JodaLocalDateTimeSerializer;
 import de.javakaffee.kryoserializers.jodatime.JodaLocalTimeSerializer;
+import de.javakaffee.kryoserializers.protobuf.ProtobufSerializer;
 import jxl.write.DateTime;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
@@ -64,7 +68,7 @@ public class KryoCloner {
     }
 
     public KryoCloner() {
-        setPool( getDefaultFactory() );
+        setPool( createDefaultFactory() );
     }
 
     public byte[] encode( Object source ) {
@@ -120,13 +124,16 @@ public class KryoCloner {
         return this;
     }
 
-    private KryoFactory getDefaultFactory() {
+    /**
+     * @see <a href="https://github.com/magro/kryo-serializers">kryo-serializers</a>
+     * @return
+     */
+    private KryoFactory createDefaultFactory() {
         return () -> {
 
-            Kryo kryo = new Kryo();
+            Kryo kryo = createDefaultKryo();
 
             kryo.setInstantiatorStrategy( new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()) );
-            kryo.addDefaultSerializer( Enum.class, EnumNameSerializer.class );
 
             kryo.register( Arrays.asList("").getClass(), new ArraysAsListSerializer() );
             kryo.register( Collections.EMPTY_LIST.getClass(), new CollectionsEmptyListSerializer() );
@@ -137,6 +144,7 @@ public class KryoCloner {
             kryo.register( Collections.singletonMap("","").getClass(), new CollectionsSingletonMapSerializer() );
             kryo.register( GregorianCalendar.class, new GregorianCalendarSerializer() );
             kryo.register( InvocationHandler.class, new JdkProxySerializer() );
+
             UnmodifiableCollectionsSerializer.registerSerializers( kryo );
             SynchronizedCollectionsSerializer.registerSerializers( kryo );
 
@@ -176,6 +184,23 @@ public class KryoCloner {
 
             return kryo;
 
+        };
+
+    }
+
+    private Kryo createDefaultKryo() {
+        return new KryoReflectionFactorySupport() {
+            @Override
+            public Serializer<?> getDefaultSerializer( final Class klass ) {
+
+                if ( CGLibProxySerializer.canSerialize(klass) )
+                    return getSerializer( CGLibProxySerializer.CGLibProxyMarker.class );
+                if ( GeneratedMessage.class.isAssignableFrom( klass ) )
+                    return new ProtobufSerializer();
+
+                return super.getDefaultSerializer( klass );
+
+            }
         };
     }
 
