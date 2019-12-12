@@ -7,6 +7,7 @@ import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoCallback;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
+import com.esotericsoftware.kryo.serializers.CompatibleFieldSerializer;
 import com.google.protobuf.GeneratedMessage;
 import de.javakaffee.kryoserializers.ArraysAsListSerializer;
 import de.javakaffee.kryoserializers.CollectionsEmptyListSerializer;
@@ -131,8 +132,9 @@ public class KryoCloner {
     private KryoFactory createDefaultFactory() {
         return () -> {
 
-            Kryo kryo = createDefaultKryo();
+            Kryo kryo = new Kryo();
 
+            kryo.setDefaultSerializer( CompatibleFieldSerializer.class );
             kryo.setInstantiatorStrategy( new Kryo.DefaultInstantiatorStrategy(new StdInstantiatorStrategy()) );
 
             kryo.register( Arrays.asList("").getClass(), new ArraysAsListSerializer() );
@@ -193,10 +195,15 @@ public class KryoCloner {
             @Override
             public Serializer<?> getDefaultSerializer( final Class klass ) {
 
-                if ( CGLibProxySerializer.canSerialize(klass) )
-                    return getSerializer( CGLibProxySerializer.CGLibProxyMarker.class );
-                if ( GeneratedMessage.class.isAssignableFrom( klass ) )
-                    return new ProtobufSerializer();
+                try {
+                    if ( CGLibProxySerializer.canSerialize(klass) )
+                        return getSerializer( CGLibProxySerializer.CGLibProxyMarker.class );
+                } catch ( Throwable e ) {}
+
+                try {
+                    if ( GeneratedMessage.class.isAssignableFrom( klass ) )
+                        return new ProtobufSerializer();
+                } catch ( Throwable e ) {}
 
                 return super.getDefaultSerializer( klass );
 
