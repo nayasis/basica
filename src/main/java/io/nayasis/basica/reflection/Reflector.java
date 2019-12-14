@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.nayasis.basica.exception.unchecked.JsonMappingException;
 import io.nayasis.basica.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.basica.model.NList;
-import io.nayasis.basica.reflection.core.BeanCopier;
+import io.nayasis.basica.reflection.core.Cloner;
 import io.nayasis.basica.reflection.core.BeanMerger;
 import io.nayasis.basica.reflection.core.ClassReflector;
 import io.nayasis.basica.reflection.core.JsonConverter;
@@ -68,7 +68,7 @@ public class Reflector {
 	 */
     public void copy( Object source, Object target ) {
 		if( source == null || target == null ) return;
-		BeanCopier.copy( source, target );
+		Cloner.copyProperties( source, target );
     }
 
 	/**

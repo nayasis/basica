@@ -4,14 +4,86 @@ import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Types;
 import io.nayasis.basica.reflection.Reflector;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
 @UtilityClass
-public class BeanCopier {
+@Slf4j
+public class Cloner {
+
+    /**
+     * creates and returns a copy of object
+     *
+     * @param object 	object to clone
+     * @return cloned object
+     */
+    public <T> T clone( T object ) {
+        return cloneObject( object, new HashMap<>() );
+    }
+
+    private <T> T cloneObject( T object, Map<Object,Object> cloned ) {
+
+        if( object == null ) return null;
+        if( cloned.containsKey(object) ) return (T) cloned.get( object );
+
+        Class<?> klass = object.getClass();
+
+        if( Types.isImmutable(klass) ) {
+            return object;
+        } else if( Types.isEnum(klass) ) {
+            return object;
+        } else if( Types.isArray(klass) ) {
+            return cloneArray( object, cloned );
+        }
+
+        Object clone = Classes.createInstance( klass );
+        cloned.put( object, clone );
+
+        for( Field field : ClassReflector.getFields(klass) ) {
+
+            int modifiers = field.getModifiers();
+
+            if( Modifier.isStatic(modifiers) ) continue;
+
+            Object val      = ClassReflector.getValue( object, field );
+            Object cloneVal = cloneObject( val, cloned );
+            ClassReflector.setValue( clone, field, cloneVal );
+
+        }
+
+        return (T) clone;
+
+    }
+
+    private <T> T cloneArray( T object, Map<Object,Object> cloned ) {
+
+        Class<?> klass   = object.getClass();
+        Class<?> generic = klass.getComponentType();
+
+        int length = Array.getLength( object );
+
+        Object target = Array.newInstance( generic, length );
+
+        if( length > 0 ) {
+            if( Types.isImmutable(generic) ) {
+                System.arraycopy( object, 0, target, 0, length );
+            } else {
+                for( int i = 0; i < length; i++ ) {
+                    Object e = Array.get( object, i );
+                    Array.set( target, i, cloneObject(e,cloned) );
+                }
+            }
+        }
+
+        cloned.put( object, target );
+        return (T) target;
+
+    }
 
     /**
      * copy properties from source to target.
@@ -19,7 +91,7 @@ public class BeanCopier {
      * @param source  source object
      * @param target  target object
      */
-    public void copy( Object source, Object target ) {
+    public void copyProperties( Object source, Object target ) {
 
         if( source == null || target == null ) return;
 
@@ -31,7 +103,7 @@ public class BeanCopier {
         Object  castedSource = castedSource( source, target );
         boolean casted       = source != castedSource;
 
-        Map<String, Field> srcFields = new HashMap<>();
+        Map<String,Field> srcFields = new HashMap<>();
         ClassReflector.getFields(source).forEach( field -> {
             srcFields.put( field.getName(), field );
         });
@@ -81,7 +153,7 @@ public class BeanCopier {
                             trgVal = Classes.createInstance( trgType );
                         }
                     }
-                    copy( srcVal, trgVal );
+                    copyProperties( srcVal, trgVal );
                 }
 
                 Array.set( target, i, trgVal );
