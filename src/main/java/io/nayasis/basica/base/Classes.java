@@ -85,20 +85,20 @@ public class Classes {
 
 		try {
 			return Thread.currentThread().getContextClassLoader();
+		} catch( Throwable e ) {}
+
+		// if can not access thread context
+		try {
+			return Classes.class.getClassLoader();
+		} catch( Throwable e ) {}
+
+		// if bootstrap classloader
+		try {
+			return ClassLoader.getSystemClassLoader();
 		} catch( Throwable e ) {
-			// if current callstack is under Thread, cannot access Thread Context.
+			// maybe caller can live with null.
+			return null;
 		}
-
-		ClassLoader classLoader = Classes.class.getClassLoader();
-
-		if( classLoader == null ) {
-			try {
-				classLoader = ClassLoader.getSystemClassLoader();
-			} catch( Throwable e ) {
-				// cannot access system ClassLoader.
-			}
-		}
-		return classLoader;
 
 	}
 
