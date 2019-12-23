@@ -8,7 +8,7 @@ import java.util.*;
  * ThreadLocal
  *
  * <pre>
- * It has global pool.
+ * It has global static pool.
  * The value made in thread local stored it with thread local's unique key issued by {@link ThreadRoot}.
  * The unique key to distinguish thread local is consisted with UUID.
  * </pre>
