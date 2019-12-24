@@ -150,6 +150,24 @@ public class Strings {
 	}
 
 	/**
+	 * trim leading whitespace from given value.
+	 * @param value value
+	 * @return	left trimmed string
+	 */
+	public String ltrim( Object value ) {
+		return nvl( value ).replaceFirst( "^\\s+", "" );
+	}
+
+	/**
+	 * trim leading whitespace from given value.
+	 * @param value value
+	 * @return	left trimmed string
+	 */
+	public String rtrim( Object value ) {
+		return nvl( value ).replaceFirst( "\\s+$", "" );
+	}
+
+	/**
 	 * Check a string is equals to other string.
 	 *
 	 * it is free from NullPointException.

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @Slf4j
 public class FilesTest {
 
@@ -19,9 +21,9 @@ public class FilesTest {
         String txt1 = Files.readFrom( path, "UTF-8" );
         String txt2 = Files.readFrom( path );
 
-        Assertions.assertFalse( txt1.isEmpty() );
-        Assertions.assertFalse( txt2.isEmpty() );
-        Assertions.assertEquals( txt1, txt2 );
+        assertFalse( txt1.isEmpty() );
+        assertFalse( txt2.isEmpty() );
+        assertEquals( txt1, txt2 );
 
     }
 
@@ -33,9 +35,17 @@ public class FilesTest {
         String txt1 = Files.readFrom( path, "UTF-8" );
         String txt2 = Files.readFrom( path );
 
-        Assertions.assertFalse( txt1.isEmpty() );
-        Assertions.assertFalse( txt2.isEmpty() );
-        Assertions.assertEquals( txt1, txt2 );
+        assertFalse( txt1.isEmpty() );
+        assertFalse( txt2.isEmpty() );
+        assertEquals( txt1, txt2 );
+
+    }
+
+    @Test
+    public void normalizeSeparator() {
+
+        assertEquals( "a", Files.normalizeSeparator( "a\\" ) );
+        assertEquals( "/", Files.normalizeSeparator( "/" ) );
 
     }
 

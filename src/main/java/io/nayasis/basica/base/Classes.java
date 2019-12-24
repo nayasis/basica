@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -297,6 +298,38 @@ public class Classes {
 	 */
 	public URL getResource( String path ) {
 		return getClassLoader().getResource( refineResourceName(path) );
+	}
+
+    /**
+     * get resources
+     *
+     * @param path	resource path
+     * @return
+     */
+    public List<URL> getResources( String path ) {
+    	return getResources( null, path );
+    }
+
+	/**
+	 * get resources
+	 *
+	 * @param classLoader	classLoader to find
+	 * @param path	        resource path
+	 * @return
+	 */
+	public List<URL> getResources( ClassLoader classLoader, String path ) {
+		List<URL> urls = new ArrayList<>();
+		if( classLoader == null )
+			classLoader = getClassLoader();
+		try {
+			Enumeration<URL> resources = classLoader.getResources( refineResourceName( path ) );
+			while( resources.hasMoreElements() ) {
+				urls.add( resources.nextElement() );
+			}
+		} catch ( IOException e ) {
+			log.error( e.getMessage(), e );
+		}
+		return urls;
 	}
 
 	/**
