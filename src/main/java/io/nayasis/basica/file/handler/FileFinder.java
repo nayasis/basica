@@ -13,11 +13,11 @@ import java.util.*;
  */
 public class FileFinder extends SimpleFileVisitor<Path> {
 
-    private boolean           checkPattern;
-    private boolean           includeDir;
-    private boolean           includeFile;
-    private Set<PathMatcher>  matchers;
-    private List<Path>        result = new ArrayList<>();
+    private boolean          checkPattern;
+    private boolean          includeDir;
+    private boolean          includeFile;
+    private Set<PathMatcher> pathMatchers;
+    private List<Path>       result = new ArrayList<>();
 
     /**
      * 기본 생성자
@@ -28,8 +28,8 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      */
     public FileFinder( boolean includeFile, boolean includeDir, String... pattern ) {
 
-        this.matchers     = toPathMacher( pattern );
-        this.checkPattern = ( matchers.size() != 0 );
+        this.pathMatchers = toPathMatcher( pattern );
+        this.checkPattern = ( pathMatchers.size() != 0 );
         this.includeFile  = includeFile;
         this.includeDir   = includeDir;
 
@@ -40,6 +40,14 @@ public class FileFinder extends SimpleFileVisitor<Path> {
 
     }
 
+    public Set<PathMatcher> getPathMatchers() {
+        return pathMatchers;
+    }
+
+    public void setPathMatchers( Set<PathMatcher> pathMatchers ) {
+        this.pathMatchers = pathMatchers;
+    }
+
     /**
      * 파일명칭의 패턴을 검사한다.
      *
@@ -47,7 +55,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      */
     private void find( Path file ) {
         if( checkPattern ) {
-            for( PathMatcher matcher : matchers ) {
+            for( PathMatcher matcher : pathMatchers ) {
         		if( matcher.matches( file ) ) {
                     add( file );
         			return;
@@ -101,7 +109,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
      * @param patterns patterns
      * @return glob PathMatcher
      */
-    public static Set<PathMatcher> toPathMacher( String... patterns ) {
+    public static Set<PathMatcher> toPathMatcher( String... patterns ) {
 
         Set<PathMatcher> matchers = new HashSet<>();
 

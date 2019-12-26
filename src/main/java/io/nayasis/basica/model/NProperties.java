@@ -1,10 +1,14 @@
 package io.nayasis.basica.model;
 
-import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.base.Strings;
+import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -21,8 +25,19 @@ public class NProperties extends Properties {
         load( resourcePath );
     }
 
-    public NProperties load( String resourcePath ) throws io.nayasis.basica.exception.unchecked.UncheckedIOException {
-        BufferedInputStream inputStream = new BufferedInputStream( Files.getResource( resourcePath ) );
+    public NProperties( URL url ) {
+        load( url );
+    }
+
+    public NProperties load( String resourcePath ) throws UncheckedIOException {
+        return loadProperties( Files.getResourceAsStream(resourcePath) );
+    }
+
+    public NProperties load( URL url ) throws UncheckedIOException {
+        return loadProperties( Files.getResourceAsStream(url) );
+    }
+
+    private NProperties loadProperties( InputStream inputStream ) throws UncheckedIOException {
         try {
             String charset = Files.getCharset( inputStream );
             load( new BufferedReader( new InputStreamReader( inputStream, charset ) ) );

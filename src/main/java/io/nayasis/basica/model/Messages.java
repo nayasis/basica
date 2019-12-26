@@ -7,6 +7,7 @@ import io.nayasis.basica.file.Files;
 import lombok.experimental.UtilityClass;
 
 import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -140,15 +141,12 @@ public class Messages {
      */
     public void load( String resourcePath ) throws UncheckedIOException {
         if( Strings.isEmpty(resourcePath) ) return;
-        if( resourcePath.contains("*") ) {
-            List<String> resources = Classes.findResources( resourcePath );
-            resources.forEach( resource -> loadPool( resource ) );
-        } else {
-            loadPool(resourcePath);
-        }
+        Classes.findResources(resourcePath).forEach( url -> {
+            loadPool( url );
+        });
     }
 
-    private void loadPool( String filePath ) throws UncheckedIOException {
+    private void loadPool( URL filePath ) throws UncheckedIOException {
         Locale locale = getLocaleFrom( filePath );
         NProperties properties = new NProperties( filePath );
         for( Object key : properties.keySet() ) {
@@ -167,9 +165,9 @@ public class Messages {
     	pool.clear();
     }
 
-    private Locale getLocaleFrom( String filePath ) {
+    private Locale getLocaleFrom( URL url ) {
 
-    	String baseName = Files.removeExtension( new File(filePath).getName() );
+    	String baseName = Files.removeExtension( new File(url.getFile()).getName() );
 
     	List<String> sentences = Strings.tokenize( baseName, "." );
 
