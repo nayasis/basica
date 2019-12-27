@@ -139,16 +139,28 @@ public class Messages {
      * @param resourcePath message file or resource path
      * @throws UncheckedIOException  if I/O exception occurs.
      */
-    public void load( String resourcePath ) throws UncheckedIOException {
+    public void loadFromResource( String resourcePath ) throws UncheckedIOException {
         if( Strings.isEmpty(resourcePath) ) return;
         Classes.findResources(resourcePath).forEach( url -> {
             loadPool( url );
         });
     }
 
-    private void loadPool( URL filePath ) throws UncheckedIOException {
-        Locale locale = getLocaleFrom( filePath );
-        NProperties properties = new NProperties( filePath );
+    /**
+     *
+     * load message file to memory
+     *
+     * @param filePath message file or resource path
+     * @throws UncheckedIOException  if I/O exception occurs.
+     */
+    public void loadFromFile( String filePath ) throws UncheckedIOException {
+        if( Strings.isEmpty(filePath) ) return;
+        loadPool( Files.toURL(filePath) );
+    }
+
+    public void loadPool( URL url ) throws UncheckedIOException {
+        Locale locale = getLocaleFrom( url );
+        NProperties properties = new NProperties( url );
         for( Object key : properties.keySet() ) {
             if( ! pool.containsKey(key) ) {
                 pool.put( key.toString(), new Hashtable<>() );

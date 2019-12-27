@@ -38,6 +38,7 @@ public class NProperties extends Properties {
     }
 
     private NProperties loadProperties( InputStream inputStream ) throws UncheckedIOException {
+        if( inputStream == null ) return this;
         try {
             String charset = Files.getCharset( inputStream );
             load( new BufferedReader( new InputStreamReader( inputStream, charset ) ) );

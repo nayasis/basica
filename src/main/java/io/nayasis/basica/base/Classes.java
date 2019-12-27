@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
@@ -297,8 +296,13 @@ public class Classes {
 	 * @param url	resource URL
 	 * @return resource input stream
 	 */
-	public InputStream getResourceAsStream( URL url ) {
-		return getClassLoader().getResourceAsStream( url.getPath() );
+	public InputStream getResourceAsStream( URL url ) throws UncheckedIOException {
+		if( url == null ) return null;
+		try {
+			return url.openStream();
+		} catch ( IOException e ) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 	/**
@@ -379,9 +383,9 @@ public class Classes {
 					Path rootPath = Paths.get( root.toURI() );
 					Files.walk( rootPath ).forEach( path -> {
 						Path curr = rootPath.relativize( path );
-						URL  url  = match( pathMatchers, curr );
-						if( url == null ) return;
-						fileUrls.putIfAbsent( "/" + Files.normalizeSeparator(curr), url );
+						if( match(pathMatchers, curr) ) {
+							fileUrls.putIfAbsent( "/" + Files.normalizeSeparator(curr), Files.toURL(path) );
+						};
 					});
 
 				} else {
@@ -389,9 +393,10 @@ public class Classes {
 					Set<PathMatcher> pathMatchers = toPathMatcher( fileSystem, pattern );
 
 					Files.walk(fileSystem.getPath( "/" )).forEach( path -> {
-						URL url = match( pathMatchers, path );
-						if( url == null ) return;
-						jarUrls.putIfAbsent( path.toString(), url );
+						if( match(pathMatchers, path) ) {
+							jarUrls.putIfAbsent( path.toString(), Files.toURL(path) );
+
+						}
 					});
 
 				}
@@ -426,18 +431,12 @@ public class Classes {
 		}
 	}
 
-	private URL match( Collection<PathMatcher> matchers, Path path ) {
+	private boolean match( Collection<PathMatcher> matchers, Path path ) {
 		for( PathMatcher matcher : matchers ) {
-			if( matcher.matches(path) ) {
-				try {
-					return path.toUri().toURL();
-				} catch ( MalformedURLException e ) {
-					log.error( e.getMessage(), e );
-					return null;
-				}
-			}
+			if( matcher.matches(path) )
+				return true;
 		}
-		return null;
+		return false;
 	}
 
 	private List<URL> getRootResources() {

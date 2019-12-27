@@ -17,11 +17,11 @@ public class MessagesTest {
     }
 
     @Test
-    public void loadSingleFile() {
+    public void loadFromFile() {
 
         String path = Files.getRootPath() + "/message/message.en.prop";
 
-        Messages.load( path );
+        Messages.loadFromFile( path );
 
         Assertions.assertEquals( "Session is expired.", Messages.get("err.session.expired") );
         Assertions.assertEquals( "notExistCode", Messages.get("notExistCode") );
@@ -29,11 +29,9 @@ public class MessagesTest {
     }
 
     @Test
-    public void loadMulti() {
+    public void loadFromResource() {
 
-        String path = "message/**.prop";
-
-        Messages.load( path );
+        Messages.loadFromResource( "/message/**.prop" );
 
         Assertions.assertEquals( "Session is expired.", Messages.get( Locale.ENGLISH,"err.session.expired") );
         Assertions.assertEquals( "Session is expired.", Messages.get( Locale.UK,"err.session.expired") );
