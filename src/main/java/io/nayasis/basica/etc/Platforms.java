@@ -22,5 +22,7 @@ public class Platforms {
     public static final boolean isSolaris       = osName.toLowerCase().contains( "solaris" ) || osName.toLowerCase().contains( "sunos" );
     /** is MAC O/S */
     public static final boolean isMac           = osName.toLowerCase().contains( "mac" );
+    /** is MAC O/S */
+    public static final boolean isAndroid       = "Dalvik".equals( System.getProperty("java.vm.name") );
 
 }
