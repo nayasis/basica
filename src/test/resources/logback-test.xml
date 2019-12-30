@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+  <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%15.15thread] %cyan(%40.40logger{39}) \(%file:%line\) %msg%n</pattern>
+    </layout>
+  </appender>
+
+  <logger name="io.nayasis.basica" level="debug">
+    <appender-ref ref="console" />
+  </logger>
+
+</configuration>
