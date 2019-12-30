@@ -4,6 +4,8 @@ import io.nayasis.basica.file.Files;
 import io.nayasis.basica.etc.QuotChecker;
 
 import java.io.File;
+import java.net.URL;
+import java.nio.file.Path;
 
 public class DeformedXmlReader {
 
@@ -11,6 +13,14 @@ public class DeformedXmlReader {
 
 	public String readFrom( String xmlString ) {
 		return toXml( xmlString );
+	}
+
+	public String readFrom( Path path ) {
+		return toXml( Files.readFrom( path ) );
+	}
+
+	public String readFrom( URL url ) {
+		return toXml( Files.readFrom( url ) );
 	}
 
     public String readFrom( File file ) {

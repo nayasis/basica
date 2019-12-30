@@ -31,16 +31,16 @@ import java.util.zip.GZIPOutputStream;
 
 
 /**
- * String Hadling Utility
+ * String Handling Utility
  *
  * @author nayasis@gmail.com
  */
 @UtilityClass
 public class Strings {
 
-	private final Pattern   PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
-	private final Pattern   PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
-	private final Formatter formatter     = new Formatter();
+	private Pattern    PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
+	private Pattern    PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
+	private Formatter  formatter     = new Formatter();
 
 	/**
 	 * get display length applying character's font width. <br>
@@ -148,6 +148,24 @@ public class Strings {
 	 */
 	public String trim( Object value ) {
 		return nvl( value ).trim();
+	}
+
+	/**
+	 * trim leading whitespace from given value.
+	 * @param value value
+	 * @return	left trimmed string
+	 */
+	public String ltrim( Object value ) {
+		return nvl( value ).replaceFirst( "^\\s+", "" );
+	}
+
+	/**
+	 * trim leading whitespace from given value.
+	 * @param value value
+	 * @return	left trimmed string
+	 */
+	public String rtrim( Object value ) {
+		return nvl( value ).replaceFirst( "\\s+$", "" );
 	}
 
 	/**
@@ -682,19 +700,16 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      */
     public String encode( Object value ) throws UncheckedIOException {
-
-    	try (
-    		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    		ObjectOutputStream    oos = new ObjectOutputStream( bos )
+		try (
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream( bos )
 		) {
-    		oos.writeObject( value );
-    		oos.close();
-    		return DatatypeConverter.printBase64Binary( bos.toByteArray() );
-
-    	} catch ( IOException e ) {
-    		throw new UncheckedIOException( e );
+			oos.writeObject( value );
+			oos.close();
+			return DatatypeConverter.printBase64Binary( bos.toByteArray() );
+		} catch ( IOException e ) {
+			throw new UncheckedIOException( e );
 		}
-
     }
 
     /**
@@ -705,20 +720,19 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
-    public <T> T decode( Object value ) throws UncheckedIOException, UncheckedClassNotFoundException {
+    public <T> T decode( String value ) throws UncheckedIOException {
+		if( value == null ) return null;
 
-        if( value == null ) return null;
+		byte bytes[] = DatatypeConverter.parseBase64Binary( nvl(value) );
 
-    	byte o[] = DatatypeConverter.parseBase64Binary( nvl(value) );
-
-    	try (
-    		ByteArrayInputStream bis = new ByteArrayInputStream( o );
-    		ObjectInputStream    ois = new ObjectInputStream( bis )
+		try (
+			ByteArrayInputStream bis = new ByteArrayInputStream( bytes );
+			ObjectInputStream ois = new ObjectInputStream( bis )
 		) {
-    		return (T) ois.readObject();
-
-    	} catch (IOException e) {
-    		throw new UncheckedIOException( e );
+			Object val = ois.readObject();
+			return val == null ? null : (T) val;
+		} catch (IOException e) {
+			throw new UncheckedIOException( e );
 		} catch ( ClassNotFoundException e) {
 			throw new UncheckedClassNotFoundException( e );
 		}

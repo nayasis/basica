@@ -3,9 +3,9 @@ package io.nayasis.basica.cipher;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.cipher.vo.KeyPair;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public class RsaEncrypterTest {

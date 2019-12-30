@@ -4,8 +4,12 @@ import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.file.Files;
+import lombok.experimental.UtilityClass;
 
 import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
@@ -17,12 +21,13 @@ import java.util.Map;
  * @author nayasis@gmail.com
  *
  */
+@UtilityClass
 public class Messages {
 
     // message pool ( code > locale > message text )
-    protected static Map<String,Map<Locale,String>> pool = new Hashtable<>();
+    protected Map<String,Map<Locale,String>> pool = new Hashtable<>();
 
-    private static Locale NULL_LOCALE = new Locale( "", "" );
+    private Locale NULL_LOCALE = new Locale( "", "" );
 
     /**
      * get message corresponding code
@@ -34,8 +39,8 @@ public class Messages {
      *
      * if message code "com.0001" is "{}는 사람입니다.", then
      *
-     * Message.get( "com.0001", "정화종" ); → "정화종은 사람입니다."
-     * Message.get( "com.0001", "ABC"    ); → "ABC는 사람입니다."
+     * Messages.get( "com.0001", "정화종" ); → "정화종은 사람입니다."
+     * Messages.get( "com.0001", "ABC"    ); → "ABC는 사람입니다."
      *     </pre>
      *   </li>
      *   <li>
@@ -44,7 +49,7 @@ public class Messages {
      *
      * if "merong" is just code and not defined, then
      *
-     * Message.get( "merong" ); → "merong"
+     * Messages.get( "merong" ); → "merong"
      *     </pre>
      *   </li>
      * </ol>
@@ -55,7 +60,7 @@ public class Messages {
      * @param param     binding parameter replaced with '{}'
      * @return message corresponding to code
      */
-    public static String get( Locale locale, Object code, Object... param ) {
+    public String get( Locale locale, Object code, Object... param ) {
         return Strings.format( getMessage( code, locale ), param );
     }
 
@@ -69,8 +74,8 @@ public class Messages {
      *
      * if message code "com.0001" is "{}는 사람입니다.", then
      *
-     * Message.get( "com.0001", "정화종" ); → "정화종은 사람입니다."
-     * Message.get( "com.0001", "ABC"    ); → "ABC는 사람입니다."
+     * Messages.get( "com.0001", "정화종" ); → "정화종은 사람입니다."
+     * Messages.get( "com.0001", "ABC"    ); → "ABC는 사람입니다."
      *     </pre>
      *   </li>
      *   <li>
@@ -79,7 +84,7 @@ public class Messages {
      *
      * if "merong" is just code and not defined, then
      *
-     * Message.get( "merong" ); → "merong"
+     * Messages.get( "merong" ); → "merong"
      *     </pre>
      *   </li>
      * </ol>
@@ -89,7 +94,7 @@ public class Messages {
      * @param param     binding parameter replaced with '{}'
      * @return message corresponding to code
      */
-    public static String get( Object code, Object... param ) {
+    public String get( Object code, Object... param ) {
     	return get( Locale.getDefault(), code, param );
     }
 
@@ -100,7 +105,7 @@ public class Messages {
      * @param locale    locale
      * @return message corresponding to code
      */
-    private static String getMessage( Object code, Locale locale ) {
+    private String getMessage( Object code, Locale locale ) {
 
         String cd = Strings.nvl( code );
 
@@ -134,19 +139,28 @@ public class Messages {
      * @param resourcePath message file or resource path
      * @throws UncheckedIOException  if I/O exception occurs.
      */
-    public static void load( String resourcePath ) throws UncheckedIOException {
+    public void loadFromResource( String resourcePath ) throws UncheckedIOException {
         if( Strings.isEmpty(resourcePath) ) return;
-        if( resourcePath.contains("*") ) {
-            List<String> resources = Classes.findResources( resourcePath );
-            resources.forEach( resource -> loadPool( resource ) );
-        } else {
-            loadPool(resourcePath);
-        }
+        Classes.findResources(resourcePath).forEach( url -> {
+            loadPool( url );
+        });
     }
 
-    private static void loadPool( String filePath ) throws UncheckedIOException {
-        Locale locale = getLocaleFrom( filePath );
-        NProperties properties = new NProperties( filePath );
+    /**
+     *
+     * load message file to memory
+     *
+     * @param filePath message file or resource path
+     * @throws UncheckedIOException  if I/O exception occurs.
+     */
+    public void loadFromFile( String filePath ) throws UncheckedIOException {
+        if( Strings.isEmpty(filePath) ) return;
+        loadPool( Files.toURL(filePath) );
+    }
+
+    public void loadPool( URL url ) throws UncheckedIOException {
+        Locale locale = getLocaleFrom( url );
+        NProperties properties = new NProperties( url );
         for( Object key : properties.keySet() ) {
             if( ! pool.containsKey(key) ) {
                 pool.put( key.toString(), new Hashtable<>() );
@@ -159,13 +173,13 @@ public class Messages {
     /**
      * clear message pool
      */
-    public static void clear() {
+    public void clear() {
     	pool.clear();
     }
 
-    private static Locale getLocaleFrom( String filePath ) {
+    private Locale getLocaleFrom( URL url ) {
 
-    	String baseName = Files.removeExtension( new File(filePath).getName() );
+    	String baseName = Files.removeExtension( new File(url.getFile()).getName() );
 
     	List<String> sentences = Strings.tokenize( baseName, "." );
 
@@ -182,6 +196,29 @@ public class Messages {
 
     	return new Locale( language, country );
 
+    }
+
+    /**
+     * get all messages
+     *
+     * @param locale    locale to extract message.
+     * @return messages in pool
+     */
+    public Map<String,String> getAll( Locale locale ) {
+        Map<String,String> messages = new HashMap<>();
+        for( String code : new HashSet<String>(pool.keySet()) ) {
+            messages.put( code, getMessage(code, locale) );
+        }
+        return messages;
+    }
+
+    /**
+     * get all messages by default locale.
+     *
+     * @return messages in pool
+     */
+    public Map<String,String> getAll() {
+        return getAll( Locale.getDefault() );
     }
 
 }

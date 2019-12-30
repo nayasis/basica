@@ -1,7 +1,9 @@
 package io.nayasis.basica.base;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TypesTest {
 
@@ -79,20 +81,20 @@ public class TypesTest {
 
     @Test
     public void isInt2() {
-        Assert.assertTrue( Types.isInt("-123") );
-        Assert.assertTrue( Types.isInt("+123") );
-        Assert.assertTrue( Types.isInt("123") );
-        Assert.assertFalse( Types.isInt("123.1") );
-        Assert.assertFalse( Types.isInt("-1.30") );
+        assertTrue( Types.isInt("-123") );
+        assertTrue( Types.isInt("+123") );
+        assertTrue( Types.isInt("123") );
+        assertFalse( Types.isInt("123.1") );
+        assertFalse( Types.isInt("-1.30") );
     }
 
     @Test
     public void isPositiveInt() {
-        Assert.assertFalse( Types.isPositiveInt("-123") );
-        Assert.assertTrue( Types.isPositiveInt("+123") );
-        Assert.assertTrue( Types.isPositiveInt("123") );
-        Assert.assertFalse( Types.isPositiveInt("123.1") );
-        Assert.assertFalse( Types.isPositiveInt("-1.30") );
+        assertFalse( Types.isPositiveInt("-123") );
+        assertTrue( Types.isPositiveInt("+123") );
+        assertTrue( Types.isPositiveInt("123") );
+        assertFalse( Types.isPositiveInt("123.1") );
+        assertFalse( Types.isPositiveInt("-1.30") );
     }
 
     @Test
@@ -153,8 +155,8 @@ public class TypesTest {
 
     @Test
     public void isNumeric() {
-        Assert.assertTrue( Types.isNumeric("1.234") );
-        Assert.assertFalse( Types.isNumeric("1.234A") );
+        assertTrue( Types.isNumeric("1.234") );
+        assertFalse( Types.isNumeric("1.234A") );
     }
 
     @Test

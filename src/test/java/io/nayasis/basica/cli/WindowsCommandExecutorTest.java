@@ -7,24 +7,21 @@ import io.nayasis.basica.exception.unchecked.CommandLineException;
 import io.nayasis.basica.file.Files;
 import io.nayasis.basica.file.worker.LineReader;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
-@Ignore
-public class WindowsCommandExecutorTest {
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-    @Before
-    public void checkPlatform() {
-        Assume.assumeTrue( Platforms.isWindows );
-    }
+@Slf4j
+@Disabled("excluded because of platform dependency")
+public class WindowsCommandExecutorTest {
 
     @Test
     public void basic() {
@@ -95,26 +92,30 @@ public class WindowsCommandExecutorTest {
 
     }
 
-    @Test( expected = CommandLineException.class )
+    @Test
     public void invalidExecutionTest() {
 
-        CommandExecutor executor = new CommandExecutor();
+        assertThrows( CommandLineException.class, () -> {
 
-        StringBuffer output = new StringBuffer();
+            CommandExecutor executor = new CommandExecutor();
 
-        String path = "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE";
-        if( Files.notExists(path) ) {
-            throw new CommandLineException( "can not test" );
-        }
+            StringBuffer output = new StringBuffer();
 
-        // 하나의 CommandExecutor로 동시에 2개의 Command를 실행하지 못해야 한다.
+            String path = "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE";
+            if( Files.notExists(path) ) {
+                throw new CommandLineException( "can not test" );
+            }
 
-        executor.run( path, output );
-        executor.run( path, output );
+            // 하나의 CommandExecutor로 동시에 2개의 Command를 실행하지 못해야 한다.
 
-        executor.waitFor();
+            executor.run( path, output );
+            executor.run( path, output );
 
-        log.debug( "Done !!\n{}", output );
+            executor.waitFor();
+
+            log.debug( "Done !!\n{}", output );
+
+        });
 
     }
 

@@ -2,21 +2,17 @@ package io.nayasis.basica.reflection.core;
 
 import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Types;
-import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.reflection.Reflector;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+@UtilityClass
 @Slf4j
 public class Cloner {
 
@@ -86,33 +82,6 @@ public class Cloner {
 
         cloned.put( object, target );
         return (T) target;
-
-    }
-
-    public <T> T cloneSerializable( T obj ) throws UncheckedIOException {
-
-        if( obj == null ) return null;
-
-        ObjectOutputStream oos  = null;
-        ObjectInputStream ois  = null;
-
-        try {
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            oos = new ObjectOutputStream( bos );
-            oos.writeObject( obj );
-            oos.flush();
-
-            ois = new ObjectInputStream( new ByteArrayInputStream( bos.toByteArray() ) );
-
-            return (T) ois.readObject();
-
-        } catch ( IOException | ClassNotFoundException e ) {
-            throw new UncheckedIOException( e );
-        } finally {
-            try { ois.close(); } catch (Exception e) {}
-            try { oos.close(); } catch (Exception e) {}
-        }
 
     }
 
@@ -194,13 +163,13 @@ public class Cloner {
     }
 
     private Object castedSource( Object source, Object target ) {
-		Class<?> sourceClass = source.getClass();
-		Class<?> targetClass = target.getClass();
-		if( Classes.isExtendedBy(targetClass,sourceClass) || Classes.isExtendedBy(sourceClass,targetClass) ) {
-		    return source;
-		} else {
-			return Reflector.toBeanFrom( source, targetClass );
-		}
+        Class<?> sourceClass = source.getClass();
+        Class<?> targetClass = target.getClass();
+        if( Classes.isExtendedBy(targetClass,sourceClass) || Classes.isExtendedBy(sourceClass,targetClass) ) {
+            return source;
+        } else {
+            return Reflector.toBeanFrom( source, targetClass );
+        }
     }
 
 }

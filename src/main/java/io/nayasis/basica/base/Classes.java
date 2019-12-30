@@ -5,14 +5,12 @@ import io.nayasis.basica.cache.implement.LruCache;
 import io.nayasis.basica.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
-import io.nayasis.basica.file.handler.FileFinder;
 import io.nayasis.basica.validation.Validator;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
@@ -20,7 +18,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
@@ -28,12 +28,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 
 /**
@@ -85,20 +86,20 @@ public class Classes {
 
 		try {
 			return Thread.currentThread().getContextClassLoader();
+		} catch( Throwable e ) {}
+
+		// if can not access thread context
+		try {
+			return Classes.class.getClassLoader();
+		} catch( Throwable e ) {}
+
+		// if bootstrap classloader
+		try {
+			return ClassLoader.getSystemClassLoader();
 		} catch( Throwable e ) {
-			// if current callstack is under Thread, cannot access Thread Context.
+			// maybe caller can live with null.
+			return null;
 		}
-
-		ClassLoader classLoader = Classes.class.getClassLoader();
-
-		if( classLoader == null ) {
-			try {
-				classLoader = ClassLoader.getSystemClassLoader();
-			} catch( Throwable e ) {
-				// cannot access system ClassLoader.
-			}
-		}
-		return classLoader;
 
 	}
 
@@ -290,13 +291,41 @@ public class Classes {
 	}
 
 	/**
+	 * Get resource as stream
+	 *
+	 * @param url	resource URL
+	 * @return resource input stream
+	 */
+	public InputStream getResourceAsStream( URL url ) throws UncheckedIOException {
+		if( url == null ) return null;
+		try {
+			return url.openStream();
+		} catch ( IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	/**
 	 * get resource
 	 *
 	 * @param path	resource path
 	 * @return
 	 */
 	public URL getResource( String path ) {
-		return getClassLoader().getResource( refineResourceName(path) );
+		return getResource( null, path );
+	}
+
+	/**
+	 * get resource
+	 *
+	 * @param classLoader	classLoader to find
+	 * @param path	        resource path
+	 * @return resource
+	 */
+	public URL getResource( ClassLoader classLoader, String path ) {
+		if( classLoader == null )
+			classLoader = getClassLoader();
+		return classLoader.getResource( refineResourceName(path) );
 	}
 
 	/**
@@ -305,7 +334,7 @@ public class Classes {
 	 * @param name resource name
 	 * @return refined resource name
 	 */
-	private String refineResourceName( String name ) {
+	private String refineResourceName( Object name ) {
 		return Strings.nvl(name).replaceFirst( "^/", "" );
 	}
 
@@ -336,118 +365,124 @@ public class Classes {
 	 * </pre>
 	 * @return found resource names
 	 */
-	public List<String> findResources( String... pattern ) {
+	public List<URL> findResources( String... pattern ) {
 
-		Set<String> resourcesInJar        = new HashSet<>();
-		Set<String> resourcesInFileSystem = new HashSet<>();
+		Map<String,URL> fileUrls = new LinkedHashMap<>();
+		Map<String,URL> jarUrls  = new LinkedHashMap<>();
 
-		if( isRunningInJar() ) {
+		for( URL root : getRootResources() ) {
 
-			URLClassLoader urlClassLoader = (URLClassLoader) getClassLoader();
-			URL jarUrl = urlClassLoader.getURLs()[ 0 ];
+			try {
 
-			JarFile jar = getJarFile( jarUrl );
+				FileSystem fileSystem = getFileSystem( root );
 
-			Set<PathMatcher> matchers = FileFinder.toPathMacher( toJarPattern( pattern ) );
-			boolean addAll = ( matchers.size() == 0 );
+				if( "file".equals(root.getProtocol()) ) {
 
-			if( log.isTraceEnabled() ) {
-				log.trace( ">> Jar pathMatchers" );
-				for( String p : toJarPattern(pattern) ) {
-					log.trace( p );
-				}
-			}
+					Set<PathMatcher> pathMatchers = toPathMatcher( fileSystem, pattern );
 
-			log.trace( ">> entry in jar" );
-			for( JarEntry entry : Collections.list( jar.entries() ) ) {
-				if( log.isTraceEnabled() ) {
-					log.trace( entry.getName() );
-				}
-				if( addAll ) {
-					resourcesInJar.add( entry.getName() );
+					Path rootPath = Paths.get( root.toURI() );
+					Files.walk( rootPath ).forEach( path -> {
+						Path curr = rootPath.relativize( path );
+						if( match(pathMatchers, curr) ) {
+							fileUrls.putIfAbsent( "/" + Files.normalizeSeparator(curr), Files.toURL(path) );
+						};
+					});
+
 				} else {
-					Path targetPath = Paths.get( entry.getName().replaceAll( "^(BOOT|WEB)-INF/classes/", "" ) );
-					for( PathMatcher matcher : matchers ) {
-						if( matcher.matches( targetPath )) {
-							resourcesInJar.add( entry.getName() );
-							break;
+
+					Set<PathMatcher> pathMatchers = toPathMatcher( fileSystem, pattern );
+
+					Files.walk(fileSystem.getPath( "/" )).forEach( path -> {
+						if( match(pathMatchers, path) ) {
+							jarUrls.putIfAbsent( path.toString(), Files.toURL(path) );
+
 						}
-					}
+					});
+
+				}
+
+			} catch ( URISyntaxException | UncheckedIOException e ) {
+				log.error( e.getMessage(), e );
+				continue;
+			}
+		}
+
+		Map<String,URL> result = new LinkedHashMap<>();
+		result.putAll( jarUrls );
+		result.putAll( fileUrls );
+
+		return new ArrayList<>( result.values() );
+
+	}
+
+	private FileSystem getFileSystem( URL url ) throws URISyntaxException {
+		if( "file".equals(url.getProtocol()) ) {
+			return FileSystems.getDefault();
+		} else {
+			try {
+				return FileSystems.getFileSystem( url.toURI() );
+			} catch ( FileSystemNotFoundException e ) {
+				try {
+					return FileSystems.newFileSystem( url.toURI(), Collections.emptyMap() );
+				} catch ( IOException ex ) {
+					throw new UncheckedIOException( ex );
 				}
 			}
+		}
+	}
 
+	private boolean match( Collection<PathMatcher> matchers, Path path ) {
+		for( PathMatcher matcher : matchers ) {
+			if( matcher.matches(path) )
+				return true;
+		}
+		return false;
+	}
+
+	private List<URL> getRootResources() {
+		List<URL> urls = new ArrayList<>();
+		try {
+			Enumeration<URL> resources = getClassLoader().getResources( "" );
+			while( resources.hasMoreElements() ) {
+				urls.add( resources.nextElement() );
+			}
+		} catch ( IOException e ) {
+			log.error( e.getMessage(), e );
+		}
+		return urls;
+	}
+
+	private Set<PathMatcher> toPathMatcher( FileSystem fileSystem, String... patterns ) {
+
+		Set<PathMatcher> matchers = new HashSet<>();
+		boolean inFile = fileSystem == FileSystems.getDefault();
+
+		for( String pattern : new HashSet<>( Arrays.asList( patterns )) ) {
+			if( Strings.isEmpty( pattern ) ) continue;
+			if( inFile )
+				pattern = refineResourceName( pattern );
+			matchers.add( fileSystem.getPathMatcher( "glob:" + pattern ) );
 		}
 
-		if( log.isTraceEnabled() ) {
-			log.trace( "pattern         : {}", Arrays.toString(pattern) );
-			log.trace( "toFilePattern   : {}", Arrays.toString(toFilePattern(pattern)) );
-		}
-
-		List<Path> paths = Files.findFile( Files.getRootPath(), -1, toFilePattern( pattern ) );
-
-		log.trace( "paths count : {}\npaths : {}", paths.size(), paths );
-
-		for( Path path : paths ) {
-			String pathVal = Files.normalizeSeparator( path.toString() );
-			resourcesInFileSystem.add( pathVal.replace( Files.getRootPath(), "" ).replaceFirst( "^/", "" ) );
-		}
-
-		log.trace( ">> resource in jar : {}", resourcesInJar );
-		log.trace( ">> resource in file system : {}", resourcesInFileSystem );
-
-		resourcesInJar.addAll( resourcesInFileSystem );
-
-		log.trace( ">> all resource : {}", resourcesInJar );
-
-		return new ArrayList<>( resourcesInJar );
+		return matchers;
 
 	}
 
 	/**
-	 * Check if current application is running in Jar package.
+	 * Check if application is running in Jar package.
 	 *
-	 * @return true if it is running in jar.
+	 * @param klass given class to detect running in Jar or War.
+	 * @return true if given class is running in jar.
 	 */
-	public boolean isRunningInJar() {
-		URL root = getClassLoader().getResource( "" );
-		if( root == null ) return true;
-		String file = root.getFile();
-		return Validator.isMatched( root.toString(), "(?i)^(jar|war):.*$" );
+	public boolean isRunningInJar( Class klass ) {
+		URL location = getRootLocation( klass );
+		if( Validator.isMatched( location.getProtocol(), "(?i)^(jar|war)$" ) ) return true;
+		if( Validator.isMatched( Files.getExtension( location.getPath() ), "(?i)^(jar|war)$" ) ) return true;
+		return false;
 	}
 
-	private String[] toFilePattern( String[] pattern ) {
-		String[] result = new String[ pattern.length ];
-		String rootPath = Files.getRootPath();
-		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
-            result[ i ] = ( rootPath + "/" + pattern[i].replaceFirst( "^" + rootPath + "/", "" ) )
-				.replaceAll( "//", "/" )
-				.replaceAll( "(/WEB-INF/classes)+", "/WEB-INF/classes" )
-				.replaceAll( "(/BOOT-INF/classes)+", "/BOOT-INF/classes" )
-			;
-        }
-		return result;
-	}
-
-	private String[] toJarPattern( String[] pattern ) {
-		String[] result = new String[ pattern.length ];
-		for( int i = 0, iCnt = pattern.length; i < iCnt; i++ ) {
-			result[ i ] = pattern[ i ].replaceAll( "//", "/" ).replaceFirst( "^/", "" );
-        }
-		return result;
-	}
-
-	private JarFile getJarFile( URL url ) {
-		try {
-			String filePath = new File( url.toURI().getSchemeSpecificPart() ).getPath();
-			filePath = Files.normalizeSeparator( filePath )
-				.replaceFirst( "\\/(WEB-INF|BOOT-INF)\\/classes(!)?(\\/)?", "" )
-				.replaceFirst( "!$", "" )
-				.replaceFirst( "file:", "" );
-			log.trace( "jar file : {}", filePath );
-            return new JarFile( filePath );
-        } catch( IOException | URISyntaxException e ) {
-            throw new UncheckedIOException( e );
-		}
+	public URL getRootLocation( Class klass ) {
+		return klass.getProtectionDomain().getCodeSource().getLocation();
 	}
 
 }

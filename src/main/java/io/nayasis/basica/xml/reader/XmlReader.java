@@ -4,6 +4,7 @@ package io.nayasis.basica.xml.reader;
 //import org.nybatis.core.exception.unchecked.SyntaxException;
 //import org.nybatis.core.exception.unchecked.UncheckedIOException;
 
+import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.exception.unchecked.ParseException;
 import io.nayasis.basica.exception.unchecked.SyntaxException;
 import org.w3c.dom.Document;
@@ -28,6 +29,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -392,6 +394,11 @@ public class XmlReader {
     	InputStream is = new ByteArrayInputStream( xml.getBytes() );
     	return readXml( is, ignoreDtd );
     }
+
+	public Document readXml( URL url, boolean ignoreDtd ) {
+		InputStream is = Classes.getResourceAsStream( url );
+		return readXml( is, ignoreDtd );
+	}
 
 	public Document readXml( InputStream inputStream, boolean ignoreDtd ) throws ParseException, UncheckedIOException {
 

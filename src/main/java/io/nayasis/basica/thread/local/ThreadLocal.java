@@ -1,5 +1,7 @@
 package io.nayasis.basica.thread.local;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.*;
 
 /**
@@ -14,22 +16,21 @@ import java.util.*;
  * @author nayasis@gmail.com
  *
  */
-public final class ThreadLocal {
+@UtilityClass
+public class ThreadLocal {
 
-	private static ThreadLocalWatcher watcher = new ThreadLocalWatcher();
+	private ThreadLocalWatcher watcher = new ThreadLocalWatcher();
 
-	private static Map<String,Map<String,Object>> pool = new HashMap<>();
+	private Map<String,Map<String,Object>> pool = new HashMap<>();
 
-	private ThreadLocal() {}
-
-	private static Object lock = new Object();
+	private Object lock = new Object();
 
 	/**
 	 * add observer to run with when <code>{@link #clear()}</code> is called
 	 *
 	 * @param observer observer
 	 */
-	public static void addObserver( Observer observer ) {
+	public void addObserver( Observer observer ) {
 		watcher.addObserver( observer );
 	}
 
@@ -39,12 +40,12 @@ public final class ThreadLocal {
 	 * @param key key to distingush value
 	 * @return value to store
 	 */
-	public static <T> T get( String key ) {
+	public <T> T get( String key ) {
 		Object val = getThreadLocal().get( key );
 		return val == null ? null : (T) val;
 	}
 
-	private static Map<String,Object> getThreadLocal() {
+	private Map<String,Object> getThreadLocal() {
 		synchronized( lock ) {
 			if( ! pool.containsKey(ThreadRoot.getKey()) ) {
 				pool.put( ThreadRoot.getKey(), new HashMap<>() );
@@ -60,7 +61,7 @@ public final class ThreadLocal {
 	 * @param key   key to distingush value
 	 * @param value value to store
 	 */
-	public static void set( String key, Object value ) {
+	public void set( String key, Object value ) {
 		getThreadLocal().put( key, value );
 	}
 
@@ -69,7 +70,7 @@ public final class ThreadLocal {
 	 *
 	 * @param key key key to distingush value
 	 */
-	public static void remove( String key ) {
+	public void remove( String key ) {
 		getThreadLocal().remove( key );
 	}
 
@@ -79,7 +80,7 @@ public final class ThreadLocal {
 	 * @param key key to distingush value
 	 * @return true if key is exist.
 	 */
-	public static boolean containsKey( String key ) {
+	public boolean containsKey( String key ) {
 		return getThreadLocal().containsKey( key );
 	}
 
@@ -90,7 +91,7 @@ public final class ThreadLocal {
 	 * It also nofify other thread local worked in NayasisCommon library
 	 * </pre>
 	 */
-	public static void clear() {
+	public void clear() {
 		watcher.notifyObservers();
 		synchronized( lock ) {
 			pool.remove( ThreadRoot.getKey() );
@@ -104,7 +105,7 @@ public final class ThreadLocal {
 	 *
 	 * @return keys stored in thread local
 	 */
-	public static Set<String> keySet() {
+	public Set<String> keySet() {
 		return getThreadLocal().keySet();
 	}
 
@@ -113,16 +114,16 @@ public final class ThreadLocal {
 	 *
 	 * @return values stored in thread local
 	 */
-	public static Collection<Object> values() {
+	public Collection<Object> values() {
 		return getThreadLocal().values();
 	}
 
 	/**
-	 * Get static pool
+	 * Get pool
 	 *
-	 * @return static pool to store indivisual thread local ( 'Key' is the unique key to distinguish indivisual thread local. )
+	 * @return pool to store indivisual thread local ( 'Key' is the unique key to distinguish indivisual thread local. )
 	 */
-	public static Map<String,Map<String,Object>> getPool() {
+	public Map<String,Map<String,Object>> getPool() {
 		return pool;
 	}
 

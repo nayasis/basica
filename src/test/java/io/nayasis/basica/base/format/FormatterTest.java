@@ -2,8 +2,8 @@ package io.nayasis.basica.base.format;
 
 import io.nayasis.basica.model.NMap;
 import lombok.ToString;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +23,15 @@ public class FormatterTest {
         Result r3 = bind( Formatter.PATTERN_DOLLAR,"${name} PRE ${age} POST", parameter );
         Result r4 = bind( Formatter.PATTERN_DOLLAR,"${name} PRE ${age:%3d} POST", parameter );
 
-        Assert.assertEquals( "PRE ? POST",      r1.string );
-        Assert.assertEquals( "PRE ${age} POST", r2.string );
-        Assert.assertEquals( "? PRE ? POST",    r3.string );
-        Assert.assertEquals( "? PRE ? POST",    r4.string );
+        Assertions.assertEquals( "PRE ? POST",      r1.string );
+        Assertions.assertEquals( "PRE ${age} POST", r2.string );
+        Assertions.assertEquals( "? PRE ? POST",    r3.string );
+        Assertions.assertEquals( "? PRE ? POST",    r4.string );
 
-        Assert.assertEquals( "[2]",      r1.params.toString() );
-        Assert.assertEquals( "[]",       r2.params.toString() );
-        Assert.assertEquals( "[abc, 2]", r3.params.toString() );
-        Assert.assertEquals( "[abc, 2]", r4.params.toString() );
+        Assertions.assertEquals( "[2]",      r1.params.toString() );
+        Assertions.assertEquals( "[]",       r2.params.toString() );
+        Assertions.assertEquals( "[abc, 2]", r3.params.toString() );
+        Assertions.assertEquals( "[abc, 2]", r4.params.toString() );
 
     }
 
@@ -45,15 +45,15 @@ public class FormatterTest {
         Result r3 = bind( Formatter.PATTERN_SHARP,"#{name} PRE #{age} POST", parameter );
         Result r4 = bind( Formatter.PATTERN_SHARP,"#{name} PRE #{age:%3d} POST", parameter );
 
-        Assert.assertEquals( "PRE ? POST",      r1.string );
-        Assert.assertEquals( "PRE #{age} POST", r2.string );
-        Assert.assertEquals( "? PRE ? POST",    r3.string );
-        Assert.assertEquals( "? PRE ? POST",    r4.string );
+        Assertions.assertEquals( "PRE ? POST",      r1.string );
+        Assertions.assertEquals( "PRE #{age} POST", r2.string );
+        Assertions.assertEquals( "? PRE ? POST",    r3.string );
+        Assertions.assertEquals( "? PRE ? POST",    r4.string );
 
-        Assert.assertEquals( "[2]",      r1.params.toString() );
-        Assert.assertEquals( "[]",       r2.params.toString() );
-        Assert.assertEquals( "[abc, 2]", r3.params.toString() );
-        Assert.assertEquals( "[abc, 2]", r4.params.toString() );
+        Assertions.assertEquals( "[2]",      r1.params.toString() );
+        Assertions.assertEquals( "[]",       r2.params.toString() );
+        Assertions.assertEquals( "[abc, 2]", r3.params.toString() );
+        Assertions.assertEquals( "[abc, 2]", r4.params.toString() );
 
     }
 

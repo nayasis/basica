@@ -3,8 +3,8 @@ package io.nayasis.basica.base;
 import lombok.Data;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @Slf4j
 @ExtensionMethod({String.class, StringExtension.class})
@@ -13,24 +13,24 @@ public class StringExtensionTest {
     @Test
     public void main() {
 
-        Assert.assertEquals( "a", "{}".fmt("a") );
+        Assertions.assertEquals( "a", "{}".fmt("a") );
 
         String temp = null;
-        Assert.assertEquals( "", temp.fmt("a") );
-        Assert.assertEquals( "", temp.toLowerCase() );
+        Assertions.assertEquals( "", temp.fmt("a") );
+        Assertions.assertEquals( "", temp.toLowerCase() );
 
-        Assert.assertEquals( "camelCase", "camel_case".toCamel() );
-        Assert.assertEquals( "camel_case", "camelCase".toSnake() );
+        Assertions.assertEquals( "camelCase", "camel_case".toCamel() );
+        Assertions.assertEquals( "camel_case", "camelCase".toSnake() );
 
         String json = "{'a':1, 'b':2, 'c':'abcd'}";
 
-        Assert.assertEquals( 1, json.toMap().get("a") );
-        Assert.assertEquals( "abcd", json.toMap().get("c") );
-        Assert.assertEquals( "abcd", json.toBean(Bean.class).getC() );
+        Assertions.assertEquals( 1, json.toMap().get("a") );
+        Assertions.assertEquals( "abcd", json.toMap().get("c") );
+        Assertions.assertEquals( "abcd", json.toBean(Bean.class).getC() );
 
         Bean param = json.toBean(Bean.class);
 
-        Assert.assertEquals( "1 is 2 or abcd", "{a} is {b} or {c}".fmt(json.toMap()) );
+        Assertions.assertEquals( "1 is 2 or abcd", "{a} is {b} or {c}".fmt(json.toMap()) );
 
     }
 
