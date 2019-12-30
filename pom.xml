@@ -93,23 +93,6 @@
       <version>1.18.10</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.esotericsoftware</groupId>
-      <artifactId>kryo</artifactId>
-      <version>4.0.2</version>
-    </dependency>
-    <dependency>
-      <groupId>de.javakaffee</groupId>
-      <artifactId>kryo-serializers</artifactId>
-      <version>0.45</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-      <version>3.10.0</version>
-      <optional>true</optional>
-    </dependency>
 
     <!-- zip -->
     <dependency>
