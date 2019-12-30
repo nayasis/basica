@@ -5,10 +5,12 @@ import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -35,6 +37,14 @@ public class NProperties extends Properties {
 
     public NProperties load( URL url ) throws UncheckedIOException {
         return loadProperties( Files.getResourceAsStream(url) );
+    }
+
+    public NProperties load( File file ) throws UncheckedIOException {
+        return loadProperties( Files.toStream(file) );
+    }
+
+    public NProperties load( Path path ) throws UncheckedIOException {
+        return loadProperties( Files.toStream(path) );
     }
 
     private NProperties loadProperties( InputStream inputStream ) throws UncheckedIOException {

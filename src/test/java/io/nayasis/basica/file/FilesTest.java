@@ -30,7 +30,7 @@ public class FilesTest {
     @Test
     public void readFromFile() {
 
-        String path = Files.getRootPath() + "/xml/Grammer.xml";
+        String path = Files.getRootPath(getClass()) + "/xml/Grammer.xml";
 
         String txt1 = Files.readFrom( path, "UTF-8" );
         String txt2 = Files.readFrom( path );

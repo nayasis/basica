@@ -1,6 +1,5 @@
 package io.nayasis.basica.model;
 
-import io.nayasis.basica.file.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -12,9 +11,7 @@ public class NPropertiesTest {
     @Test
     public void load() {
 
-        String path = Files.getRootPath() + "/model/test.properties";
-
-        NProperties properties = new NProperties( path );
+        NProperties properties = new NProperties( "/model/test.properties" );
 
         log.debug( properties.toString() );
 
@@ -22,6 +19,5 @@ public class NPropertiesTest {
         assertEquals( "merong", properties.get("granada") );
 
     }
-
 
 }

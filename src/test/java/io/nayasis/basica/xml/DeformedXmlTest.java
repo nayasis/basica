@@ -14,7 +14,7 @@ public class DeformedXmlTest {
 	@Test
 	public void read() {
 
-		Xml xml = new XmlDeformed( new File(Files.getRootPath() + "/xml/Deformed.xml") );
+		Xml xml = new XmlDeformed( new File(Files.getRootPath(getClass()) + "/xml/Deformed.xml") );
 
 		Assertions.assertTrue( ! xml.toString().isEmpty() );
 

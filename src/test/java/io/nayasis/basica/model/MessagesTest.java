@@ -19,7 +19,7 @@ public class MessagesTest {
     @Test
     public void loadFromFile() {
 
-        String path = Files.getRootPath() + "/message/message.en.prop";
+        String path = Files.getRootPath(this.getClass()) + "/message/message.en.prop";
 
         Messages.loadFromFile( path );
 

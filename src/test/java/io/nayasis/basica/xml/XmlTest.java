@@ -1,5 +1,6 @@
 package io.nayasis.basica.xml;
 
+import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.exception.unchecked.ParseException;
 import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
@@ -19,7 +20,7 @@ public class XmlTest {
     @Test
     public void basicParse() {
 
-        Xml xml02 = new Xml( Paths.get( Files.getRootPath(), "/xml/common.xml") );
+        Xml xml02 = new Xml( Paths.get( Files.getRootPath(this.getClass()), "/xml/common.xml") );
 
         xml02.setDocType( "MERONG", "http://struts.apache.org/dtds/struts-2.0.dtd" );
 
@@ -52,7 +53,7 @@ public class XmlTest {
     @Test
     public void setDocType() {
 
-        Xml fileXmlNoError = new Xml( Paths.get( Files.getRootPath(), "/xml/common.xml") );
+        Xml fileXmlNoError = new Xml( Classes.getResource("/xml/common.xml") );
 
         fileXmlNoError.setDocType( "MERONG", "http://struts.apache.org/dtds/struts-2.0.dtd" );
 
@@ -184,7 +185,7 @@ public class XmlTest {
 
     @Test
     public void readXmlTolerantly() throws UncheckedIOException, ParseException {
-        Xml xml = new XmlDeformed( Paths.get( Files.getRootPath(), "/xml/Grammer.xml") );
+        Xml xml = new XmlDeformed( Classes.getResource( "/xml/Grammer.xml") );
         assertTrue( ! xml.toString().isEmpty() );
     }
 

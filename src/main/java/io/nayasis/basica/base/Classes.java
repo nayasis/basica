@@ -469,14 +469,20 @@ public class Classes {
 	}
 
 	/**
-	 * Check if current application is running in Jar package.
+	 * Check if application is running in Jar package.
 	 *
-	 * @return true if it is running in jar.
+	 * @param klass given class to detect running in Jar or War.
+	 * @return true if given class is running in jar.
 	 */
-	public boolean isRunningInJar() {
-		URL root = getResource( "" );
-		if( root == null ) return true;
-		return Validator.isMatched( root.getProtocol(), "^(jar|war)$" );
+	public boolean isRunningInJar( Class klass ) {
+		URL location = getRootLocation( klass );
+		if( Validator.isMatched( location.getProtocol(), "(?i)^(jar|war)$" ) ) return true;
+		if( Validator.isMatched( Files.getExtension( location.getPath() ), "(?i)^(jar|war)$" ) ) return true;
+		return false;
+	}
+
+	public URL getRootLocation( Class klass ) {
+		return klass.getProtectionDomain().getCodeSource().getLocation();
 	}
 
 }

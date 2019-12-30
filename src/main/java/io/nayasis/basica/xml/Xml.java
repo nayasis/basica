@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -102,6 +103,25 @@ public class Xml {
 	 */
 	public Xml( String xml ) throws ParseException, UncheckedIOException {
 		readFrom( xml, true );
+	}
+
+	/**
+	 * Create new document from XML string.
+	 *
+	 * @param url URL having XML contents.
+	 */
+	public Xml( URL url ) throws ParseException, UncheckedIOException {
+		readFrom( url, true );
+	}
+
+	/**
+	 * Create new document from XML string.
+	 *
+	 * @param url URL having XML contents.
+	 * @param ignoreDtd ignore XML's DTD ruleset
+	 */
+	public Xml( URL url, boolean ignoreDtd ) throws ParseException, UncheckedIOException {
+		readFrom( url, ignoreDtd );
 	}
 
 	/**
@@ -608,6 +628,19 @@ public class Xml {
     	doc = new XmlReader().readXml( xml, ignoreDtd );
     	return this;
     }
+
+	/**
+	 * Read XML from string
+	 *
+	 * @param url 		XML URL to read
+	 * @param ignoreDtd ignore DTD
+	 * @return self instance
+	 * @throws ParseException	XML parsing exception
+	 */
+	public Xml readFrom( URL url, boolean ignoreDtd ) throws ParseException {
+		doc = new XmlReader().readXml( url, ignoreDtd );
+		return this;
+	}
 
 	/**
 	 * Read XML from file
