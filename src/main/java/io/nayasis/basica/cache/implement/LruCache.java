@@ -12,8 +12,8 @@ import java.util.Set;
 /**
  * Simple LRU Cache
  *
- * @param <K>
- * @param <V>
+ * @param <K> Key type parameter
+ * @param <V> Value type parameter
  */
 public class LruCache<K,V> implements Cache<K,V>, Serializable {
 

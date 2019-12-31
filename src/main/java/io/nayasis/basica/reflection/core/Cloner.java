@@ -20,6 +20,7 @@ public class Cloner {
      * creates and returns a copy of object
      *
      * @param object 	object to clone
+     * @param <T> This is the type parameter
      * @return cloned object
      */
     public <T> T clone( T object ) {

@@ -240,6 +240,7 @@ public class Strings {
 	 *       </pre></td>
 	 *     </tr>
 	 *   </tbody>
+	 *   <caption>format method usage</caption>
 	 * </table>
 	 *
 	 * @param format format string
@@ -718,6 +719,7 @@ public class Strings {
      * decode text to object
      *
      * @param value text to decode as object
+	 * @param <T> This is the type parameter
      * @return decoded object
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
@@ -1296,8 +1298,8 @@ public class Strings {
 	}
 
 	/**
-	 * convert Throwable(or Exception) stacktrace to String
-	 * @param e
+	 * convert Throwable(Exception or Error) stacktrace to String
+	 * @param e throwable
 	 * @return stacktrace
 	 */
 	public String fromThrowable( Throwable e ) {

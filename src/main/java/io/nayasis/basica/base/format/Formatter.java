@@ -21,8 +21,9 @@ public class Formatter {
     protected static final String FORMAT_INDEX = "_{{%d}}";
 
     /**
-     * return formatted string binding parameters
+     * return binding parameters in string formatted
      *
+     * @param pattern   parameter extracting pattern
      * @param format    format string
      * @param parameter binding parameter
      * @param binder    binder containing binding logic
@@ -34,7 +35,7 @@ public class Formatter {
     }
 
     /**
-     * return formatted string binding parameters
+     * return binding parameters in string formatted
      *
      * @param pattern               parameter extracting pattern
      * @param format                format string
