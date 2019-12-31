@@ -1,5 +1,6 @@
 package io.nayasis.basica.model;
 
+import io.nayasis.basica.base.Classes;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ public class NPropertiesTest {
     @Test
     public void load() {
 
-        NProperties properties = new NProperties( "/model/test.properties" );
+        NProperties properties = new NProperties( Classes.getResource("/model/test.properties") );
 
         log.debug( properties.toString() );
 

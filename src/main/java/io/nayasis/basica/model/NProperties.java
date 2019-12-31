@@ -3,6 +3,7 @@ package io.nayasis.basica.model;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
+import lombok.NoArgsConstructor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,9 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+@NoArgsConstructor
 public class NProperties extends Properties {
-
-    public NProperties() {}
 
     public NProperties( Properties defaults ) {
         super( defaults );
@@ -31,8 +31,8 @@ public class NProperties extends Properties {
         load( url );
     }
 
-    public NProperties load( String resourcePath ) throws UncheckedIOException {
-        return loadProperties( Files.getResourceAsStream(resourcePath) );
+    public NProperties load( String filePath ) throws UncheckedIOException {
+        return loadProperties( Files.toStream(filePath) );
     }
 
     public NProperties load( URL url ) throws UncheckedIOException {
