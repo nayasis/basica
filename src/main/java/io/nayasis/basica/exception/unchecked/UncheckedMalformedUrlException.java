@@ -2,7 +2,7 @@ package io.nayasis.basica.exception.unchecked;
 
 
 /**
- * Runtime {@link #UncheckedFileNotFoundException}
+ * Runtime {@link #UncheckedMalformedUrlException}
  *
  * @author nayasis@gmail.com
  *

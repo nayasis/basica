@@ -212,6 +212,9 @@
             <goals>
               <goal>jar</goal>
             </goals>
+            <configuration>
+              <encoding>${project.build.sourceEncoding}</encoding>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -285,23 +288,6 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.4</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <encoding>${project.build.sourceEncoding}</encoding>
-                  <additionalparam>-Xdoclint:none</additionalparam>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
         </plugins>
       </build>
     </profile>
@@ -309,7 +295,7 @@
       <id>github</id>
       <properties>
         <github.global.server>github</github.global.server>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
+<!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
       </properties>
       <distributionManagement>
         <repository>

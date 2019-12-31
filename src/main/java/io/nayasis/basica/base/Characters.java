@@ -113,9 +113,9 @@ public class Characters {
 	 * resolve Hangul character to Chosung, Joongsung, Jonsung
 	 * 
      * <pre>
-     * Characters.resolveKorean( '롱' ); -> [ 'ㄹ','ㅗ','ㅇ']
-     * Characters.resolveKorean( '수' ); -> ['ㅅ','ㅜ','\0' ]
-     * Characters.resolveKorean( 'H'  ); -> null
+     * Characters.resolveKorean( '롱' ); -&gt; [ 'ㄹ','ㅗ','ㅇ']
+     * Characters.resolveKorean( '수' ); -&gt; ['ㅅ','ㅜ','\0' ]
+     * Characters.resolveKorean( 'H'  ); -&gt; null
      * </pre>
 	 * 
 	 * @param ch character to resolve
@@ -146,9 +146,9 @@ public class Characters {
 	 * check if character has Hangul Jonsung.
 	 * 
 	 * <pre>
-	 * Characters.hasHangulJongsung( 'H'  ) -> false
-	 * Characters.hasHangulJongsung( '수' ) -> false
-	 * Characters.hasHangulJongsung( '롱' ) -> true
+	 * Characters.hasHangulJongsung( 'H'  ) -&gt; false
+	 * Characters.hasHangulJongsung( '수' ) -&gt; false
+	 * Characters.hasHangulJongsung( '롱' ) -&gt; true
 	 * </pre>
 	 * 
 	 * @param ch character to check

@@ -26,7 +26,7 @@ public class Formatter {
      * @param format    format string
      * @param parameter binding parameter
      * @param binder    binder containing binding logic
-     * @param <T>
+     * @param <T> This is the type parameter
      * @return formatter string
      */
     public <T> String bindParam( ExtractPattern pattern, Object format, T parameter, ParameterBinder<T> binder ) {
@@ -36,11 +36,12 @@ public class Formatter {
     /**
      * return formatted string binding parameters
      *
+     * @param pattern               parameter extracting pattern
      * @param format                format string
      * @param parameter             binding parameter
      * @param binder                binder containing binding logic
      * @param koreanModification    flag whether modify korean JOSA characters
-     * @param <T>
+     * @param <T> This is the type parameter
      * @return formatter string
      */
     public <T> String bindParam( ExtractPattern pattern, Object format, T parameter, ParameterBinder<T> binder, boolean koreanModification ) {

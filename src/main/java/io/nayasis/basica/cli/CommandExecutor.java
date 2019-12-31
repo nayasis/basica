@@ -86,7 +86,8 @@ public class CommandExecutor {
 	/**
 	 * run command
 	 *
-	 * @param command command to execute
+	 * @param command 		command to execute
+	 * @param lineReader	line reader
 	 * @return self instance
 	 */
 	public CommandExecutor run( Command command, LineReader lineReader ) throws CommandLineException {

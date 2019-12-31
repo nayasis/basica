@@ -108,6 +108,7 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
      * Get value by json path
      *
      * @param jsonPath json path
+     * @param <T> This is the type parameter
      * @see <a href="https://github.com/jayway/JsonPath">json path example</a>
      * @return value(s) extracted by json path
      */
