@@ -37,7 +37,8 @@ public class ThreadLocal {
 	/**
 	 * Get value by key
 	 *
-	 * @param key key to distingush value
+	 * @param key key to distinguish value
+	 * @param <T> This is the type parameter
 	 * @return value to store
 	 */
 	public <T> T get( String key ) {

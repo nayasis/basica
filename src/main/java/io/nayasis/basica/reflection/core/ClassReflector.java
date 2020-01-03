@@ -50,7 +50,7 @@ public class ClassReflector {
      *
      * @param target    target instance
      * @param field     target field
-     * @param <T>
+     * @param <T> This is the type parameter
      * @return  field's value
      */
     public <T> T getValue( Object target, Field field ) throws UncheckedIllegalAccessException {
@@ -74,7 +74,7 @@ public class ClassReflector {
      *
      * @param target    target instance
      * @param field     target field
-     * @param <T>
+     * @param <T> This is the type parameter
      * @return  field's value
      */
     public <T> T getValue( Object target, String field ) throws UncheckedIllegalAccessException {
@@ -179,7 +179,7 @@ public class ClassReflector {
      *
      * @param target    object to extract fields
      * @param regex     regexp to filter fields by name.
-     * @return
+     * @return field set
      */
     public Set<Field> getFields( Object target, String regex ) {
         if( target == null ) return new HashSet<>();
@@ -191,7 +191,7 @@ public class ClassReflector {
      *
      * @param klass class to extract fields
      * @param regex regexp to filter fields by name.
-     * @return
+     * @return field set
      */
     public Set<Field> getFields( Class klass, String regex ) {
         if( Strings.isEmpty(regex) ) return new HashSet<>();

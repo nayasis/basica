@@ -42,7 +42,7 @@ public class Command {
 	 *
 	 * <pre>
 	 *   addQuote( "mailto:google@gmail.com" );
-	 *     -> stored as "\"mailto:google@gmail.com\"".
+	 *     -&gt; stored as "\"mailto:google@gmail.com\"".
 	 * </pre>
 	 * @param command	command
 	 * @return self instance

@@ -1,19 +1,13 @@
 package io.nayasis.basica.cli;
 
-import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
-import com.googlecode.lanterna.terminal.Terminal;
-import io.nayasis.basica.etc.Platforms;
 import io.nayasis.basica.exception.unchecked.CommandLineException;
 import io.nayasis.basica.file.Files;
 import io.nayasis.basica.file.worker.LineReader;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -186,28 +180,6 @@ public class WindowsCommandExecutorTest {
         executor.waitFor();
 
         log.debug( "Done !!\n{}", output );
-
-    }
-
-    @Test
-    public void createLanternaTerminal() throws IOException {
-
-        Terminal terminal = new DefaultTerminalFactory( System.out, System.in, Charset.forName( Platforms.osCharset) ).createTerminal();
-
-        terminal.enterPrivateMode();
-
-        terminal.setCursorPosition( 10, 5 );
-        terminal.putCharacter( 'H' );
-        terminal.putCharacter( 'e' );
-        terminal.putCharacter( 'l' );
-        terminal.putCharacter( 'l' );
-        terminal.putCharacter( 'o' );
-        terminal.putCharacter( '!' );
-
-        terminal.flush();
-
-//        terminal.exitPrivateMode();
-
 
     }
 

@@ -1,11 +1,11 @@
 package io.nayasis.basica.cipher;
 
+import io.nayasis.basica.validation.Assert;
 import io.nayasis.basica.validation.Validator;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.exception.unchecked.DecodingException;
 import io.nayasis.basica.exception.unchecked.EncodingException;
 import io.nayasis.basica.exception.unchecked.NoSuchAlgorithmException;
-import org.springframework.util.Assert;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -72,7 +72,7 @@ public class Encrypter {
      * @return encrypted value
      */
     public String encrypt( String value ) {
-        Assert.notNull( defaultSecretKey, "default secret key is missing.");
+        Assert.isNotNull( defaultSecretKey, "default secret key is missing.");
         return encrypt( value, defaultSecretKey );
     }
 
@@ -115,7 +115,7 @@ public class Encrypter {
      * @return  decrypted value
      */
     public String decrypt( String value ) {
-        Assert.notNull( defaultSecretKey, "default secret key is missing.");
+        Assert.isNotNull( defaultSecretKey, "default secret key is missing.");
         return decrypt( value, defaultSecretKey );
     }
 

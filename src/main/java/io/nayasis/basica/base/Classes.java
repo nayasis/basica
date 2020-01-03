@@ -309,7 +309,7 @@ public class Classes {
 	 * get resource
 	 *
 	 * @param path	resource path
-	 * @return
+	 * @return resource URL
 	 */
 	public URL getResource( String path ) {
 		return getResource( null, path );
@@ -320,7 +320,7 @@ public class Classes {
 	 *
 	 * @param classLoader	classLoader to find
 	 * @param path	        resource path
-	 * @return resource
+	 * @return resource URL
 	 */
 	public URL getResource( ClassLoader classLoader, String path ) {
 		if( classLoader == null )

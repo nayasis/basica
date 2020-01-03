@@ -206,38 +206,41 @@ public class Strings {
 	 * <p>Format</p>
 	 * <table>
 	 *   <thead>
-	 *      <th>Markup</th>
-	 *      <th>Description</th>
-	 *      <th>Example</th>
+	 *     <tr>
+	 *       <th>Markup</th>
+	 *       <th>Description</th>
+	 *       <th>Example</th>
+	 *     </tr>
 	 *   </thead>
 	 *   <tbody>
 	 *     <tr>
 	 *       <th>{}</th><td>index based</td>
 	 *       <td><pre>
-	 *         Strings.format("{}st, {}nd", 1, 2) -> "1st, 2nd"
+	 *         Strings.format("{}st, {}nd", 1, 2) -&gt; "1st, 2nd"
 	 *       </pre></td>
 	 *     </tr>
 	 *     <tr>
 	 *       <th>{key}</th><td>parameter based</td>
 	 *       <td><pre>
 	 *         NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
-	 *         Strings.format( "PRE {name} POST {age}", parameter ) -> "PRE abc POST 2"
+	 *         Strings.format( "PRE {name} POST {age}", parameter ) -&gt; "PRE abc POST 2"
 	 *       </pre></td>
 	 *     </tr>
 	 *     <tr>
 	 *       <th>{key:format}</th><td>parameter based with format</td>
 	 *       <td><pre>
 	 *         NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
-	 *         Strings.format( "PRE {name} POST {age:%3d}", parameter ) -> "PRE abc POST __2"
+	 *         Strings.format( "PRE {name} POST {age:%3d}", parameter ) -&gt; "PRE abc POST __2"
 	 *       </pre></td>
 	 *     </tr>
 	 *     <tr>
 	 *       <th>{:format}</th><td>index based with format</td>
 	 *       <td><pre>
-	 *         Strings.format("{}st, {:%3d}nd", 1, 2) -> "1st, __2nd"
+	 *         Strings.format("{}st, {:%3d}nd", 1, 2) -&gt; "1st, __2nd"
 	 *       </pre></td>
 	 *     </tr>
 	 *   </tbody>
+	 *   <caption>format method usage</caption>
 	 * </table>
 	 *
 	 * @param format format string
@@ -252,7 +255,7 @@ public class Strings {
      * return left padded string.
      *
      * <pre>
-     * {@link Strings#lpad}("AAAAAA", 'Z', 10) ) -> "ZZZZAAAAAA"
+     * {@link Strings#lpad}("AAAAAA", 'Z', 10) ) -&gt; "ZZZZAAAAAA"
      * </pre>
      *
      * @param value    	original value
@@ -285,7 +288,7 @@ public class Strings {
      * return right padded string.
      *
      * <pre>
-     * {@link Strings#rpad}("AAAAAA", 'Z', 10) ) -> "AAAAAAZZZZ"
+     * {@link Strings#rpad}("AAAAAA", 'Z', 10) ) -&gt; "AAAAAAZZZZ"
      * </pre>
      *
 	 * @param value    	original value
@@ -339,7 +342,7 @@ public class Strings {
 	 *
      * <pre>
      * String text = Strings.toCamel( "unicode_text" );
-     * System.out.println( text ); -> "unicodeText""
+     * System.out.println( text ); -&gt; "unicodeText""
      * </pre>
      * @param text   text to convert
      * @return camel cased text
@@ -503,7 +506,7 @@ public class Strings {
      * <pre>
      * List&lt;String&gt; collection = Arrays.asList( "a", "b", null, "c" );
      * Strings.join( collection, "," );
-     * -> "a,b,c"
+     * -&gt; "a,b,c"
      * </pre>
      *
      * @param collection 	collection to join
@@ -645,11 +648,11 @@ public class Strings {
      * Compress multiple space to single space
      *
      * <pre>
-     * {@link Strings#compressSpace}( "A     B" ); -> "A B"
-     * {@link Strings#compressSpace}( "A    B" );  -> "A B"
-     * {@link Strings#compressSpace}( "A   B" );   -> "A B"
-     * {@link Strings#compressSpace}( "A  B" );    -> "A B"
-     * {@link Strings#compressSpace}( "A B" );     -> "A B"
+     * {@link Strings#compressSpace}( "A     B" ); -&gt; "A B"
+     * {@link Strings#compressSpace}( "A    B" );  -&gt; "A B"
+     * {@link Strings#compressSpace}( "A   B" );   -&gt; "A B"
+     * {@link Strings#compressSpace}( "A  B" );    -&gt; "A B"
+     * {@link Strings#compressSpace}( "A B" );     -&gt; "A B"
      * </pre>
      *
      * @param value text value
@@ -664,9 +667,9 @@ public class Strings {
 	 * Compress multiple space or enter to single space
 	 *
 	 * <pre>
-	 * {@link Strings#compressBlank}( "A     B" );   -> "A B"
-	 * {@link Strings#compressBlank}( "A B" );       -> "A B"
-	 * {@link Strings#compressBlank}( "A \n\n B" );  -> "A B"
+	 * {@link Strings#compressBlank}( "A     B" );   -&gt; "A B"
+	 * {@link Strings#compressBlank}( "A B" );       -&gt; "A B"
+	 * {@link Strings#compressBlank}( "A \n\n B" );  -&gt; "A B"
 	 * </pre>
 	 *
 	 * @param value text value
@@ -681,7 +684,7 @@ public class Strings {
 	 * Compress multiple enter to single enter
 	 *
 	 * <pre>
-	 * {@link Strings#compressEnter}( "A\n\n\nB" );  -> "A\nB"
+	 * {@link Strings#compressEnter}( "A\n\n\nB" );  -&gt; "A\nB"
 	 * </pre>
 	 *
 	 * @param value text value
@@ -716,6 +719,7 @@ public class Strings {
      * decode text to object
      *
      * @param value text to decode as object
+	 * @param <T> This is the type parameter
      * @return decoded object
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
@@ -826,9 +830,9 @@ public class Strings {
 	 * compare string like DBMS's LIKE.
 	 *
 	 * <pre>
-	 * {@link Strings#like}( "ABCDEFG", "%BCD%"   ) -> true
-	 * {@link Strings#like}( "ABCDEFG", "%BCD_F%" ) -> true
-	 * {@link Strings#like}( "AB_DEFG", "AB.DEFG" ) -> false
+	 * {@link Strings#like}( "ABCDEFG", "%BCD%"   ) -&gt; true
+	 * {@link Strings#like}( "ABCDEFG", "%BCD_F%" ) -&gt; true
+	 * {@link Strings#like}( "AB_DEFG", "AB.DEFG" ) -&gt; false
 	 * </pre>
 	 *
 	 * @param value   string to compare
@@ -886,9 +890,9 @@ public class Strings {
 	 * compare string like DBMS's <b>NOT LIKE</b>.
 	 *
 	 * <pre>
-	 * {@link Strings#notLike}( "ABCDEFG", "%BCD%"   ) -> false
-	 * {@link Strings#notLike}( "ABCDEFG", "%BCD_F%" ) -> false
-	 * {@link Strings#notLike}( "AB_DEFG", "AB.DEFG" ) -> true
+	 * {@link Strings#notLike}( "ABCDEFG", "%BCD%"   ) -&gt; false
+	 * {@link Strings#notLike}( "ABCDEFG", "%BCD_F%" ) -&gt; false
+	 * {@link Strings#notLike}( "AB_DEFG", "AB.DEFG" ) -&gt; true
 	 *
 	 *  </pre>
 	 *
@@ -928,12 +932,12 @@ public class Strings {
 	 *
 	 *  String pattern = "#\\{(.+?)}";
 	 *  List&lt;String&gt; finded = Strings.capture( "/admkr#{AAAA}note#{BBBB}ananan#{AAAA}sss", pattern );
-	 *  System.out.println( finded ); -> ['AAAA','BBBB', 'AAAA']
+	 *  System.out.println( finded ); -&gt; ['AAAA','BBBB', 'AAAA']
 	 *
 	 *  ----------------------------------------------------------------
 	 *
-	 *  Strings.capturePatterns( "1.2.3.4", "\\." )   -> []
-	 *  Strings.capturePatterns( "1.2.3.4", "(\\.)" ) -> ['.', '.', '.']
+	 *  Strings.capturePatterns( "1.2.3.4", "\\." )   -&gt; []
+	 *  Strings.capturePatterns( "1.2.3.4", "(\\.)" ) -&gt; ['.', '.', '.']
 	 *
 	 * </pre>
 	 *
@@ -953,12 +957,12 @@ public class Strings {
 	 *
 	 *  String pattern = "#\\{(.+?)}";
 	 *  List&lt;String&gt; finded = Strings.capture( "/admkr#{AAAA}note#{BBBB}ananan#{AAAA}sss", pattern );
-	 *  System.out.println( finded ); -> ['AAAA','BBBB', 'AAAA']
+	 *  System.out.println( finded ); -&gt; ['AAAA','BBBB', 'AAAA']
 	 *
 	 *  ----------------------------------------------------------------
 	 *
-	 *  Strings.capturePatterns( "1.2.3.4", "\\." )   -> []
-	 *  Strings.capturePatterns( "1.2.3.4", "(\\.)" ) -> ['.', '.', '.']
+	 *  Strings.capturePatterns( "1.2.3.4", "\\." )   -&gt; []
+	 *  Strings.capturePatterns( "1.2.3.4", "(\\.)" ) -&gt; ['.', '.', '.']
 	 *
 	 * </pre>
 	 *
@@ -1294,8 +1298,8 @@ public class Strings {
 	}
 
 	/**
-	 * convert Throwable(or Exception) stacktrace to String
-	 * @param e
+	 * convert Throwable(Exception or Error) stacktrace to String
+	 * @param e throwable
 	 * @return stacktrace
 	 */
 	public String fromThrowable( Throwable e ) {
