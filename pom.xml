@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.3.1</version>
+  <version>0.3.1-SNAPSHOT</version>
   <name>basica</name>
   <description>
     basic utility components
@@ -35,13 +35,6 @@
     <system>GitHub Issue Management</system>
     <url>https://github.com/nayasis/basica/issues</url>
   </issueManagement>
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub OWNER Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/nayasis/basica</url>
-    </repository>
-  </distributionManagement>
 
   <properties>
     <java.version>1.8</java.version>
@@ -203,5 +196,60 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>github</id>
+      <distributionManagement>
+        <repository>
+          <id>github</id>
+          <name>GitHub OWNER Apache Maven Packages</name>
+          <url>https://maven.pkg.github.com/nayasis/basica</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <id>github-private</id>
+      <properties>
+        <github.global.server>github-private</github.global.server>
+      </properties>
+      <distributionManagement>
+        <repository>
+          <id>internal.repo</id>
+          <name>Temporary Staging Repository</name>
+          <url>file://${project.build.directory}/mvn-repo</url>
+        </repository>
+      </distributionManagement>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.github.github</groupId>
+            <artifactId>site-maven-plugin</artifactId>
+            <version>0.12</version>
+            <configuration>
+              <merge>true</merge>
+              <includes>
+                <include>**/*</include>
+              </includes>
+              <message>${project.version}</message>                                  <!-- git commit message -->
+              <noJekyll>true</noJekyll>                                              <!-- disable webpage processing -->
+              <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
+              <branch>refs/heads/master</branch>                                     <!-- remote branch name -->
+              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repository name -->
+              <repositoryOwner>nayasis</repositoryOwner>                             <!-- github username  -->
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>site</goal>
+                </goals>
+                <phase>deploy</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
