@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.3.0</version>
   <name>basica</name>
   <description>
     basic utility components
@@ -35,6 +35,13 @@
     <system>GitHub Issue Management</system>
     <url>https://github.com/nayasis/basica/issues</url>
   </issueManagement>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub OWNER Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/nayasis/basica</url>
+    </repository>
+  </distributionManagement>
 
   <properties>
     <java.version>1.8</java.version>
@@ -43,13 +50,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>private</id>
-      <url>https://github.com/nayasis/UnofficialMavenRepository/raw/master/</url>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
@@ -167,13 +167,6 @@
             <goals>
               <goal>jar</goal>
             </goals>
-            <configuration>
-              <archive combine.children="append">
-                <manifestEntries>
-                  <Automatic-Module-Name>io.nayasis.basica</Automatic-Module-Name>
-                </manifestEntries>
-              </archive>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -210,106 +203,5 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>central</id>
-      <distributionManagement>
-        <snapshotRepository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-          <id>ossrh</id>
-          <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-      </distributionManagement>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.7</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>github</id>
-      <properties>
-        <github.global.server>github</github.global.server>
-<!--        <maven.javadoc.skip>true</maven.javadoc.skip>-->
-      </properties>
-      <distributionManagement>
-        <repository>
-          <id>internal.repo</id>
-          <name>Temporary Staging Repository</name>
-          <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
-      </distributionManagement>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.github.github</groupId>
-            <artifactId>site-maven-plugin</artifactId>
-            <version>0.12</version>
-            <configuration>
-              <merge>true</merge>
-              <includes>
-                <include>**/*</include>
-              </includes>
-              <message>${project.version}</message>                                  <!-- git commit message -->
-              <noJekyll>true</noJekyll>                                              <!-- disable webpage processing -->
-              <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-              <branch>refs/heads/master</branch>                                     <!-- remote branch name -->
-              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repository name -->
-              <repositoryOwner>nayasis</repositoryOwner>                             <!-- github username  -->
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>site</goal>
-                </goals>
-                <phase>deploy</phase>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>
