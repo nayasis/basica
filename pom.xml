@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.nayasis.common</groupId>
+  <groupId>io.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.2.2-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
   <name>basica</name>
   <description>
     basic utility components
@@ -115,25 +115,6 @@
       <version>2.6.12</version>
       <optional>true</optional>
     </dependency>
-    <!-- spring -->
-    <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-jpa</artifactId>
-      <version>2.1.5.RELEASE</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>javax.persistence</groupId>
-      <artifactId>javax.persistence-api</artifactId>
-      <version>2.2</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-commons</artifactId>
-      <version>2.1.10.RELEASE</version>
-      <scope>compile</scope>
-    </dependency>
 
     <!-- test -->
     <dependency>
@@ -155,17 +136,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.lanterna</groupId>
-      <artifactId>lanterna</artifactId>
-      <version>3.0.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.8.6</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
