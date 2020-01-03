@@ -10,6 +10,6 @@ basic utility components
 <dependency>
   <groupId>io.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.3.0</version>
+  <version>0.3.1</version>
 </dependency>
 ```
