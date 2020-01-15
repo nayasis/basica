@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapLikeType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.validation.Validator;
 import io.nayasis.basica.base.Types;
 import io.nayasis.basica.exception.unchecked.JsonMappingException;
@@ -188,7 +189,7 @@ public class JsonConverter {
     private void makeKeyUnflatten( String jsonPath, Object value, Map result ) {
 
         String path  = jsonPath.replaceFirst( "\\[.*\\]", "" ).replaceFirst( "\\..*?$", "" );
-        String index = jsonPath.replaceFirst(  "^(" + path + ")\\[(.*?)\\](.*?)$", "$2" );
+        String index = jsonPath.replaceFirst(  "^(" + Strings.escapeRegexp(path) + ")\\[(.*?)\\](.*?)$", "$2" );
 
         if( index.equals( jsonPath ) ) index = "";
 
