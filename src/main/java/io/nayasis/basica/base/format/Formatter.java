@@ -152,17 +152,18 @@ public class Formatter {
 
     private Map toParam( Object ... parameters ) {
 
+        Map params = new HashMap();
+
         if( parameters.length == 1 ) {
             if ( Types.isMap(parameters[0]) ) {
-                return (Map) parameters[0];
+                params.putAll( (Map) parameters[0] );
             } else if ( ! Types.isImmutable(parameters[0]) ) {
                 try {
-                    return Reflector.toMapFrom(parameters[0]);
+                    params.putAll( Reflector.toMapFrom(parameters[0]) );
                 } catch ( Exception e ) {}
             }
         }
 
-        Map params = new HashMap();
         int index = 0;
         for( Object param : parameters ) {
             params.put( String.format(FORMAT_INDEX, index++), param );

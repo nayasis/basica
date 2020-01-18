@@ -37,6 +37,8 @@ public class StringsTest {
 
         String json = "{'a':1, 'b':2, 'c':'abcd'}";
         Bean param = Reflector.toBeanFrom(json, Bean.class);
+
+        assertEquals( "Bean(a=1, b=2, c=abcd)", Strings.format("{}", param) );
         assertEquals( "1 is 2 or abcd", Strings.format("{a} is {b} or {c}", param) );
 
         @Data
