@@ -42,6 +42,28 @@ public class FilesTest {
     }
 
     @Test
+    public void writeFile() {
+
+        String tempFile = Files.getUserHome() + "/" + getClass().getName();
+
+        try {
+
+            Files.writeTo( tempFile, writer -> {
+                writer.write( "merong-" );
+                writer.write( "nayasis" );
+            });
+
+            String written = Files.readFrom( tempFile );
+
+            assertEquals( "merong-nayasis", written.trim() );
+
+        } finally {
+            Files.delete( tempFile );
+        }
+
+    }
+
+    @Test
     public void normalizeSeparator() {
 
         assertEquals( "a", Files.normalizeSeparator( "a\\" ) );
