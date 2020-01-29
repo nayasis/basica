@@ -511,22 +511,40 @@ public class Strings {
      *
      * @param collection 	collection to join
      * @param concater 		concatenation string
+     * @param skipEmpty 	skip empty entry
      * @return joined text
      */
-    public String join( Collection<?> collection, String concater ) {
+    public String join( Collection<?> collection, String concater, boolean skipEmpty ) {
 
     	if( collection == null || collection.size() == 0 ) return "";
 
     	StringBuilder sb = new StringBuilder();
 
     	for( Object e : collection ) {
-    		if( isEmpty(e) ) continue;
+    		if( skipEmpty && isEmpty(e) ) continue;
     		if( sb.length() > 0 ) sb.append( concater );
-    		sb.append( e.toString() );
+    		sb.append( e == null ? null : e.toString() );
     	}
     	return sb.toString();
 
     }
+
+	/**
+	 * Join collection's element to single string.
+	 *
+	 * <pre>
+	 * List&lt;String&gt; collection = Arrays.asList( "a", "b", null, "c" );
+	 * Strings.join( collection, "," );
+	 * -&gt; "a,b,c"
+	 * </pre>
+	 *
+	 * @param collection 	collection to join
+	 * @param concater 		concatenation string
+	 * @return joined text
+	 */
+	public String join( Collection<?> collection, String concater ) {
+		return join( collection, concater, true );
+	}
 
 	/**
 	 * Split string around matches of the given <a href="../util/regex/Pattern.html#sum">regular expression</a>.
