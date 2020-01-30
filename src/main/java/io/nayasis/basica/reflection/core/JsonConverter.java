@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,10 +139,12 @@ public class JsonConverter {
             for( String key : map.keySet() ) {
                 makeKeyFlatten( prefix + key, map.get( key ), result );
             }
-        } else if( json instanceof List ) {
-            List list = (List) json;
-            for( int i = 0, iCnt = list.size(); i < iCnt; i++ ) {
-                makeKeyFlatten( String.format( "%s[%d]", currentPath, i ), list.get( i ), result );
+        } else if( json instanceof Collection ) {
+            Iterator iterator = ((Collection) json).iterator();
+            int i = 0;
+            while( iterator.hasNext() ) {
+                Object e = iterator.next();
+                makeKeyFlatten( String.format( "%s[%d]", currentPath, i++ ), e, result );
             }
         } else {
             result.put( currentPath, json );
