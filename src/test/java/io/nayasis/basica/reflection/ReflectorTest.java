@@ -112,6 +112,36 @@ public class ReflectorTest {
     }
 
     @Test
+    public void toMap() {
+
+        Person p1 = new Person().name("nayasis").birth(new NDate("1977-01-22") );
+        Person p2 = new Person().name("jake").birth(new NDate("2011-04-25") );
+
+        Account account = new Account().address("seoul").age(40).balance(new BigDecimal(1_000));
+
+        p1.children().add( p2 );
+        p1.account( account );
+
+        Map map = Reflector.toMapFrom( p1 );
+
+        assertTrue( map.containsKey("name") );
+        assertTrue( map.containsKey("birth") );
+        assertTrue( map.containsKey("children") );
+        assertTrue( map.containsKey("account") );
+
+        Map map2 = Reflector.toFlattenMap( map );
+
+        assertTrue( map2.containsKey("name") );
+        assertTrue( map2.containsKey("birth") );
+        assertTrue( map2.containsKey("children[0].birth") );
+        assertTrue( map2.containsKey("children[0].name") );
+        assertTrue( map2.containsKey("account.address") );
+        assertTrue( map2.containsKey("account.age") );
+        assertTrue( map2.containsKey("account.balance") );
+
+    }
+
+    @Test
     public void copyPrimitiveArray() {
 
         int[] source = { 1,2,3,4 };
@@ -268,9 +298,10 @@ public class ReflectorTest {
     @Accessors(fluent=true)
     static class Person {
 
-        private String name;
-        private NDate  birth;
+        private String       name;
+        private NDate        birth;
         private List<Person> children = new ArrayList<>();
+        private Account      account;
 
         public int hashCode() {
             return (int)(name.hashCode() + birth.toTime() + children.size() );
