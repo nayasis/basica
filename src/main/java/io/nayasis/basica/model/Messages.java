@@ -124,6 +124,8 @@ public class Messages {
             if( ! messages.containsKey(localeKey) ) {
                 if( ! messages.containsKey( NULL_LOCALE ) ) {
                     localeKey = messages.keySet().iterator().next();
+                } else {
+                    localeKey = NULL_LOCALE;
                 }
             }
         }
