@@ -142,7 +142,7 @@ public class Messages {
     public void loadFromResource( String resourcePath ) throws UncheckedIOException {
         if( Strings.isEmpty(resourcePath) ) return;
         Classes.findResources(resourcePath).forEach( url -> {
-            loadPool( url );
+            loadFromURL( url );
         });
     }
 
@@ -155,10 +155,17 @@ public class Messages {
      */
     public void loadFromFile( String filePath ) throws UncheckedIOException {
         if( Strings.isEmpty(filePath) ) return;
-        loadPool( Files.toURL(filePath) );
+        loadFromURL( Files.toURL(filePath) );
     }
 
-    public void loadPool( URL url ) throws UncheckedIOException {
+    /**
+     *
+     * load message file to memory
+     *
+     * @param url URL path of message resource
+     * @throws UncheckedIOException  if I/O exception occurs.
+     */
+    public void loadFromURL( URL url ) throws UncheckedIOException {
         Locale locale = getLocaleFrom( url );
         NProperties properties = new NProperties( url );
         for( Object key : properties.keySet() ) {
