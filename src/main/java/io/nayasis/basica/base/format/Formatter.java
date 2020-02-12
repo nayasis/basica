@@ -134,6 +134,11 @@ public class Formatter {
 
     public String format( Object format, Object... parameter ) {
 
+        // when null parameter inputted
+        if( parameter == null ) {
+            parameter = new Object[] { null };
+        }
+
         if( parameter.length == 0 ) return Strings.nvl( format );
 
         return bindParam( PATTERN_BASIC, format, toParam(parameter), (key, userFormat, param) -> {

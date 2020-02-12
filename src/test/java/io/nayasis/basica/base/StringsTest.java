@@ -33,6 +33,11 @@ public class StringsTest {
     }
 
     @Test
+    public void formatAllowNullParameter() {
+        assertEquals( "badCredentials", Strings.format("badCredentials", null) );
+    }
+
+    @Test
     public void formatFromBean() {
 
         String json = "{'a':1, 'b':2, 'c':'abcd'}";
