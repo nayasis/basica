@@ -1,15 +1,24 @@
 package io.nayasis.basica.file.handler.implement;
 
-import io.nayasis.basica.exception.unchecked.UncheckedIOException;
-import io.nayasis.basica.model.NList;
-import io.nayasis.basica.model.NMap;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.base.Types;
+import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.handler.ExcelHandler;
+import io.nayasis.basica.model.NList;
+import io.nayasis.basica.model.NMap;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.format.CellDateFormatter;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
@@ -19,7 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined.GREY_40_PERCENT;
-import static org.apache.poi.ss.usermodel.CellType.*;
+import static org.apache.poi.ss.usermodel.CellType.BOOLEAN;
+import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
 
 public class ExcelHandlerApachePoi extends ExcelHandler {
 
@@ -155,26 +165,27 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 		NList result = new NList();
 
 		Sheet sheet = workbook.getSheetAt( sheetIndex );
-
 		if( sheet == null ) return result;
 
-		NMap header = getExcelColumnHeader( sheet );
+		Header header = getColumnHeader( sheet );
 
-		if( header.size() == 0 ) return result;
+		if( header.isEmpty() ) return result;
+
+		result.addKey( header.body.values() );
 
 		FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
-		for( int idxRow = 1, maxRowCnt = sheet.getPhysicalNumberOfRows(); idxRow < maxRowCnt; idxRow++ ) {
+		for( int idxRow = header.nameHeader ? 1 : 0, maxRowCnt = sheet.getPhysicalNumberOfRows(); idxRow < maxRowCnt; idxRow++ ) {
 
 			Row  row  = sheet.getRow( idxRow );
 			NMap data = new NMap();
 
-			for( int idxColumn = 0, maxColumnCnt = header.size(); idxColumn < maxColumnCnt; idxColumn++ ) {
+			for( int idxColumn = 0, maxColumnCnt = header.body.size(); idxColumn < maxColumnCnt; idxColumn++ ) {
 
 				Cell cell = row.getCell( idxColumn );
 				if( cell == null ) continue;
 
-				String key = Strings.nvl( header.get(idxColumn) );
+				String key = Strings.nvl( header.body.get(idxColumn) );
 				data.put( key, getValue(cell, evaluator) );
 
 			}
@@ -213,11 +224,11 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 
 	}
 
-	private NMap getExcelColumnHeader( Sheet sheet ) {
+	private Header getColumnHeader( Sheet sheet ) {
 
-    	NMap result = new NMap();
+		if( sheet == null || sheet.getPhysicalNumberOfRows() == 0 ) return null;
 
-    	if( sheet == null || sheet.getPhysicalNumberOfRows() == 0 ) return result;
+		Header header = new Header();
 
     	Row row = sheet.getRow( 0 );
 
@@ -225,12 +236,19 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 			throw new IllegalArgumentException( String.format("No header in sheet(%s).", sheet.getSheetName()) );
 		}
 
-    	for( int i = 0, iCnt = row.getPhysicalNumberOfCells(); i < iCnt; i++ ) {
-    		Cell cell = row.getCell( i );
-    		result.put( i, cell.getStringCellValue() );
-    	}
+		try {
+			for( int i = 0, iCnt = row.getPhysicalNumberOfCells(); i < iCnt; i++ ) {
+				Cell cell = row.getCell( i );
+				header.body.put( i, cell.getStringCellValue() );
+			}
+		} catch ( NullPointerException e ) {
+			for( int i = 0, iCnt = row.getPhysicalNumberOfCells(); i < iCnt; i++ ) {
+				header.body.put( i, Strings.nvl(i) );
+			}
+			header.nameHeader = false;
+		}
 
-    	return result;
+		return header;
 
     }
 
@@ -276,5 +294,16 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
         return DateUtil.isADateFormat( formatIndex, format) ;
 
     }
+
+    private class Header {
+
+		private NMap    body       = new NMap();
+		private boolean nameHeader = true;
+
+		private boolean isEmpty() {
+			return body.isEmpty();
+		}
+
+	}
 
 }
