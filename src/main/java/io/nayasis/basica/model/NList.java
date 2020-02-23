@@ -166,11 +166,17 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     public NList addKey( Object... key ) {
         for( Object val : key ) {
         	if( ! containsKey( val ) ) {
-        		header.put( val, 0 );
+        		this.header.put( val, new Integer(0) );
         	}
         }
         return this;
+    }
 
+    public NList addKey( Collection keys ) {
+        if( Validator.isNotEmpty(keys) ) {
+            keys.forEach( key -> addKey(key) );
+        }
+        return this;
     }
 
     /**
