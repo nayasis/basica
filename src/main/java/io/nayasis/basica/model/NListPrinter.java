@@ -12,6 +12,7 @@ import java.util.Map;
 public class NListPrinter {
 
     private static final int     LIMIT_CNT_toString = 5_000;
+    private static final int     MAX_COLUMN_LENGTH  = 100;
     private static final String  NEW_LINE           = "-------------------------------------------------------------";
 
     private NList nlist = null;
@@ -43,7 +44,7 @@ public class NListPrinter {
 
         }
 
-        Map<Object, Integer> columnWidthList = getColumnWidth();
+        Map<Object,Integer> columnWidthList = getColumnWidth();
 
         String newLine = getNewLine( columnWidthList );
 
@@ -142,25 +143,33 @@ public class NListPrinter {
 
         Object val = nlist.get(key, i);
 
-        if( val instanceof Map ) {
+        if( val == null ) {
+            return val;
+        } else if( val instanceof Map ) {
             if( ((Map) val ).isEmpty() ) return "{-}";
         }
 
-        return nlist.get(key, i);
+        String txt = val.toString().replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
+        while( Strings.getDisplayLength(txt) > MAX_COLUMN_LENGTH ) {
+            txt = txt.substring( 0, txt.length() - 1 );
+        }
+        return txt;
+
     }
 
-    private String getNewLine( Map<Object, Integer> columnWidthList ) {
+    private String getNewLine( Map<Object,Integer> columnsWidth ) {
 
         StringBuffer sb = new StringBuffer();
+        sb.append( '+' );
 
-        for( Object key : columnWidthList.keySet() ) {
-            for( int i = 0, iCnt = columnWidthList.get(key) ; i < iCnt; i++ ) {
+        for( Object key : columnsWidth.keySet() ) {
+            for( int i = 0, iCnt = columnsWidth.get(key) ; i <= iCnt; i++ ) {
                 sb.append( '-' );
             }
-            sb.append( "--" );
+            sb.append( "+" );
         }
 
-        sb.append( "-\n" );
+        sb.append( "\n" );
 
         return sb.toString();
 
@@ -168,17 +177,17 @@ public class NListPrinter {
 
     private Map<Object, Integer> getColumnWidth() {
 
-        Map<Object, Integer> list = new LinkedHashMap<Object, Integer>();
+        Map<Object,Integer> list = new LinkedHashMap<Object, Integer>();
 
         for( Object key : nlist.keySet() ) {
 
             int columnWidth = 0;
 
             columnWidth = Math.max( columnWidth, Strings.getDisplayLength( key ) );
-            columnWidth = Math.max( columnWidth, Strings.getDisplayLength( nlist.alias.get( key ) ) ) + 2; // (%s)
+            columnWidth = Math.max( columnWidth, Strings.getDisplayLength( nlist.alias.get(key) ) ) + 2; // (%s)
 
             for( NMap row : nlist.body ) {
-                columnWidth = Math.max(  columnWidth, Strings.getDisplayLength( row.get( key ) ) );
+                columnWidth = Math.max(  columnWidth, Math.min(MAX_COLUMN_LENGTH, Strings.getDisplayLength(row.get(key))) );
             }
 
             list.put( key, columnWidth );
