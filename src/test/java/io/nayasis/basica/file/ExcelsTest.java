@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @Slf4j
 public class ExcelsTest {
 
@@ -18,10 +16,11 @@ public class ExcelsTest {
 
         log.debug( "\n{}", sheet );
 
-        Assertions.assertEquals( sheet.keySize(), 12 );
-        Assertions.assertEquals( sheet.getRow(0).get("0"), "item" );
-        Assertions.assertEquals( sheet.getRow(1).get("1"), "core" );
+        Assertions.assertEquals( sheet.keySize(), 34 );
+        Assertions.assertEquals( sheet.getRow(0).get("0"), "item"  );
+        Assertions.assertEquals( sheet.getRow(1).get("1"), "core"  );
         Assertions.assertEquals( sheet.getRow(5).get("2"), "label" );
 
     }
+
 }

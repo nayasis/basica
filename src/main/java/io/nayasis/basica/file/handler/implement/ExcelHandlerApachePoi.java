@@ -226,9 +226,10 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 
 	private Header getColumnHeader( Sheet sheet ) {
 
-		if( sheet == null || sheet.getPhysicalNumberOfRows() == 0 ) return null;
-
 		Header header = new Header();
+
+		int colCnt = getMaxColumnCount( sheet );
+		if( colCnt == 0 ) return header;
 
     	Row row = sheet.getRow( 0 );
 
@@ -237,20 +238,31 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 		}
 
 		try {
-			for( int i = 0, iCnt = row.getPhysicalNumberOfCells(); i < iCnt; i++ ) {
+			for( int i = 0; i < colCnt; i++ ) {
 				Cell cell = row.getCell( i );
 				header.body.put( i, cell.getStringCellValue() );
 			}
+			header.nameHeader = true;
 		} catch ( NullPointerException e ) {
-			for( int i = 0, iCnt = row.getPhysicalNumberOfCells(); i < iCnt; i++ ) {
+			for( int i = 0; i < colCnt; i++ ) {
 				header.body.put( i, Strings.nvl(i) );
 			}
-			header.nameHeader = false;
 		}
 
 		return header;
 
     }
+
+    private int getMaxColumnCount( Sheet sheet ) {
+		int max = 0;
+		if( sheet != null ) {
+			for( int i = 0; i < sheet.getPhysicalNumberOfRows(); i++ ) {
+				Row row = sheet.getRow( i );
+				max = Math.max( max, row.getLastCellNum() );
+			}
+		}
+		return max;
+	}
 
     private Object getNumericCellValue( Cell cell ) {
 
@@ -298,7 +310,7 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
     private class Header {
 
 		private NMap    body       = new NMap();
-		private boolean nameHeader = true;
+		private boolean nameHeader = false;
 
 		private boolean isEmpty() {
 			return body.isEmpty();
