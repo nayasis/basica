@@ -472,12 +472,19 @@ public class Types {
     }
 
     public Boolean toBoolean( Object value ) throws NumberFormatException {
+        return toBoolean( value, false );
+    }
+
+    public Boolean toBoolean( Object value, boolean emptyToTrue ) throws NumberFormatException {
+        if( value == null ) {
+            return emptyToTrue ? true : false;
+        }
         if( isBoolean(value) ) return (Boolean) value;
         if( isIntLike(value) || isBigInteger(value) ) return toInt(value) == 1;
         if( isFloat(value) ) return toFloat(value) == 1;
         if( isDouble(value) ) return toDouble(value) == 1;
         if( isBigDecimal(value) ) return toBigDecimal(value).compareTo(ONE) == 0;
-        return Strings.toBoolean( value );
+        return Strings.toBoolean( value, emptyToTrue );
     }
 
     public Object castPrimitive( Object val, Class castType ) {

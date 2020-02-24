@@ -40,7 +40,7 @@ public class Excels {
 
 		} catch( Throwable e ) {
 			error.append(
-				"Excels can not use [Apache Poi Library] because it is not imported.\n" +
+				"Excels can not use [Apache Poi Library] because it is not imported or re-imported.\n" +
 				"\t- Maven dependency is like below.\n" +
 				"\t\t<dependency>\n" +
 				"\t\t  <groupId>org.apache.poi</groupId>\n" +
@@ -58,7 +58,7 @@ public class Excels {
 
 		} catch( Throwable e ) {
 			error.append(
-				"Excels can not use [JExcel Library] because it is not imported.\n" +
+				"Excels can not use [JExcel Library] because it is not imported or re-imported.\n" +
 				"\t- Maven dependency is like below.\n" +
 				"\t\t<dependency>\n" +
 				"\t\t  <groupId>net.sourceforge.jexcelapi</groupId>\n" +

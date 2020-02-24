@@ -1069,8 +1069,41 @@ public class Strings {
 	 * @return 'Y' or 'N'
 	 */
 	public String toYn( Object value ) {
+		return toYn( value, false );
+	}
 
-		if( isEmpty(value) ) return "N";
+	/**
+	 * Return value to Y or N
+	 *
+	 * @param value value to convert
+	 *   <table summary="rule" border="1" style="border-collapse:collapse; border:1px gray solid;">
+	 *     <tr><td>Y</td><td>N</td></tr>
+	 *     <tr>
+	 *       <td>
+	 *         <ul>
+	 *           <li>y</li>
+	 *           <li>yes</li>
+	 *           <li>t</li>
+	 *           <li>true</li>
+	 *         </ul>
+	 *       </td>
+	 *       <td>
+	 *         <ul>
+	 *           <li>Null or empty</li>
+	 *           <li>Not in 'Y' condition</li>
+	 *         </ul>
+	 *       </td>
+	 *     </tr>
+	 *   </table>
+	 * @param emptyToY return 'N' when value is empty.
+	 *
+	 * @return 'Y' or 'N'
+	 */
+	public String toYn( Object value, boolean emptyToY ) {
+
+		if( isEmpty(value) ) {
+			return emptyToY ? "Y" : "N";
+		}
 
 		if( value instanceof Boolean ) {
 			return ((Boolean) value).compareTo( true ) == 0 ? "Y" : "N";
@@ -1109,7 +1142,30 @@ public class Strings {
 	 * @return true if value is positive
 	 */
 	public boolean toBoolean( Object value ) {
-		return "Y".equals( toYn( value ) );
+		return toBoolean( value, false );
+	}
+
+	/**
+	 * Return value to true or false.
+	 *
+	 * @param value value to convert
+	 *   <table summary="rule" border="1" style="border-collapse:collapse; border:1px gray solid;">
+	 *     <tr><td>true</td><td>false</td></tr>
+	 *     <tr><td><ul>
+	 *         <li>y</li>
+	 *         <li>yes</li>
+	 *         <li>t</li>
+	 *         <li>true</li>
+	 *     </ul></td><td><ul>
+	 *         <li>Null or empty</li>
+	 *         <li>Not in 'Y' condition</li>
+	 *     </ul></td></tr>
+	 *   </table>
+	 * @param emptyToTrue return false when value is empty.
+	 * @return true if value is positive
+	 */
+	public boolean toBoolean( Object value, boolean emptyToTrue ) {
+		return "Y".equals( toYn( value, emptyToTrue ) );
 	}
 
 	/**
