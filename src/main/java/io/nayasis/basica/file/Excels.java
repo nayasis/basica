@@ -30,6 +30,8 @@ public class Excels {
 
 		if( excelHandler != null ) return excelHandler;
 
+		StringBuilder error = new StringBuilder();
+
 		try {
 
 			excelHandler = new ExcelHandlerApachePoi();
@@ -37,15 +39,15 @@ public class Excels {
 			return excelHandler;
 
 		} catch( Throwable e ) {
-			String errorMessage =
-					"Excels can not use [Apache Poi Library] because it is not imported.\n" +
-					"\t- Maven dependency is like below.\n" +
-					"\t\t<dependency>\n" +
-					"\t\t  <groupId>org.apache.poi</groupId>\n" +
-					"\t\t  <artifactId>poi-ooxml</artifactId>\n" +
-					"\t\t  <version>4.1.2</version>\n" +
-					"\t\t</dependency>\n";
-			log.warn( errorMessage );
+			error.append(
+				"Excels can not use [Apache Poi Library] because it is not imported.\n" +
+				"\t- Maven dependency is like below.\n" +
+				"\t\t<dependency>\n" +
+				"\t\t  <groupId>org.apache.poi</groupId>\n" +
+				"\t\t  <artifactId>poi-ooxml</artifactId>\n" +
+				"\t\t  <version>4.1.2</version>\n" +
+				"\t\t</dependency>\n"
+			);
 		}
 
 		try {
@@ -55,19 +57,21 @@ public class Excels {
 			return excelHandler;
 
 		} catch( Throwable e ) {
-			String errorMessage =
-					"Excels can not use [JExcel Library] because it is not imported.\n" +
-					"\t- Maven dependency is like below.\n" +
-					"\t\t<dependency>\n" +
-					"\t\t  <groupId>net.sourceforge.jexcelapi</groupId>\n" +
-					"\t\t  <artifactId>jxl</artifactId>\n" +
-					"\t\t  <version>2.6.12</version>\n" +
-					"\t\t</dependency>\n";
-			log.warn( errorMessage );
+			error.append(
+				"Excels can not use [JExcel Library] because it is not imported.\n" +
+				"\t- Maven dependency is like below.\n" +
+				"\t\t<dependency>\n" +
+				"\t\t  <groupId>net.sourceforge.jexcelapi</groupId>\n" +
+				"\t\t  <artifactId>jxl</artifactId>\n" +
+				"\t\t  <version>2.6.12</version>\n" +
+				"\t\t</dependency>\n"
+			);
 		}
 
 		if( excelHandler == null ) {
-			throw new NoClassDefFoundError( "There is no excel libaray like ApachePoi or Jxl." );
+			NoClassDefFoundError throwable = new NoClassDefFoundError( "There is no excel libaray like ApachePoi or Jxl." );
+			throwable.initCause( new LinkageError( error.toString() ) );
+			throw throwable;
 		}
 
 		return excelHandler;
