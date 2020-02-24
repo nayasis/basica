@@ -12,7 +12,7 @@ import java.util.Map;
 public class NListPrinter {
 
     private static final int     LIMIT_CNT_toString = 5_000;
-    private static final int     MAX_COLUMN_LENGTH  = 100;
+    private static final int     MAX_COLUMN_LENGTH  = 255;
     private static final String  NEW_LINE           = "-------------------------------------------------------------";
 
     private NList nlist = null;
@@ -150,6 +150,9 @@ public class NListPrinter {
         }
 
         String txt = val.toString().replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
+        if( txt.length() > MAX_COLUMN_LENGTH ) {
+            txt = txt.substring( 0, MAX_COLUMN_LENGTH );
+        }
         while( Strings.getDisplayLength(txt) > MAX_COLUMN_LENGTH ) {
             txt = txt.substring( 0, txt.length() - 1 );
         }
