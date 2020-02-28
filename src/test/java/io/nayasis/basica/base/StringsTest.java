@@ -21,6 +21,8 @@ public class StringsTest {
     @Test
     public void format() {
 
+        assertEquals( "items : (count:3)\n", Strings.format( "items : (count:{})\n{}", 3 ) );
+
         assertEquals( "{ name : merong, age : 2 }", Strings.format( "{ name : {}, age : {} }", "merong", 2 ) );
         assertEquals( "5K\nUtil\ndesc", Strings.format("{}\n{}\n{}", "5K", "Util", "desc") );
 

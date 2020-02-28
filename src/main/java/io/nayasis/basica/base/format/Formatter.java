@@ -143,10 +143,15 @@ public class Formatter {
 
         return bindParam( PATTERN_BASIC, format, toParam(parameter), (key, userFormat, param) -> {
 
-            Object val = param.get( key );
+            Object  val   = param.get( key );
+            boolean exist = param.containsKey( key );
 
             if( userFormat.isEmpty() ) {
-                return val == null ? null : val.toString();
+                if( val == null ) {
+                    return exist ? null : "";
+                } else {
+                    return val.toString();
+                }
             } else {
                 return String.format( userFormat, val );
             }
