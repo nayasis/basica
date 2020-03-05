@@ -540,7 +540,13 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @return self instance
      */
     public NList set( Object key, int rowIndex, Object value ) {
-        NMap data = body.get( rowIndex );
+        NMap data;
+        try {
+            data = body.get( rowIndex );
+        } catch ( IndexOutOfBoundsException e ) {
+            data = new NMap();
+            body.add( rowIndex,data);
+        }
         data.put( key, value );
         if( ! containsKey( key ) ) {
         	header.put( key, ++rowIndex );
