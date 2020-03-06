@@ -35,13 +35,6 @@
     <system>GitHub Issue Management</system>
     <url>https://github.com/nayasis/basica/issues</url>
   </issueManagement>
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub OWNER Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/nayasis/basica</url>
-    </repository>
-  </distributionManagement>
 
   <properties>
     <java.version>1.8</java.version>
