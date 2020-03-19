@@ -21,7 +21,7 @@ public class ThreadRoot implements Observer {
 	};
 
 	static {
-		ThreadLocal.addObserver( new ThreadRoot() );
+		NThreadLocal.addObserver( new ThreadRoot() );
 	}
 
 	@Override

@@ -17,7 +17,7 @@ import java.util.*;
  *
  */
 @UtilityClass
-public class ThreadLocal {
+public class NThreadLocal {
 
 	private ThreadLocalWatcher watcher = new ThreadLocalWatcher();
 

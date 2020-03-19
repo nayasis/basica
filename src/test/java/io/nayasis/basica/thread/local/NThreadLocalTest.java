@@ -9,7 +9,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-public class ThreadLocalTest {
+public class NThreadLocalTest {
 
     @Test
     public void test() throws InterruptedException {
@@ -35,12 +35,12 @@ public class ThreadLocalTest {
 
         return new Thread( () -> {
 
-            ThreadLocal.set( key, 0 );
+            NThreadLocal.set( key, 0 );
 
             Thread child = new Thread( () -> {
                 for( int i = 0; i < count; i++ ) {
-                    Integer val = ThreadLocal.get( key );
-                    ThreadLocal.set( key, ++val );
+                    Integer val = NThreadLocal.get( key );
+                    NThreadLocal.set( key, ++val );
                     log.debug( "key : {}, count : {}, val : {}", key, count, val );
                     try {
                         Thread.sleep( 10 );
@@ -48,7 +48,7 @@ public class ThreadLocalTest {
                         e.printStackTrace();
                     }
                 }
-                result.put( key + "-" + count, ThreadLocal.get(key) );
+                result.put( key + "-" + count, NThreadLocal.get(key) );
             });
 
             child.start();
