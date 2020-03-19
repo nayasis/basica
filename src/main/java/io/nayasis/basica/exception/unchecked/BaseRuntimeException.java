@@ -36,22 +36,22 @@ public class BaseRuntimeException extends RuntimeException implements Serializab
     /**
      * Constructor
      *
-     * @param format        error message format
-     * @param messageParam  parameters binding with '{}' phrase
+     * @param format      error message format
+     * @param parameters  parameters binding with '{}' phrase
      */
-    public BaseRuntimeException( String format, Object... messageParam ) {
-        super( Strings.format(format, messageParam) );
+    public BaseRuntimeException( String format, Object... parameters ) {
+        super( Strings.format(format, parameters) );
     }
 
     /**
      * Constructor
      *
-     * @param rootCause     root cause
-     * @param format        error message format
-     * @param messageParam  parameters binding with '{}' phrase
+     * @param rootCause   root cause
+     * @param format      error message format
+     * @param parameters  parameters binding with '{}' phrase
      */
-    public BaseRuntimeException( Throwable rootCause, String format, Object... messageParam ) {
-        super( Strings.format(format, messageParam), rootCause );
+    public BaseRuntimeException( Throwable rootCause, String format, Object... parameters ) {
+        super( Strings.format(format, parameters), rootCause );
     }
 
     /**
