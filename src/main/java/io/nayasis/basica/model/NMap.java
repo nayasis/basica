@@ -125,9 +125,26 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
     }
 
     /**
-     * rebuild key to JsonPath. <br><br>
+     * return true if this map contains a mapping for the specified json path.
      *
-     * Map can contains POJO and then JsonPath could not working on it.
+     * @param jsonPath  json path
+     * @see <a href="https://github.com/jayway/JsonPath">json path example</a>
+     * @return true if this map contains a maaping for the specified key.
+     */
+    public boolean containsJsonPath( String jsonPath ) {
+        if( containsKey(jsonPath) ) return true;
+        try {
+            JsonPath.read( this, jsonPath );
+            return true;
+        } catch ( Exception e ) {
+            return false;
+        }
+    }
+
+    /**
+     * rebuild key for JsonPath. <br><br>
+     *
+     * This map could contain POJO so JsonPath could not working because JsonPath could work well only in entire Map structure.
      * it change all POJO value to Map.
      *
      * @return self instance
