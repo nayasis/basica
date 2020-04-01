@@ -250,6 +250,33 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>local-nexus</id>
+      <distributionManagement>
+        <repository>
+          <id>team-store-snapshots</id>
+          <name>Store Maven Repository - Snapshots</name>
+          <url>http://mvn.onestorecorp.com/content/repositories/team-store-snapshots/</url>
+        </repository>
+      </distributionManagement>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 
 </project>
