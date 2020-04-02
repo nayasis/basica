@@ -16,8 +16,6 @@
 
 package io.nayasis.basica.base.scanner.resource;
 
-import io.nayasis.basica.base.scanner.resource.Resource;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
