@@ -13,6 +13,7 @@ import org.objenesis.ObjenesisStd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,11 +31,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 
 /**
@@ -84,23 +87,34 @@ public class Classes {
 	 */
 	public ClassLoader getClassLoader() {
 
+		ClassLoader classLoader = null;
+
 		try {
-			return Thread.currentThread().getContextClassLoader();
+			classLoader = Thread.currentThread().getContextClassLoader();
 		} catch( Throwable e ) {}
 
-		// if can not access thread context
-		try {
-			return Classes.class.getClassLoader();
-		} catch( Throwable e ) {}
-
-		// if bootstrap classloader
-		try {
-			return ClassLoader.getSystemClassLoader();
-		} catch( Throwable e ) {
-			// maybe caller can live with null.
-			return null;
+		if( classLoader == null ) {
+			classLoader = Classes.class.getClassLoader();
+			if( classLoader == null ) {
+				try {
+					return ClassLoader.getSystemClassLoader();
+				} catch( Throwable e ) {}
+			}
 		}
 
+		return classLoader;
+
+	}
+
+	private Iterator list( ClassLoader classloader ) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		Class klass = classloader.getClass();
+		while ( klass != java.lang.ClassLoader.class ) {
+			klass = klass.getSuperclass();
+		}
+		Field fieldClasses = klass.getDeclaredField("classes");
+		fieldClasses.setAccessible(true);
+		Vector classes = (Vector) fieldClasses.get( classloader );
+		return classes.iterator();
 	}
 
 	/**
@@ -370,7 +384,13 @@ public class Classes {
 		Map<String,URL> fileUrls = new LinkedHashMap<>();
 		Map<String,URL> jarUrls  = new LinkedHashMap<>();
 
-		for( URL root : getRootResources() ) {
+		List<URL> resources = getRootResources();
+
+		System.out.println( "resources size : " + resources.size() );
+
+		for( URL root : resources ) {
+
+			System.out.println( root );
 
 			try {
 

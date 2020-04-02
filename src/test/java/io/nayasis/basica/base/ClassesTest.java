@@ -1,5 +1,7 @@
 package io.nayasis.basica.base;
 
+import io.nayasis.basica.base.scanner.PathMatchingResourcePatternResolver;
+import io.nayasis.basica.base.scanner.resource.Resource;
 import io.nayasis.basica.file.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +44,32 @@ public class ClassesTest {
 //        List<URL> urls = Classes.findResources( "**/*" );
 //        List<URL> urls = Classes.findResources( "**/LICENSE.md" );
 //        List<URL> urls = Classes.findResources( "/META-INF/LICENSE.md" );
+
+    }
+
+    @Test
+    public void findResourcesWithPath() {
+
+        PathMatchingResourcePatternResolver resourceLoader = new PathMatchingResourcePatternResolver();
+
+        try {
+            Resource[] resources = resourceLoader.getResources( "classpath:message/*.prop" );
+
+            for( Resource resource : resources ) {
+                try {
+                    InputStream inputStream = resource.getInputStream();
+                    String text = Files.readFrom( inputStream );
+                    System.out.println( ">> localization.ko.prop" );
+                    System.out.println( text );
+                } catch ( IOException e ) {
+                    e.printStackTrace();
+                }
+            }
+
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+
 
     }
 
