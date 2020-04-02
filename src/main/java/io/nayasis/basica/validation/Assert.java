@@ -14,7 +14,7 @@ public class Assert {
 		if( object != null ) throwException( errorMessage );
 	}
 
-	public static void isNotNull( Object object, Object... errorMessage ) throws IllegalArgumentException {
+	public static void notNull( Object object, Object... errorMessage ) throws IllegalArgumentException {
 		if( object == null ) throwException( errorMessage );
 	}
 
@@ -34,15 +34,15 @@ public class Assert {
 		if( Files.exists(filePath) ) throwException( errorMessage );
 	}
 
-	public static void isTrue( boolean result, Object... errorMessage ) throws IllegalArgumentException {
+	public static void beTrue( boolean result, Object... errorMessage ) throws IllegalArgumentException {
 		if( ! result ) throwException( errorMessage );
 	}
 
-	public static void isNotTrue( boolean result, Object... errorMessage ) throws IllegalArgumentException {
+	public static void notTrue( boolean result, Object... errorMessage ) throws IllegalArgumentException {
 		if( result ) throwException( errorMessage );
 	}
 
-	public static void isTrue( BiFunction logic, Object... errorMessage ) throws IllegalArgumentException {
+	public static void beTrue( BiFunction logic, Object... errorMessage ) throws IllegalArgumentException {
 		try {
 			if( ! logic.run() ) throwException( errorMessage );
 		} catch( Throwable t ) {
@@ -50,7 +50,7 @@ public class Assert {
 		}
 	}
 
-	public static void isNotTrue( BiFunction logic, Object... errorMessage ) throws IllegalArgumentException {
+	public static void notTrue( BiFunction logic, Object... errorMessage ) throws IllegalArgumentException {
 		try {
 			if( logic.run() ) throwException( errorMessage );
 		} catch( Throwable t ) {
@@ -58,11 +58,11 @@ public class Assert {
 		}
 	}
 
-	public static void isEmpty( Object object, Object... errorMessage ) throws IllegalArgumentException {
+	public static void empty( Object object, Object... errorMessage ) throws IllegalArgumentException {
 		if( Validator.isNotEmpty(object) ) throwException( errorMessage );
 	}
 
-	public static void isNotEmpty( Object object, Object... errorMessage ) throws IllegalArgumentException {
+	public static void notEmpty( Object object, Object... errorMessage ) throws IllegalArgumentException {
 		if( Validator.isEmpty(object) ) throwException( errorMessage );
 	}
 
