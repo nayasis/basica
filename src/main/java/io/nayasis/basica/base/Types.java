@@ -299,8 +299,9 @@ public class Types {
         return list;
     }
 
-    public <T> T[] toArray( List<T> list ) {
-        return (T[]) list.toArray();
+    public <T> T[] toArray( List<T> list, Class<T> returnType ) {
+        T[] array = (T[]) Array.newInstance( returnType, 0 );
+        return list.toArray( array );
     }
 
     public Collection toCollection( Object value ) {
