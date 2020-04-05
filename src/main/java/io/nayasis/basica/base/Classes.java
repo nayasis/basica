@@ -13,6 +13,7 @@ import org.objenesis.ObjenesisStd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,11 +31,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 
 /**
@@ -100,6 +103,38 @@ public class Classes {
 			// maybe caller can live with null.
 			return null;
 		}
+
+	}
+
+	public List<ClassLoader> getAllClassLoaders() {
+		ClassLoader loader = getClassLoader();
+		while( loader != null ) {
+			log.trace( "");
+			for( Iterator iterator = list(loader); iterator.hasNext(); ) {
+
+			}
+		}
+		return null;
+	}
+
+
+	private Iterator list( ClassLoader classLoader ) {
+
+		Class klass = classLoader.getClass();
+		while ( klass != ClassLoader.class ) {
+			klass = klass.getSuperclass();
+		}
+
+		Vector classes = new Vector();
+		try {
+			Field fieldClasses = klass.getDeclaredField("classes" );
+			fieldClasses.setAccessible(true);
+			 classes = (Vector) fieldClasses.get(classLoader);
+		} catch ( NoSuchFieldException|IllegalAccessException e ) {
+			log.error( e.getMessage(), e );
+			classes = new Vector<>();
+		}
+		return classes.iterator();
 
 	}
 
