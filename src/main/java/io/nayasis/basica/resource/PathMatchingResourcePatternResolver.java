@@ -87,28 +87,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Create a new PathMatchingResourcePatternResolver.
-	 * <p>ClassLoader access will happen via the thread context class loader.
-	 * @param resourceLoader the ResourceLoader to load root directories and
-	 * actual resources with
-	 */
-	public PathMatchingResourcePatternResolver( ResourceLoader resourceLoader ) {
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
-		this.resourceLoader = resourceLoader;
-	}
-
-	/**
-	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
-	 * @param classLoader the ClassLoader to load classpath resources with,
-	 * or {@code null} for using the thread context class loader
-	 * at the time of actual resource access
-	 */
-	public PathMatchingResourcePatternResolver( ClassLoader classLoader ) {
-		this.resourceLoader = new DefaultResourceLoader(classLoader);
-	}
-
-
-	/**
 	 * Return the ResourceLoader that this pattern resolver works with.
 	 */
 	public ResourceLoader getResourceLoader() {
@@ -143,7 +121,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	@Override
-	public Resource[] getResources( String locationPattern ) throws IOException {
+	public Set<Resource> getResources( String locationPattern ) throws IOException {
 
 		Assert.notNull( locationPattern, "Location pattern must not be null" );
 
@@ -168,7 +146,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				return findPathMatchingResources(locationPattern);
 			} else {
 				// a single resource with the given name
-				return new Resource[] {getResourceLoader().getResource(locationPattern)};
+				LinkedHashSet<Resource> resources = new LinkedHashSet<>();
+				resources.add( getResourceLoader().getResource( locationPattern ) );
+				return resources;
 			}
 		}
 	}
@@ -182,7 +162,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see ClassLoader#getResources
 	 * @see #convertClassLoaderURL
 	 */
-	protected Resource[] findAllClassPathResources(String location) throws IOException {
+	protected Set<Resource> findAllClassPathResources(String location) throws IOException {
 		String path = location;
 		if (path.startsWith("/")) {
 			path = path.substring(1);
@@ -191,7 +171,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (log.isTraceEnabled()) {
 			log.trace("Resolved classpath location [" + location + "] to resources " + result);
 		}
-		return result.toArray(new Resource[0]);
+		return result;
 	}
 
 	/**
@@ -353,11 +333,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #doFindPathMatchingJarResources
 	 * @see #doFindPathMatchingFileResources
 	 */
-	protected Resource[] findPathMatchingResources( String locationPattern ) throws IOException {
+	protected Set<Resource> findPathMatchingResources( String locationPattern ) throws IOException {
 
-		String rootDirPath = determineRootDir(locationPattern);
-		String subPattern = locationPattern.substring(rootDirPath.length());
-		Resource[] rootDirResources = getResources(rootDirPath);
+		String rootDirPath = getRootDir( locationPattern );
+		String subPattern  = locationPattern.substring( rootDirPath.length() );
+		Set<Resource> rootDirResources = getResources( rootDirPath );
+
 		Set<Resource> result = new LinkedHashSet<>(16);
 
 		log.trace( "location pattern : {}", locationPattern );
@@ -366,20 +347,20 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		log.trace( ">> found root dirs\n{}", rootDirResources );
 
-		for (Resource rootDirResource : rootDirResources) {
+		for ( Resource rootDirResource : rootDirResources ) {
 
 			log.trace( "root dir resource : {}", rootDirResources );
 
 			rootDirResource = resolveRootDirResource(rootDirResource);
 			URL rootDirUrl = rootDirResource.getURL();
-			if (equinoxResolveMethod != null && rootDirUrl.getProtocol().startsWith("bundle")) {
+			if ( equinoxResolveMethod != null && rootDirUrl.getProtocol().startsWith("bundle") ) {
 				URL resolvedUrl = (URL) ClassReflector.invokeMethod(equinoxResolveMethod, null, rootDirUrl);
 				if (resolvedUrl != null) {
 					rootDirUrl = resolvedUrl;
 				}
 				rootDirResource = new UrlResource(rootDirUrl);
 			}
-			if (rootDirUrl.getProtocol().startsWith( Resources.URL_PROTOCOL_VFS)) {
+			if( rootDirUrl.getProtocol().startsWith( Resources.URL_PROTOCOL_VFS) ) {
 				result.addAll( VfsResourceMatchingDelegate.findMatchingResources(rootDirUrl, subPattern, getPathMatcher()));
 			} else if ( Resources.isJarURL(rootDirUrl) ) {
 				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirUrl, subPattern));
@@ -390,7 +371,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (log.isTraceEnabled()) {
 			log.trace("Resolved location pattern [" + locationPattern + "] to resources " + result);
 		}
-		return result.toArray(new Resource[0]);
+		return result;
 	}
 
 	/**
@@ -405,13 +386,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @return the part of the location that denotes the root directory
 	 * @see #retrieveMatchingFiles
 	 */
-	protected String determineRootDir(String location) {
+	protected String getRootDir( String location ) {
 		int prefixEnd = location.indexOf(':') + 1;
 		int rootDirEnd = location.length();
 		while (rootDirEnd > prefixEnd && getPathMatcher().isPattern(location.substring(prefixEnd, rootDirEnd))) {
 			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 2) + 1;
 		}
-		if (rootDirEnd == 0) {
+		if( rootDirEnd == 0 ) {
 			rootDirEnd = prefixEnd;
 		}
 		return location.substring(0, rootDirEnd);
@@ -562,27 +543,22 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @throws IOException in case of I/O errors
 	 * @see #retrieveMatchingFiles
 	 */
-	protected Set<Resource> doFindPathMatchingFileResources(Resource rootDirResource, String subPattern)
-			throws IOException {
-
-		File rootDir;
+	protected Set<Resource> doFindPathMatchingFileResources( Resource rootDirResource, String subPattern ) throws IOException {
 		try {
-			rootDir = rootDirResource.getFile().getAbsoluteFile();
-		}
-		catch (FileNotFoundException ex) {
-			if (log.isDebugEnabled()) {
+			File rootDir = rootDirResource.getFile().getAbsoluteFile();
+			return doFindMatchingFileSystemResources( rootDir, subPattern );
+		} catch ( FileNotFoundException ex ) {
+			if(log.isDebugEnabled()) {
 				log.debug("Cannot search for matching files underneath " + rootDirResource +
 						" in the file system: " + ex.getMessage());
 			}
 			return Collections.emptySet();
-		}
-		catch (Exception ex) {
-			if (log.isInfoEnabled()) {
+		} catch (Exception ex) {
+			if( log.isInfoEnabled() ) {
 				log.info("Failed to resolve " + rootDirResource + " in the file system: " + ex);
 			}
 			return Collections.emptySet();
 		}
-		return doFindMatchingFileSystemResources(rootDir, subPattern);
 	}
 
 	/**
@@ -595,8 +571,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #retrieveMatchingFiles
 	 */
 	protected Set<Resource> doFindMatchingFileSystemResources(File rootDir, String subPattern) throws IOException {
-		if (log.isTraceEnabled()) {
-			log.trace("Looking for matching resources in directory tree [" + rootDir.getPath() + "]");
+		if( log.isTraceEnabled() ) {
+			log.trace("Looking for matching resources in directory tree [{}]", rootDir.getPath() );
 		}
 		Set<File> matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
 		Set<Resource> result = new LinkedHashSet<>(matchingFiles.size());

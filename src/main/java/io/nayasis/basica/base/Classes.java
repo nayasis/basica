@@ -387,18 +387,14 @@ public class Classes {
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 		for( String ptn : pattern ) {
-
 			try {
-				Resource[] list = resolver.getResources( String.format( "classpath:%s", ptn ) );
-
-				for( Resource resource : list ) {
+				Set<Resource> resources = resolver.getResources( String.format( "classpath:%s", ptn ) );
+				for( Resource resource : resources ) {
 					urls.add( resource.getURL() );
 				}
-
 			} catch ( IOException e ) {
 				log.error( e.getMessage(), e );
 			}
-
 		}
 
 		return urls;

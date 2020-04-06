@@ -21,6 +21,7 @@ import io.nayasis.basica.resource.loader.ResourceLoader;
 import io.nayasis.basica.resource.type.interfaces.Resource;
 
 import java.io.IOException;
+import java.util.Set;
 
 
 public interface ResourcePatternResolver extends ResourceLoader {
@@ -34,6 +35,6 @@ public interface ResourcePatternResolver extends ResourceLoader {
 	 * @return the corresponding Resource objects
 	 * @throws IOException in case of I/O errors
 	 */
-	Resource[] getResources( String locationPattern ) throws IOException;
+	Set<Resource> getResources( String locationPattern ) throws IOException;
 
 }
