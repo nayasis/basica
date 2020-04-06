@@ -1,6 +1,11 @@
 package io.nayasis.basica.base;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -177,6 +182,20 @@ public class TypesTest {
 
     @Test
     public void toCollection() {
+    }
+
+    @Test
+    public void toArray() {
+
+        List<String> list = new ArrayList<>();
+        list.add( "1" );
+        list.add( "2" );
+        list.add( "3" );
+
+        String[] array = Types.toArray( list, String.class );
+
+        Assertions.assertEquals( "[1, 2, 3]", Arrays.toString(array) );
+
     }
 
     @Test

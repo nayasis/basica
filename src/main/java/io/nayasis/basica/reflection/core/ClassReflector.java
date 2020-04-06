@@ -168,6 +168,14 @@ public class ClassReflector {
 
     }
 
+    public Object getFieldIn( Field field, Object target ) {
+        try {
+            return field.get( target );
+        } catch ( IllegalAccessException e ) {
+            throw new UncheckedIllegalAccessException( e );
+        }
+    }
+
     private void addAll( Set<Field> set, Field[] fields ) {
         for ( Field field : fields ) {
             set.add(field);
@@ -233,7 +241,6 @@ public class ClassReflector {
         Classes.findParents(klass).forEach( parent -> {
             methods.addAll( getMethods(parent) );
         });
-
         for( Method method : klass.getDeclaredMethods() ) {
             methods.add( method );
         }
@@ -251,27 +258,73 @@ public class ClassReflector {
      * @param regex     regexp to filter methods by name.
      * @return methods
      */
-    public Set<Method> getMethods( Object object, String regex ) {
+    public Set<Method> findMethods( Object object, String regex ) {
         if( object == null ) return new HashSet<>();
-        return getMethods( object.getClass(), regex );
+        return findMethods( object.getClass(), regex );
     }
 
     /**
-     * get methods in Class
+     * find methods in Class
      *
      * @param klass     class to extract methods
      * @param regex     regexp to filter methods by name.
      * @return methods
      */
-    public Set<Method> getMethods( Class klass, String regex ) {
+    public Set<Method> findMethods( Class klass, String regex ) {
         if( Validator.isEmpty(regex) ) return new HashSet<>();
-        Set<Method> result = new LinkedHashSet<>();
+        return getMethods( klass ).stream()
+            .filter( method -> method.getName().matches( regex ) )
+            .collect( Collectors.toSet() );
+    }
+
+    /**
+     * get methods in Class
+     *
+     * @param klass         class to extract methods
+     * @param regex         regexp to filter methods by name.
+     * @param parameterType parameter types of the method
+     * @return methods
+     */
+    public Set<Method> findMethods( Class klass, String regex, Class... parameterType ) {
+        return findMethods( klass, regex ).stream()
+            .filter( method -> parameterType == null || Arrays.equals( parameterType, method.getParameterTypes() ) )
+            .collect( Collectors.toSet() );
+    }
+
+    /**
+     * find method in Class
+     *
+     * @param klass     class to extract methods
+     * @param name      regexp to filter methods by name.
+     * @return Method object, or {@code null} if none found
+     */
+    public Method findMethod( Class klass, String name ) {
+        if( Validator.isEmpty(name) ) return null;
         for( Method method : getMethods(klass) ) {
-            if( method.getName().matches(regex) ) {
-                result.add( method );
+            if( method.getName().equals(name) )
+                return method;
+        }
+        return null;
+    }
+
+    /**
+     * find method in Class
+     *
+     * @param klass         class to extract methods
+     * @param name          method name
+     * @param parameterType parameter types of the method
+     * @return Method object, or {@code null} if none found
+     */
+    public Method findMethod( Class klass, String name, Class... parameterType ) {
+        if( Validator.isEmpty(name) ) return null;
+        for( Method method : getMethods(klass) ) {
+            if( method.getName().equals(name) ) {
+                if( parameterType == null || Arrays.equals(parameterType, method.getParameterTypes()) ) {
+                    return method;
+                }
             }
         }
-        return result;
+        return null;
     }
 
     /**
@@ -305,6 +358,37 @@ public class ClassReflector {
         CACHE_CONSTRUCTOR.putIfAbsent( klass, constructors );
         return constructors;
 
+    }
+
+    /**
+     * Invoke the specified {@link Method} against the supplied target object with no arguments.
+     * The target object can be {@code null} when invoking a static {@link Method}.
+     * <p>Thrown exceptions are handled via a call.
+     * @param method the method to invoke
+     * @param target the target object to invoke the method on
+     * @return the invocation result, if any
+     * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
+     */
+    public static Object invokeMethod(Method method, Object target) {
+        return invokeMethod(method, target, new Object[0]);
+    }
+
+    /**
+     * Invoke the specified {@link Method} against the supplied target object with the
+     * supplied arguments. The target object can be {@code null} when invoking a
+     * static {@link Method}.
+     * <p>Thrown exceptions are handled via a call.
+     * @param method the method to invoke
+     * @param target the target object to invoke the method on
+     * @param args the invocation arguments (may be {@code null})
+     * @return the invocation result, if any
+     */
+    public static Object invokeMethod(Method method, Object target, Object... args) {
+        try {
+            return method.invoke(target, args);
+        } catch ( Exception ex ) {
+            throw new IllegalStateException("Should never get here");
+        }
     }
 
 }

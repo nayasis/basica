@@ -642,11 +642,8 @@ public class Strings {
      * @param text text to change
      * @return uncapitalized text
      */
-    public String upcapitalize( Object text ) {
-    	if( isEmpty(text) ) return "";
-    	char[] array = nvl( text ).toCharArray();
-    	array[ 0 ] = Character.toLowerCase( array[0] );
-    	return new String( array );
+    public String uncapitalize( Object text ) {
+		return changeFirstCharacterCase( text, false );
     }
 
     /**
@@ -656,11 +653,26 @@ public class Strings {
      * @return capitalized text
      */
     public String capitalize( Object text ) {
-    	if( isEmpty(text) ) return "";
-    	char[] array = nvl( text ).toCharArray();
-    	array[ 0 ] = Character.toUpperCase( array[0] );
-    	return new String( array );
+    	return changeFirstCharacterCase( text, true );
     }
+
+    private String changeFirstCharacterCase( Object val, boolean capitalize ) {
+
+		if( isEmpty(val) ) return "";
+
+		String string = val.toString();
+
+		char origin  = string.charAt( 0 );
+		char changed = capitalize ? Character.toUpperCase( origin ) : Character.toLowerCase( origin );
+
+		if( origin == changed )
+			return string;
+
+		char[] array = string.toCharArray();
+		array[0] = changed;
+		return new String( array, 0, array.length );
+
+	}
 
     /**
      * Compress multiple space to single space

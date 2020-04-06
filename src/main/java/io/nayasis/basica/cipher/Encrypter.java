@@ -72,7 +72,7 @@ public class Encrypter {
      * @return encrypted value
      */
     public String encrypt( String value ) {
-        Assert.isNotNull( defaultSecretKey, "default secret key is missing.");
+        Assert.notNull( defaultSecretKey, "default secret key is missing.");
         return encrypt( value, defaultSecretKey );
     }
 
@@ -115,7 +115,7 @@ public class Encrypter {
      * @return  decrypted value
      */
     public String decrypt( String value ) {
-        Assert.isNotNull( defaultSecretKey, "default secret key is missing.");
+        Assert.notNull( defaultSecretKey, "default secret key is missing.");
         return decrypt( value, defaultSecretKey );
     }
 

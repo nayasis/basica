@@ -99,7 +99,7 @@ public class StringExtension {
     }
 
     public static String upcapitalize( String string ) {
-        return Strings.upcapitalize( string );
+        return Strings.uncapitalize( string );
     }
 
     public static String capitalize( String string ) {
