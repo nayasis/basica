@@ -1,8 +1,8 @@
 package io.nayasis.basica.base;
 
-import io.nayasis.basica.base.scanner.PathMatchingResourcePatternResolver;
-import io.nayasis.basica.base.scanner.resource.Resource;
 import io.nayasis.basica.file.Files;
+import io.nayasis.basica.resource.PathMatchingResourcePatternResolver;
+import io.nayasis.basica.resource.type.interfaces.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ public class ClassesTest {
         PathMatchingResourcePatternResolver resourceLoader = new PathMatchingResourcePatternResolver();
 
         try {
-            Resource[] resources = resourceLoader.getResources( "classpath:message/*.prop" );
+            Resource[] resources = resourceLoader.getResources( "classpath*:message/*.prop" );
 
             for( Resource resource : resources ) {
                 try {
@@ -69,7 +69,6 @@ public class ClassesTest {
         } catch ( IOException e ) {
             e.printStackTrace();
         }
-
 
     }
 

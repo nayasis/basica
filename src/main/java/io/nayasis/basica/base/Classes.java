@@ -5,6 +5,9 @@ import io.nayasis.basica.cache.implement.LruCache;
 import io.nayasis.basica.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
+import io.nayasis.basica.resource.PathMatchingResourcePatternResolver;
+import io.nayasis.basica.resource.type.interfaces.Resource;
+import io.nayasis.basica.validation.Assert;
 import io.nayasis.basica.validation.Validator;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,7 @@ import org.objenesis.ObjenesisStd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -24,7 +28,6 @@ import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,10 +35,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -381,57 +382,26 @@ public class Classes {
 	 */
 	public List<URL> findResources( String... pattern ) {
 
-		Map<String,URL> fileUrls = new LinkedHashMap<>();
-		Map<String,URL> jarUrls  = new LinkedHashMap<>();
+		List<URL> urls = new ArrayList<>();
 
-		List<URL> resources = getRootResources();
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
-		System.out.println( "resources size : " + resources.size() );
-
-		for( URL root : resources ) {
-
-			System.out.println( root );
+		for( String ptn : pattern ) {
 
 			try {
+				Resource[] list = resolver.getResources( String.format( "classpath:%s", ptn ) );
 
-				FileSystem fileSystem = getFileSystem( root );
-
-				if( "file".equals(root.getProtocol()) ) {
-
-					Set<PathMatcher> pathMatchers = toPathMatcher( fileSystem, pattern );
-
-					Path rootPath = Paths.get( root.toURI() );
-					Files.walk( rootPath ).forEach( path -> {
-						Path curr = rootPath.relativize( path );
-						if( match(pathMatchers, curr) ) {
-							fileUrls.putIfAbsent( "/" + Files.normalizeSeparator(curr), Files.toURL(path) );
-						};
-					});
-
-				} else {
-
-					Set<PathMatcher> pathMatchers = toPathMatcher( fileSystem, pattern );
-
-					Files.walk(fileSystem.getPath( "/" )).forEach( path -> {
-						if( match(pathMatchers, path) ) {
-							jarUrls.putIfAbsent( path.toString(), Files.toURL(path) );
-
-						}
-					});
-
+				for( Resource resource : list ) {
+					urls.add( resource.getURL() );
 				}
 
-			} catch ( URISyntaxException | UncheckedIOException e ) {
+			} catch ( IOException e ) {
 				log.error( e.getMessage(), e );
-				continue;
 			}
+
 		}
 
-		Map<String,URL> result = new LinkedHashMap<>();
-		result.putAll( jarUrls );
-		result.putAll( fileUrls );
-
-		return new ArrayList<>( result.values() );
+		return urls;
 
 	}
 
@@ -504,5 +474,96 @@ public class Classes {
 	public URL getRootLocation( Class klass ) {
 		return klass.getProtectionDomain().getCodeSource().getLocation();
 	}
+
+	/**
+	 * Replacement for {@code Class.forName()}.
+	 * it can return array class names (e.g. "String[]").
+	 * Furthermore, it is also capable of resolving inner class names in Java source
+	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
+	 * @param name 			name of the Class
+	 * @return a class instance for the supplied name
+	 * @throws ClassNotFoundException if the class was not found
+	 * @throws LinkageError if the class file could not be loaded
+	 */
+	public Class<?> forName( String name ) throws ClassNotFoundException, LinkageError {
+		return forName( name, null );
+	}
+
+
+	/**
+	 * Replacement for {@code Class.forName()}.
+	 * it can return array class names (e.g. "String[]").
+	 * Furthermore, it is also capable of resolving inner class names in Java source
+	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
+	 * @param name 			name of the Class
+	 * @param classLoader 	class loader to use
+	 * 						(may be {@code null}, which indicates the default class loader)
+	 * @return a class instance for the supplied name
+	 * @throws ClassNotFoundException if the class was not found
+	 * @throws LinkageError if the class file could not be loaded
+	 */
+	public Class<?> forName( String name, ClassLoader classLoader ) throws ClassNotFoundException, LinkageError {
+
+		Assert.notNull( name, "name mus not be null" );
+
+		// "java.lang.String[]" style arrays
+		if (name.endsWith( SUFFIX_ARRAY )) {
+			String elementClassName = name.substring(0, name.length() - SUFFIX_ARRAY.length());
+			Class<?> elementClass = forName(elementClassName, classLoader);
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+
+		// "[Ljava.lang.String;" style arrays
+		if (name.startsWith( PREFIX_NON_PRIMITIVE_ARRAY ) && name.endsWith(";")) {
+			String elementName = name.substring( PREFIX_NON_PRIMITIVE_ARRAY.length(), name.length() - 1);
+			Class<?> elementClass = forName(elementName, classLoader);
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+
+		// "[[I" or "[[Ljava.lang.String;" style arrays
+		if ( name.startsWith( PREFIX_INTERNAL_ARRAY ) ) {
+			String elementName = name.substring( PREFIX_INTERNAL_ARRAY.length());
+			Class<?> elementClass = forName( elementName, classLoader );
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+
+		if( classLoader == null )
+			classLoader = Classes.getClassLoader();
+
+		try {
+			return Class.forName( name, false, classLoader );
+		} catch ( ClassNotFoundException ex ) {
+			int lastDotIndex = name.lastIndexOf( SEPARATOR_PACKAGE );
+			if ( lastDotIndex != -1 ) {
+				String innerClassName =
+					name.substring(0, lastDotIndex) + SEPARATOR_INNER_CLASS + name.substring(lastDotIndex + 1);
+				try {
+					return Class.forName( innerClassName, false, classLoader );
+				} catch ( ClassNotFoundException ex2 ) {
+					// let original exception get through
+				}
+			}
+			throw ex;
+		}
+
+	}
+
+	/** Suffix for array class names: {@code "[]"}. */
+	private static final String SUFFIX_ARRAY = "[]";
+
+	/** Prefix for internal non-primitive array class names: {@code "[L"}. */
+	private static final String PREFIX_NON_PRIMITIVE_ARRAY = "[L";
+
+	/** Prefix for internal array class names: {@code "["}. */
+	private static final String PREFIX_INTERNAL_ARRAY = "[";
+
+	/** The package separator character: {@code '.'}. */
+	public static final char SEPARATOR_PACKAGE = '.';
+
+	/** The path separator character: {@code '/'}. */
+	public static final char SEPARATOR_PATH = '/';
+
+	/** The inner class separator character: {@code '$'}. */
+	public static final char SEPARATOR_INNER_CLASS = '$';
 
 }
