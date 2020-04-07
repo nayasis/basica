@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +54,7 @@ public class ClassesTest {
         PathMatchingResourcePatternResolver resourceLoader = new PathMatchingResourcePatternResolver();
 
         try {
-            Resource[] resources = resourceLoader.getResources( "classpath*:message/*.prop" );
+            Set<Resource> resources = resourceLoader.getResources( "classpath*:message/*.prop" );
 
             for( Resource resource : resources ) {
                 try {
