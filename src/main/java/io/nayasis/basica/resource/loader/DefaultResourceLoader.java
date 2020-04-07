@@ -59,7 +59,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @param classLoader the ClassLoader to load class path resources with, or {@code null}
 	 * for using the thread context class loader at the time of actual resource access
 	 */
-	public DefaultResourceLoader( ClassLoader classLoader) {
+	public DefaultResourceLoader( ClassLoader classLoader ) {
 		this.classLoader = classLoader;
 	}
 
@@ -70,7 +70,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>The default is that ClassLoader access will happen using the thread context
 	 * class loader at the time of this ResourceLoader's initialization.
 	 */
-	public void setClassLoader( ClassLoader classLoader) {
+	public void setClassLoader( ClassLoader classLoader ) {
 		this.classLoader = classLoader;
 	}
 
@@ -81,7 +81,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	@Override
 	public ClassLoader getClassLoader() {
-		return (this.classLoader != null ? this.classLoader : Classes.getClassLoader());
+		return ( this.classLoader != null ? this.classLoader : Classes.getClassLoader() );
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 */
 	protected static class ClassPathContextResource extends ClassPathResource implements ContextResource {
 
-		public ClassPathContextResource(String path, ClassLoader classLoader) {
+		public ClassPathContextResource( String path, ClassLoader classLoader ) {
 			super(path, classLoader);
 		}
 
