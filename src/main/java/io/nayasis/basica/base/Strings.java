@@ -1055,6 +1055,17 @@ public class Strings {
 	}
 
 	/**
+	 * extract digit from word
+	 *
+	 * @param string word
+	 * @return digit characters
+	 */
+	public String extractDigit( String string ) {
+		if( isEmpty( string ) ) return "";
+		return string.replaceAll( "[^0-9]", "" );
+	}
+
+	/**
 	 * Return value to Y or N
 	 *
 	 * @param value value to convert
