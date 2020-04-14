@@ -3,6 +3,7 @@ package io.nayasis.basica.base.format;
 import io.nayasis.basica.base.Characters;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.base.Types;
+import io.nayasis.basica.base.format.function.Replacer;
 import io.nayasis.basica.reflection.Reflector;
 
 import java.util.HashMap;
@@ -14,9 +15,11 @@ import java.util.regex.Matcher;
  */
 public class Formatter {
 
-    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "(^|[^\\\\])\\{([^\\s]*?)(|[^\\\\])\\}",    new int[]{2,3}, "\\\\(\\{|\\})",     "$1" );
-    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "(^|[^\\\\])#\\{([^\\s]*?)(|[^\\\\])\\}",   new int[]{2,3}, "\\\\(#|\\{|\\})",   "$1" );
-    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "(^|[^\\\\])\\$\\{([^\\s]*?)(|[^\\\\])\\}", new int[]{2,3}, "\\\\(\\$|\\{|\\})", "$1" );
+    private static final Replacer bracketCompressor = text -> text.replaceAll( "\\{\\{", "{" ).replaceAll( "\\}\\}", "}" );
+
+    public static final ExtractPattern PATTERN_BASIC  = new ExtractPattern( "\\{([^\\s\\{\\}]*?)\\}"    ).replacer(bracketCompressor).escapeChar('{');
+    public static final ExtractPattern PATTERN_SHARP  = new ExtractPattern( "#\\{([^\\s\\{\\}]*?)\\}"   ).replacer(bracketCompressor);
+    public static final ExtractPattern PATTERN_DOLLAR = new ExtractPattern( "\\$\\{([^\\s\\{\\}]*?)\\}" ).replacer(bracketCompressor);
 
     protected static final String FORMAT_INDEX = "_{{%d}}";
 
@@ -51,7 +54,7 @@ public class Formatter {
 
         if( source.isEmpty() ) return source;
 
-        Matcher matcher = pattern.getPattern().matcher( source );
+        Matcher matcher = pattern.pattern().matcher( source );
 
         StringBuilder sb = new StringBuilder();
 
@@ -60,54 +63,49 @@ public class Formatter {
 
         while( matcher.find() ) {
 
-            Key key = new Key( getDefinition(matcher,pattern), index );
+            String prefix = source.substring( cursor, matcher.start() );
 
-            sb.append( removeEscapeParamTag(pattern,source.substring(cursor, matcher.start())) );
-
-            String value = null;
-
-            for( int i = 1, iCnt = matcher.groupCount(); i <= iCnt; i++ ) {
-
-                if( pattern.getTargetGroups().contains(i) ) {
-                    if( value == null ) {
-                        value = binder.bind( key.getName(), key.getFormat(), parameter );
-                        sb.append( value );
-                    }
-                } else {
-                    sb.append( matcher.group(i) );
-                }
-
+            if( pattern.isEscapable(prefix) ) {
+                continue;
             }
 
-            index++;
+            sb.append( pattern.replacer().replace(prefix) );
 
+            Key    key   = new Key( matcher.group(1), index );
+            String value = binder.bind( key.name(), key.format(), parameter );
+
+            sb.append( value );
+
+            index++;
             cursor = matcher.end();
 
             if( koreanModification ) {
                 if( modifyKorean(value, cursor, sb, source) ) {
                     cursor++;
-                    continue;
                 }
             }
 
         }
 
-        sb.append( removeEscapeParamTag(pattern,source.substring(cursor)) );
+        // add remains
+        sb.append( pattern.replacer().replace(source.substring(cursor)) );
 
         return sb.toString();
 
     }
 
-    private String getDefinition( Matcher matcher, ExtractPattern pattern ) {
-        StringBuilder sb = new StringBuilder();
-        for( int i : pattern.getTargetGroups() ) {
-            sb.append( matcher.group(i) );
-        }
-        return sb.toString();
+    /**
+     * compress double curly brackets to single
+     *
+     * @param text  text
+     * @return return '{{' to '{' , '}}' to '}'.
+     */
+    private String compressCurlyBrackets( String text ) {
+        return text.replaceAll( "\\{\\{", "{" ).replaceAll( "\\}\\}", "}" );
     }
 
-    private String removeEscapeParamTag( ExtractPattern pattern, String val ) {
-        return pattern.getRecoveryPattern().matcher( val ).replaceAll( pattern.getRecoveryReplacer() );
+    private boolean notValid( String prefix ) {
+        return ! prefix.isEmpty() && prefix.charAt(prefix.length()-1) == '{';
     }
 
     private boolean modifyKorean( String val, int cursor, StringBuilder buffer, String source ) {

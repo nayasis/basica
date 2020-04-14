@@ -21,14 +21,18 @@ public class StringsTest {
     @Test
     public void format() {
 
+        NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
+
+        assertEquals( "PRE {age} POST", Strings.format( "PRE {{age}} POST", parameter ) );
+
+        assertEquals( "001001", Strings.format( "{}{}","001","001" ) );
+
         assertEquals( "items : (count:3)\n", Strings.format( "items : (count:{})\n{}", 3 ) );
 
         assertEquals( "{ name : merong, age : 2 }", Strings.format( "{ name : {}, age : {} }", "merong", 2 ) );
         assertEquals( "5K\nUtil\ndesc", Strings.format("{}\n{}\n{}", "5K", "Util", "desc") );
 
-        NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
         assertEquals( "PRE 2 POST", Strings.format( "PRE {age} POST", parameter ) );
-        assertEquals( "PRE {age} POST", Strings.format( "PRE \\{age} POST", parameter ) );
         assertEquals( "abc PRE 2 POST", Strings.format( "{name} PRE {age} POST", parameter ) );
         assertEquals( "abc PRE   2 POST", Strings.format( "{name} PRE {age:%3d} POST", parameter ) );
 
@@ -222,13 +226,6 @@ public class StringsTest {
     }
 
     @Test
-    public void sr() {
-
-        log.debug( Strings.trim( "aaaa" ).replaceFirst( "^#\\{", "" ).replaceFirst( "\\}$", "" ) );
-
-    }
-
-    @Test
     public void toBoolean() {
 
         assertEquals( Strings.toBoolean( "true" ), true );
@@ -249,9 +246,7 @@ public class StringsTest {
 
     @Test
     public void regTest() {
-
         System.out.println( "#{name.value[1]}".replaceAll( "#\\{.+?(\\..+?)?\\}", String.format("#{%s$1}", "?") ) );
-
     }
 
     @Test
