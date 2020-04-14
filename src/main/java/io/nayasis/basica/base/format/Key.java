@@ -2,10 +2,12 @@ package io.nayasis.basica.base.format;
 
 import io.nayasis.basica.base.Strings;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import static io.nayasis.basica.base.format.Formatter.FORMAT_INDEX;
 
 @Data
+@Accessors(fluent=true)
 public class Key {
 
     private String name   = "";
