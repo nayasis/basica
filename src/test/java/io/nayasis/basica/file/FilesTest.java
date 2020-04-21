@@ -66,8 +66,21 @@ public class FilesTest {
     @Test
     public void normalizeSeparator() {
 
+        assertEquals( "//NAS/Game & Watch - Zelda", Files.normalizeSeparator( "\\\\NAS\\Game & Watch - Zelda" ) );
         assertEquals( "a", Files.normalizeSeparator( "a\\" ) );
         assertEquals( "/", Files.normalizeSeparator( "/" ) );
+
+    }
+
+    @Test
+    public void toRelativePath() {
+
+        String root = "//NAS/emul/image/ArcadeMame";
+        String path = "\\\\NAS\\emul\\image\\ArcadeMame\\Game & Watch - Zelda";
+
+        String result = Files.toRelativePath(root, path);
+
+        log.debug( "{}, {} -> {}", root, path, result );
 
     }
 
