@@ -5,11 +5,10 @@ import io.nayasis.basica.base.Strings;
 import java.util.LinkedList;
 import java.util.List;
 
+import static io.nayasis.basica.file.Files.FOLDER_SEPARATOR;
+import static io.nayasis.basica.file.Files.FOLDER_SEPARATOR_WINDOWS;
+
 public class PathModifier {
-
-    private static final String SEPARATOR_FOLDER = "/";
-
-    private static final String SEPARATOR_FOLDER_WINDOWS = "\\";
 
     private static final String PATH_PARENT = "..";
 
@@ -19,7 +18,7 @@ public class PathModifier {
 
         if ( Strings.isEmpty(path) ) return path;
 
-        String pathToUse = path.replace( SEPARATOR_FOLDER_WINDOWS, SEPARATOR_FOLDER );
+        String pathToUse = path.replace( FOLDER_SEPARATOR_WINDOWS, FOLDER_SEPARATOR );
 
         // Strip prefix from path to analyze, to not treat it as part of the
         // first path element. This is necessary to correctly parse paths like
@@ -29,19 +28,19 @@ public class PathModifier {
         String prefix = "";
         if (prefixIndex != -1) {
             prefix = pathToUse.substring(0, prefixIndex + 1);
-            if (prefix.contains( SEPARATOR_FOLDER )) {
+            if (prefix.contains( FOLDER_SEPARATOR )) {
                 prefix = "";
             }
             else {
                 pathToUse = pathToUse.substring(prefixIndex + 1);
             }
         }
-        if (pathToUse.startsWith( SEPARATOR_FOLDER )) {
-            prefix = prefix + SEPARATOR_FOLDER;
+        if (pathToUse.startsWith( FOLDER_SEPARATOR )) {
+            prefix = prefix + FOLDER_SEPARATOR;
             pathToUse = pathToUse.substring(1);
         }
 
-        List<String> pathArray = Strings.split( pathToUse, SEPARATOR_FOLDER );
+        List<String> pathArray = Strings.split( pathToUse, FOLDER_SEPARATOR );
         LinkedList<String> pathElements = new LinkedList<>();
         int tops = 0;
 
@@ -71,11 +70,11 @@ public class PathModifier {
             pathElements.add(0, PATH_PARENT );
         }
         // If nothing else left, at least explicitly point to current path.
-        if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith( SEPARATOR_FOLDER )) {
+        if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith( FOLDER_SEPARATOR )) {
             pathElements.add(0, PATH_CURRENT );
         }
 
-        return prefix + Strings.join( pathElements, SEPARATOR_FOLDER );
+        return prefix + Strings.join( pathElements, FOLDER_SEPARATOR );
 
     }
 

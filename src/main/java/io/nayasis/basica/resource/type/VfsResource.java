@@ -18,7 +18,6 @@ package io.nayasis.basica.resource.type;
 
 import io.nayasis.basica.resource.type.abstracts.AbstractResource;
 import io.nayasis.basica.resource.type.interfaces.Resource;
-import io.nayasis.basica.resource.util.NestedIOException;
 import io.nayasis.basica.validation.Assert;
 
 import java.io.File;
@@ -43,7 +42,6 @@ import java.net.URL;
 public class VfsResource extends AbstractResource {
 
 	private final Object resource;
-
 
 	public VfsResource(Object resource) {
 		Assert.notNull(resource, "VirtualFile must not be null");
@@ -70,9 +68,8 @@ public class VfsResource extends AbstractResource {
 	public URL getURL() throws IOException {
 		try {
 			return VfsUtils.getURL(this.resource);
-		}
-		catch (Exception ex) {
-			throw new NestedIOException("Failed to obtain URL for file " + this.resource, ex);
+		} catch ( Exception ex ) {
+			throw new IOException( "Failed to obtain URL for file " + this.resource, ex );
 		}
 	}
 
@@ -80,9 +77,8 @@ public class VfsResource extends AbstractResource {
 	public URI getURI() throws IOException {
 		try {
 			return VfsUtils.getURI(this.resource);
-		}
-		catch (Exception ex) {
-			throw new NestedIOException("Failed to obtain URI for " + this.resource, ex);
+		} catch (Exception ex) {
+			throw new IOException( "Failed to obtain URL for " + this.resource, ex );
 		}
 	}
 

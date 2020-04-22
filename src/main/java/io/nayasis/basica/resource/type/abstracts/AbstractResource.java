@@ -17,7 +17,6 @@
 package io.nayasis.basica.resource.type.abstracts;
 
 import io.nayasis.basica.resource.type.interfaces.Resource;
-import io.nayasis.basica.resource.util.NestedIOException;
 import io.nayasis.basica.resource.util.Resources;
 
 import java.io.File;
@@ -109,9 +108,8 @@ public abstract class AbstractResource implements Resource {
 		URL url = getURL();
 		try {
 			return Resources.toURI(url);
-		}
-		catch (URISyntaxException ex) {
-			throw new NestedIOException("Invalid URI [" + url + "]", ex);
+		} catch ( URISyntaxException ex ) {
+			throw new IOException( String.format("Invalid URI [%s]", url), ex );
 		}
 	}
 
@@ -152,13 +150,10 @@ public abstract class AbstractResource implements Resource {
 				size += read;
 			}
 			return size;
-		}
-		finally {
+		} finally {
 			try {
 				is.close();
-			}
-			catch (IOException ex) {
-			}
+			} catch (IOException ex) {}
 		}
 	}
 
