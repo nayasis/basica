@@ -2,13 +2,13 @@ package io.nayasis.basica.file;
 
 import io.nayasis.basica.base.Classes;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @Slf4j
 public class FilesTest {
@@ -75,12 +75,12 @@ public class FilesTest {
     @Test
     public void toRelativePath() {
 
-        String root = "//NAS/emul/image/ArcadeMame";
-        String path = "\\\\NAS\\emul\\image\\ArcadeMame\\Game & Watch - Zelda";
+        String root = "//NAS/emul/ArcadeMame";
+        String path = "\\\\NAS\\emul\\ArcadeMame\\Game & Watch - Zelda";
 
         String result = Files.toRelativePath(root, path);
 
-        log.debug( "{}, {} -> {}", root, path, result );
+        assertEquals( "ArcadeMame/Game & Watch - Zelda", result );
 
     }
 
