@@ -19,7 +19,7 @@ public class FormatterTest {
         NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
 
         Result r1 = bind( Formatter.PATTERN_DOLLAR,"PRE ${age} POST", parameter );
-        Result r2 = bind( Formatter.PATTERN_DOLLAR,"PRE \\${age} POST", parameter );
+        Result r2 = bind( Formatter.PATTERN_DOLLAR,"PRE ${{age}} POST", parameter );
         Result r3 = bind( Formatter.PATTERN_DOLLAR,"${name} PRE ${age} POST", parameter );
         Result r4 = bind( Formatter.PATTERN_DOLLAR,"${name} PRE ${age:%3d} POST", parameter );
 
@@ -41,7 +41,7 @@ public class FormatterTest {
         NMap parameter = new NMap( "{'name':'abc', 'age':2}" );
 
         Result r1 = bind( Formatter.PATTERN_SHARP,"PRE #{age} POST", parameter );
-        Result r2 = bind( Formatter.PATTERN_SHARP,"PRE \\#{age} POST", parameter );
+        Result r2 = bind( Formatter.PATTERN_SHARP,"PRE #{{age}} POST", parameter );
         Result r3 = bind( Formatter.PATTERN_SHARP,"#{name} PRE #{age} POST", parameter );
         Result r4 = bind( Formatter.PATTERN_SHARP,"#{name} PRE #{age:%3d} POST", parameter );
 
