@@ -1,9 +1,5 @@
 package io.nayasis.basica.xml.reader;
 
-//import org.nybatis.core.exception.unchecked.ParseException;
-//import org.nybatis.core.exception.unchecked.SyntaxException;
-//import org.nybatis.core.exception.unchecked.UncheckedIOException;
-
 import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.exception.unchecked.ParseException;
 import io.nayasis.basica.exception.unchecked.SyntaxException;
