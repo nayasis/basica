@@ -25,7 +25,7 @@ public class UnmodifiableChecker {
         Class<? extends Map> klass = map.getClass();
 
         if( ! CACHE.contains(klass) ) {
-            Map instance = Classes.newInstance( klass );
+            Map instance = Classes.createInstance( klass );
             try {
                 instance.putAll( new HashMap() );
                 CACHE.putIfAbsent( klass, Boolean.FALSE );
@@ -45,7 +45,7 @@ public class UnmodifiableChecker {
         Class<? extends Collection> klass = collection.getClass();
 
         if( ! CACHE.contains(klass) ) {
-            Collection instance = Classes.newInstance( klass );
+            Collection instance = Classes.createInstance( klass );
             try {
                 instance.addAll( Collections.emptyList() );
                 CACHE.putIfAbsent( klass, Boolean.FALSE );

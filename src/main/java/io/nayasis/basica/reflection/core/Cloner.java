@@ -42,7 +42,7 @@ public class Cloner {
             return cloneArray( object, cloned );
         }
 
-        Object clone = Classes.newInstance( klass );
+        Object clone = Classes.createInstance( klass );
         cloned.put( object, clone );
 
         for( Field field : ClassReflector.getFields(klass) ) {
@@ -151,7 +151,7 @@ public class Cloner {
                         if( Types.isArray(srcVal) ) {
                             trgVal = Array.newInstance( trgType.getComponentType(), Array.getLength(srcVal) );
                         } else {
-                            trgVal = Classes.newInstance( trgType );
+                            trgVal = Classes.createInstance( trgType );
                         }
                     }
                     copyProperties( srcVal, trgVal );
@@ -166,7 +166,7 @@ public class Cloner {
     private Object castedSource( Object source, Object target ) {
         Class<?> sourceClass = source.getClass();
         Class<?> targetClass = target.getClass();
-        if( Classes.isExtendedBy(targetClass,sourceClass) || Classes.isExtendedBy(sourceClass,targetClass) ) {
+        if( Classes.hasExtend(targetClass,sourceClass) || Classes.hasExtend(sourceClass,targetClass) ) {
             return source;
         } else {
             return Reflector.toBeanFrom( source, targetClass );
