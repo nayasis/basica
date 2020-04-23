@@ -633,12 +633,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 */
 	private static class PatternVirtualFileVisitor implements InvocationHandler {
 
-		private final String subPattern;
-
-		private final PathMatcher pathMatcher;
-
-		private final String rootPath;
-
+		private final String        subPattern;
+		private final PathMatcher   pathMatcher;
+		private final String        rootPath;
 		private final Set<Resource> resources = new LinkedHashSet<>();
 
 		public PatternVirtualFileVisitor(String rootPath, String subPattern, PathMatcher pathMatcher) {
@@ -648,7 +645,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public Object invoke( Object proxy, Method method, Object[] args ) throws Throwable {
 			String methodName = method.getName();
 			if (Object.class == method.getDeclaringClass()) {
 				if (methodName.equals("equals")) {
@@ -671,9 +668,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 
 		public void visit(Object vfsResource) {
-			if (this.pathMatcher.match(this.subPattern,
-					VfsPatternUtils.getPath(vfsResource).substring(this.rootPath.length()))) {
-				this.resources.add(new VfsResource(vfsResource));
+			if( pathMatcher.match(subPattern,
+					VfsPatternUtils.getPath(vfsResource).substring(rootPath.length()))) {
+				resources.add(new VfsResource(vfsResource));
 			}
 		}
 

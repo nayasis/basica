@@ -16,8 +16,8 @@
 
 package io.nayasis.basica.resource.type;
 
+import io.nayasis.basica.exception.unchecked.BaseRuntimeException;
 import io.nayasis.basica.reflection.core.ClassReflector;
-import io.nayasis.basica.resource.util.ReflectionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,9 +61,9 @@ public abstract class VfsUtils {
 	private static final Method VIRTUAL_FILE_METHOD_GET_CHILD;
 
 	protected static final Class<?> VIRTUAL_FILE_VISITOR_INTERFACE;
-	protected static final Method VIRTUAL_FILE_METHOD_VISIT;
+	protected static final Method   VIRTUAL_FILE_METHOD_VISIT;
 
-	private static final Field VISITOR_ATTRIBUTES_FIELD_RECURSE;
+	private static final Field  VISITOR_ATTRIBUTES_FIELD_RECURSE;
 	private static final Method GET_PHYSICAL_FILE;
 
 	static {
@@ -90,8 +90,7 @@ public abstract class VfsUtils {
 
 			Class<?> visitorAttributesClass = loader.loadClass(VFS3_PKG + "VisitorAttributes");
 			VISITOR_ATTRIBUTES_FIELD_RECURSE = visitorAttributesClass.getField("RECURSE");
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			throw new IllegalStateException("Could not detect JBoss VFS infrastructure", ex);
 		}
 	}
@@ -99,26 +98,21 @@ public abstract class VfsUtils {
 	protected static Object invokeVfsMethod(Method method, Object target, Object... args) throws IOException {
 		try {
 			return method.invoke(target, args);
-		}
-		catch (InvocationTargetException ex) {
+		} catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
 			if (targetEx instanceof IOException) {
 				throw (IOException) targetEx;
 			}
-			ReflectionUtils.handleInvocationTargetException(ex);
+			throw new BaseRuntimeException( ex );
+		} catch (Exception ex) {
+			throw new BaseRuntimeException( ex );
 		}
-		catch (Exception ex) {
-			ReflectionUtils.handleReflectionException(ex);
-		}
-
-		throw new IllegalStateException("Invalid code path reached");
 	}
 
 	static boolean exists(Object vfsResource) {
 		try {
 			return (Boolean) invokeVfsMethod(VIRTUAL_FILE_METHOD_EXISTS, vfsResource);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			return false;
 		}
 	}
@@ -126,8 +120,7 @@ public abstract class VfsUtils {
 	static boolean isReadable(Object vfsResource) {
 		try {
 			return ((Long) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_SIZE, vfsResource) > 0);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			return false;
 		}
 	}
@@ -173,13 +166,13 @@ public abstract class VfsUtils {
 		return (File) invokeVfsMethod(GET_PHYSICAL_FILE, vfsResource);
 	}
 
-	public static Object getRoot(URI url) throws IOException {
+	protected static Object getRoot(URI url) throws IOException {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URI, null, url);
 	}
 
 	// protected methods used by the support sub-package
 
-	public static Object getRoot(URL url) throws IOException {
+	protected static Object getRoot(URL url) throws IOException {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URL, null, url);
 	}
 

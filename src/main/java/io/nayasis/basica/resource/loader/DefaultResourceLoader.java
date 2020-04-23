@@ -19,7 +19,6 @@ package io.nayasis.basica.resource.loader;
 import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.resource.resolver.ProtocolResolver;
 import io.nayasis.basica.resource.type.ClassPathResource;
-import io.nayasis.basica.resource.type.ContextResource;
 import io.nayasis.basica.resource.type.FileUrlResource;
 import io.nayasis.basica.resource.type.UrlResource;
 import io.nayasis.basica.resource.type.interfaces.Resource;
@@ -173,15 +172,10 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * ClassPathResource that explicitly expresses a context-relative path
 	 * through implementing the ContextResource interface.
 	 */
-	protected static class ClassPathContextResource extends ClassPathResource implements ContextResource {
+	protected static class ClassPathContextResource extends ClassPathResource {
 
 		public ClassPathContextResource( String path, ClassLoader classLoader ) {
 			super(path, classLoader);
-		}
-
-		@Override
-		public String getPathWithinContext() {
-			return getPath();
 		}
 
 		@Override

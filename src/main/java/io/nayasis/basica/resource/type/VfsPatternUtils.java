@@ -19,6 +19,7 @@ package io.nayasis.basica.resource.type;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -39,8 +40,12 @@ public abstract class VfsPatternUtils extends VfsUtils {
 		return (path != null ? path : "");
 	}
 
-	public static Object findRoot(URL url) throws IOException {
+	public static Object findRoot( URL url ) throws IOException {
 		return getRoot(url);
+	}
+
+	public static Object findRoot( URI uri ) throws IOException {
+		return getRoot(uri);
 	}
 
 	public static void visit(Object resource, InvocationHandler visitor) throws IOException {
