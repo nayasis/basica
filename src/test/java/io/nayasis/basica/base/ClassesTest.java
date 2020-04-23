@@ -1,8 +1,6 @@
 package io.nayasis.basica.base;
 
 import io.nayasis.basica.file.Files;
-import io.nayasis.basica.resource.PathMatchingResourcePatternResolver;
-import io.nayasis.basica.resource.type.interfaces.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,7 +10,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,6 +30,7 @@ public class ClassesTest {
         Assertions.assertEquals( 2, urls.size() );
 
         for ( URL url : urls ) {
+            log.debug( "url : {}", url );
             InputStream inputStream = Classes.getResourceAsStream(url);
             Assertions.assertNotNull( inputStream );
             Assertions.assertTrue( Strings.isNotEmpty(Files.readFrom(inputStream)) );
@@ -45,31 +43,6 @@ public class ClassesTest {
 //        List<URL> urls = Classes.findResources( "**/*" );
 //        List<URL> urls = Classes.findResources( "**/LICENSE.md" );
 //        List<URL> urls = Classes.findResources( "/META-INF/LICENSE.md" );
-
-    }
-
-    @Test
-    public void findResourcesWithPath() {
-
-        PathMatchingResourcePatternResolver resourceLoader = new PathMatchingResourcePatternResolver();
-
-        try {
-            Set<Resource> resources = resourceLoader.getResources( "classpath*:message/*.prop" );
-
-            for( Resource resource : resources ) {
-                try {
-                    InputStream inputStream = resource.getInputStream();
-                    String text = Files.readFrom( inputStream );
-                    System.out.println( ">> localization.ko.prop" );
-                    System.out.println( text );
-                } catch ( IOException e ) {
-                    e.printStackTrace();
-                }
-            }
-
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        }
 
     }
 

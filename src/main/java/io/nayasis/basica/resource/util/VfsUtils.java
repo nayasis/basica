@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nayasis.basica.resource.type.helper;
+package io.nayasis.basica.resource.util;
 
 import io.nayasis.basica.exception.unchecked.BaseRuntimeException;
 import io.nayasis.basica.reflection.core.ClassReflector;
@@ -23,8 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URL;
 
@@ -69,7 +71,7 @@ public abstract class VfsUtils {
 	static {
 		ClassLoader loader = VfsUtils.class.getClassLoader();
 		try {
-			Class<?> vfsClass = loader.loadClass(VFS3_PKG + VFS_NAME);
+			Class<?> vfsClass = loader.loadClass(VFS3_PKG + VFS_NAME );
 			VFS_METHOD_GET_ROOT_URL = vfsClass.getMethod("getChild", URL.class);
 			VFS_METHOD_GET_ROOT_URI = vfsClass.getMethod("getChild", URI.class);
 
@@ -109,7 +111,7 @@ public abstract class VfsUtils {
 		}
 	}
 
-	static boolean exists(Object vfsResource) {
+	public static boolean exists(Object vfsResource) {
 		try {
 			return (Boolean) invokeVfsMethod(VIRTUAL_FILE_METHOD_EXISTS, vfsResource);
 		} catch (IOException ex) {
@@ -117,7 +119,7 @@ public abstract class VfsUtils {
 		}
 	}
 
-	static boolean isReadable(Object vfsResource) {
+	public static boolean isReadable(Object vfsResource) {
 		try {
 			return ((Long) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_SIZE, vfsResource) > 0);
 		} catch (IOException ex) {
@@ -125,27 +127,27 @@ public abstract class VfsUtils {
 		}
 	}
 
-	static long getSize(Object vfsResource) throws IOException {
+	public static long getSize(Object vfsResource) throws IOException {
 		return (Long) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_SIZE, vfsResource);
 	}
 
-	static long getLastModified(Object vfsResource) throws IOException {
+	public static long getLastModified(Object vfsResource) throws IOException {
 		return (Long) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_LAST_MODIFIED, vfsResource);
 	}
 
-	static InputStream getInputStream(Object vfsResource) throws IOException {
+	public static InputStream getInputStream(Object vfsResource) throws IOException {
 		return (InputStream) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_INPUT_STREAM, vfsResource);
 	}
 
-	static URL getURL(Object vfsResource) throws IOException {
+	public static URL getURL(Object vfsResource) throws IOException {
 		return (URL) invokeVfsMethod(VIRTUAL_FILE_METHOD_TO_URL, vfsResource);
 	}
 
-	static URI getURI(Object vfsResource) throws IOException {
+	public static URI getURI(Object vfsResource) throws IOException {
 		return (URI) invokeVfsMethod(VIRTUAL_FILE_METHOD_TO_URI, vfsResource);
 	}
 
-	static String getName(Object vfsResource) {
+	public static String getName(Object vfsResource) {
 		try {
 			return (String) invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_NAME, vfsResource);
 		}
@@ -154,34 +156,42 @@ public abstract class VfsUtils {
 		}
 	}
 
-	static Object getRelative(URL url) throws IOException {
+	public static Object getRelative(URL url) throws IOException {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URL, null, url);
 	}
 
-	static Object getChild(Object vfsResource, String path) throws IOException {
+	public static Object getChild(Object vfsResource, String path) throws IOException {
 		return invokeVfsMethod(VIRTUAL_FILE_METHOD_GET_CHILD, vfsResource, path);
 	}
 
-	static File getFile(Object vfsResource) throws IOException {
+	public static File getFile(Object vfsResource) throws IOException {
 		return (File) invokeVfsMethod(GET_PHYSICAL_FILE, vfsResource);
 	}
 
-	protected static Object getRoot(URI url) throws IOException {
+	public static Object getRoot(URI url) throws IOException {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URI, null, url);
 	}
 
 	// protected methods used by the support sub-package
 
-	protected static Object getRoot(URL url) throws IOException {
+	public static Object getRoot(URL url) throws IOException {
 		return invokeVfsMethod(VFS_METHOD_GET_ROOT_URL, null, url);
 	}
 
-	protected static Object doGetVisitorAttributes() {
+	public static Object getVisitorAttributes() {
 		return ClassReflector.getFieldIn(VISITOR_ATTRIBUTES_FIELD_RECURSE, null);
 	}
 
-	protected static String doGetPath(Object resource) {
-		return (String) ClassReflector.invokeMethod( VIRTUAL_FILE_METHOD_GET_PATH_NAME, resource );
+	public static String getPath(Object resource) {
+		Object rtn = ClassReflector.invokeMethod( VIRTUAL_FILE_METHOD_GET_PATH_NAME, resource );
+		return rtn == null ? "" : rtn.toString();
+	}
+
+	public static void visit(Object resource, InvocationHandler visitor) throws IOException {
+		Object visitorProxy = Proxy.newProxyInstance(
+			VIRTUAL_FILE_VISITOR_INTERFACE.getClassLoader(),
+			new Class<?>[] {VIRTUAL_FILE_VISITOR_INTERFACE}, visitor);
+		invokeVfsMethod(VIRTUAL_FILE_METHOD_VISIT, resource, visitorProxy);
 	}
 
 }

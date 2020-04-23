@@ -17,7 +17,7 @@
 package io.nayasis.basica.resource.type;
 
 import io.nayasis.basica.resource.type.abstracts.AbstractResource;
-import io.nayasis.basica.resource.type.helper.VfsUtils;
+import io.nayasis.basica.resource.util.VfsUtils;
 import io.nayasis.basica.resource.type.interfaces.Resource;
 import io.nayasis.basica.validation.Assert;
 

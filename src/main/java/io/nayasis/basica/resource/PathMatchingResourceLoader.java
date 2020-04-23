@@ -19,6 +19,7 @@ package io.nayasis.basica.resource;
 import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.reflection.core.ClassReflector;
+import io.nayasis.basica.resource.invocation.VfsVisitor;
 import io.nayasis.basica.resource.loader.DefaultResourceLoader;
 import io.nayasis.basica.resource.loader.ResourceLoader;
 import io.nayasis.basica.resource.matcher.AntPathMatcher;
@@ -26,17 +27,15 @@ import io.nayasis.basica.resource.matcher.PathMatcher;
 import io.nayasis.basica.resource.resolver.ResourcePatternResolver;
 import io.nayasis.basica.resource.type.FileSystemResource;
 import io.nayasis.basica.resource.type.UrlResource;
-import io.nayasis.basica.resource.type.helper.VfsPatternUtils;
-import io.nayasis.basica.resource.type.VfsResource;
 import io.nayasis.basica.resource.type.interfaces.Resource;
 import io.nayasis.basica.resource.util.Resources;
+import io.nayasis.basica.resource.util.VfsUtils;
 import io.nayasis.basica.validation.Assert;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
@@ -54,26 +53,26 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipException;
 
+import static io.nayasis.basica.resource.util.Resources.JAR_URL_SEPARATOR;
 import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_CLASSPATH;
 import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_FILE;
-import static io.nayasis.basica.resource.util.Resources.JAR_URL_SEPARATOR;
 import static io.nayasis.basica.resource.util.Resources.URL_PROTOCOL_VFS;
 import static io.nayasis.basica.resource.util.Resources.WAR_URL_SEPARATOR;
 
 
 @Slf4j
-public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
+public class PathMatchingResourceLoader implements ResourcePatternResolver {
 
-	private static Method equinoxResolveMethod;
+	private static Method EQUINOX_RESOLVE_METHOD;
 
 	static {
 		try {
 			// Detect Equinox OSGi (e.g. on WebSphere 6.1)
 			Class<?> fileLocatorClass = Classes.forName( "org.eclipse.core.runtime.FileLocator" );
-			equinoxResolveMethod = fileLocatorClass.getMethod("resolve", URL.class );
+			EQUINOX_RESOLVE_METHOD = fileLocatorClass.getMethod("resolve", URL.class );
 			log.trace("Found Equinox FileLocator for OSGi bundle URL resolution");
-		} catch (Throwable ex) {
-			equinoxResolveMethod = null;
+		} catch ( Throwable e ) {
+			EQUINOX_RESOLVE_METHOD = null;
 		}
 	}
 
@@ -86,7 +85,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
 	 * <p>ClassLoader access will happen via the thread context class loader.
 	 */
-	public PathMatchingResourcePatternResolver() {
+	public PathMatchingResourceLoader() {
 		this.resourceLoader = new DefaultResourceLoader();
 	}
 
@@ -335,15 +334,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			log.trace( "root dir resource : {}", rootDirResources );
 
 			URL rootDirUrl = rootDirResource.getURL();
-			if ( equinoxResolveMethod != null && rootDirUrl.getProtocol().startsWith("bundle") ) {
-				URL resolvedUrl = (URL) ClassReflector.invokeMethod(equinoxResolveMethod, null, rootDirUrl);
+			if ( EQUINOX_RESOLVE_METHOD != null && rootDirUrl.getProtocol().startsWith("bundle") ) {
+				URL resolvedUrl = (URL) ClassReflector.invokeMethod( EQUINOX_RESOLVE_METHOD, null, rootDirUrl);
 				if (resolvedUrl != null) {
 					rootDirUrl = resolvedUrl;
 				}
 				rootDirResource = new UrlResource(rootDirUrl);
 			}
 			if( rootDirUrl.getProtocol().startsWith(URL_PROTOCOL_VFS) ) {
-				result.addAll( VfsResourceMatchingDelegate.findMatchingResources(rootDirUrl, subPattern, getPathMatcher()));
+				result.addAll( VfsResourceMatcher.findResources(rootDirUrl, subPattern, getPathMatcher()));
 			} else if ( Resources.isJarURL(rootDirUrl) ) {
 				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirUrl, subPattern));
 			} else {
@@ -605,7 +604,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @since 5.1
 	 * @see File#listFiles()
 	 */
-	protected File[] listDirectory(File dir) {
+	private File[] listDirectory(File dir) {
 		File[] files = dir.listFiles();
 		if (files == null) {
 			log.info("Could not retrieve contents of directory [{}]", dir.getAbsolutePath() );
@@ -619,78 +618,13 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	/**
 	 * Inner delegate class, avoiding a hard JBoss VFS API dependency at runtime.
 	 */
-	private static class VfsResourceMatchingDelegate {
-		public static Set<Resource> findMatchingResources( URL rootDirURL, String locationPattern, PathMatcher pathMatcher) throws IOException {
-			Object root = VfsPatternUtils.findRoot(rootDirURL);
-			PatternVirtualFileVisitor visitor = new PatternVirtualFileVisitor(VfsPatternUtils.getPath(root), locationPattern, pathMatcher);
-			VfsPatternUtils.visit(root, visitor);
+	private static class VfsResourceMatcher {
+		public static Set<Resource> findResources( URL rootDir, String locationPattern, PathMatcher pathMatcher ) throws IOException {
+			Object root = VfsUtils.getRoot(rootDir);
+			VfsVisitor visitor = new VfsVisitor(VfsUtils.getPath(root), locationPattern, pathMatcher);
+			VfsUtils.visit(root, visitor);
 			return visitor.getResources();
 		}
-	}
-
-	/**
-	 * VFS visitor for path matching purposes.
-	 */
-	private static class PatternVirtualFileVisitor implements InvocationHandler {
-
-		private final String        subPattern;
-		private final PathMatcher   pathMatcher;
-		private final String        rootPath;
-		private final Set<Resource> resources = new LinkedHashSet<>();
-
-		public PatternVirtualFileVisitor(String rootPath, String subPattern, PathMatcher pathMatcher) {
-			this.subPattern = subPattern;
-			this.pathMatcher = pathMatcher;
-			this.rootPath = (rootPath.isEmpty() || rootPath.endsWith("/") ? rootPath : rootPath + "/");
-		}
-
-		@Override
-		public Object invoke( Object proxy, Method method, Object[] args ) throws Throwable {
-			String methodName = method.getName();
-			if (Object.class == method.getDeclaringClass()) {
-				if (methodName.equals("equals")) {
-					// Only consider equal when proxies are identical.
-					return (proxy == args[0]);
-				}
-				else if (methodName.equals("hashCode")) {
-					return System.identityHashCode(proxy);
-				}
-			} else if ("getAttributes".equals(methodName)) {
-				return getAttributes();
-			} else if ("visit".equals(methodName)) {
-				visit(args[0]);
-				return null;
-			} else if ("toString".equals(methodName)) {
-				return toString();
-			}
-
-			throw new IllegalStateException("Unexpected method invocation: " + method);
-		}
-
-		public void visit(Object vfsResource) {
-			if( pathMatcher.match(subPattern,
-					VfsPatternUtils.getPath(vfsResource).substring(rootPath.length()))) {
-				resources.add(new VfsResource(vfsResource));
-			}
-		}
-
-		public Object getAttributes() {
-			return VfsPatternUtils.getVisitorAttributes();
-		}
-
-		public Set<Resource> getResources() {
-			return this.resources;
-		}
-
-		public int size() {
-			return this.resources.size();
-		}
-
-		@Override
-		public String toString() {
-			return "sub-pattern: " + this.subPattern + ", resources: " + this.resources;
-		}
-
 	}
 
 }

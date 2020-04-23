@@ -18,8 +18,8 @@ package io.nayasis.basica.resource.type.abstracts;
 
 import io.nayasis.basica.resource.type.ClassPathResource;
 import io.nayasis.basica.resource.type.UrlResource;
-import io.nayasis.basica.resource.type.helper.VfsPatternUtils;
 import io.nayasis.basica.resource.type.VfsResource;
+import io.nayasis.basica.resource.util.VfsUtils;
 import io.nayasis.basica.resource.type.interfaces.Resource;
 import io.nayasis.basica.resource.util.Resources;
 
@@ -307,11 +307,11 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	private static class VfsResourceDelegate {
 
 		public static Resource getResource(URL url) throws IOException {
-			return new VfsResource( VfsPatternUtils.findRoot( url ) );
+			return new VfsResource( VfsUtils.getRoot( url ) );
 		}
 
 		public static Resource getResource(URI uri) throws IOException {
-			return new VfsResource( VfsPatternUtils.findRoot(uri) );
+			return new VfsResource( VfsUtils.getRoot(uri) );
 		}
 	}
 

@@ -5,7 +5,7 @@ import io.nayasis.basica.cache.implement.LruCache;
 import io.nayasis.basica.exception.unchecked.UncheckedClassCastException;
 import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
-import io.nayasis.basica.resource.PathMatchingResourcePatternResolver;
+import io.nayasis.basica.resource.PathMatchingResourceLoader;
 import io.nayasis.basica.resource.type.interfaces.Resource;
 import io.nayasis.basica.validation.Assert;
 import io.nayasis.basica.validation.Validator;
@@ -384,7 +384,7 @@ public class Classes {
 
 		List<URL> urls = new ArrayList<>();
 
-		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		PathMatchingResourceLoader resolver = new PathMatchingResourceLoader();
 
 		for( String ptn : pattern ) {
 			try {
