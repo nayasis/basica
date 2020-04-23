@@ -396,7 +396,7 @@ public class XmlReader {
     }
 
 	public Document readXml( URL url, boolean ignoreDtd ) {
-		InputStream is = Classes.getResourceAsStream( url );
+		InputStream is = Classes.getResourceStream( url );
 		return readXml( is, ignoreDtd );
 	}
 

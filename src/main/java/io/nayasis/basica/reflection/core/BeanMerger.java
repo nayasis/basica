@@ -162,7 +162,7 @@ public class BeanMerger {
         Iterator sourceIterator = source.iterator();
         Iterator targetIterator = target.iterator();
 
-        Collection result = Classes.createInstance( target.getClass() );
+        Collection result = Classes.newInstance( target.getClass() );
 
         while( sourceIterator.hasNext() || targetIterator.hasNext() ) {
 

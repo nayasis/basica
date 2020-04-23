@@ -16,341 +16,139 @@
 
 package io.nayasis.basica.resource;
 
-import io.nayasis.basica.base.Classes;
-import io.nayasis.basica.base.Strings;
-import io.nayasis.basica.reflection.core.ClassReflector;
-import io.nayasis.basica.resource.invocation.VfsVisitor;
+import io.nayasis.basica.resource.finder.ClasspathResourceFinder;
+import io.nayasis.basica.resource.finder.FileResourceFinder;
+import io.nayasis.basica.resource.finder.JarResourceFinder;
+import io.nayasis.basica.resource.finder.VfsResourceFinder;
+import io.nayasis.basica.resource.invocation.EquinoxInvocater;
 import io.nayasis.basica.resource.loader.DefaultResourceLoader;
 import io.nayasis.basica.resource.loader.ResourceLoader;
 import io.nayasis.basica.resource.matcher.AntPathMatcher;
 import io.nayasis.basica.resource.matcher.PathMatcher;
 import io.nayasis.basica.resource.resolver.ResourcePatternResolver;
-import io.nayasis.basica.resource.type.FileSystemResource;
 import io.nayasis.basica.resource.type.UrlResource;
 import io.nayasis.basica.resource.type.interfaces.Resource;
-import io.nayasis.basica.resource.util.Resources;
-import io.nayasis.basica.resource.util.VfsUtils;
 import io.nayasis.basica.validation.Assert;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLConnection;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.zip.ZipException;
 
-import static io.nayasis.basica.resource.util.Resources.JAR_URL_SEPARATOR;
+import static io.nayasis.basica.resource.invocation.EquinoxInvocater.isEquinoxUrl;
 import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_CLASSPATH;
-import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_FILE;
-import static io.nayasis.basica.resource.util.Resources.URL_PROTOCOL_VFS;
-import static io.nayasis.basica.resource.util.Resources.WAR_URL_SEPARATOR;
+import static io.nayasis.basica.resource.util.Resources.isJarURL;
+import static io.nayasis.basica.resource.util.Resources.isVfsURL;
 
 
 @Slf4j
 public class PathMatchingResourceLoader implements ResourcePatternResolver {
 
-	private static Method EQUINOX_RESOLVE_METHOD;
+	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+	private PathMatcher    pathMatcher    = new AntPathMatcher();
 
-	static {
-		try {
-			// Detect Equinox OSGi (e.g. on WebSphere 6.1)
-			Class<?> fileLocatorClass = Classes.forName( "org.eclipse.core.runtime.FileLocator" );
-			EQUINOX_RESOLVE_METHOD = fileLocatorClass.getMethod("resolve", URL.class );
-			log.trace("Found Equinox FileLocator for OSGi bundle URL resolution");
-		} catch ( Throwable e ) {
-			EQUINOX_RESOLVE_METHOD = null;
-		}
-	}
-
-	private final ResourceLoader resourceLoader;
-
-	private PathMatcher pathMatcher = new AntPathMatcher();
-
-
-	/**
-	 * Create a new PathMatchingResourcePatternResolver with a DefaultResourceLoader.
-	 * <p>ClassLoader access will happen via the thread context class loader.
-	 */
-	public PathMatchingResourceLoader() {
-		this.resourceLoader = new DefaultResourceLoader();
-	}
-
-	/**
-	 * Return the ResourceLoader that this pattern resolver works with.
-	 */
-	public ResourceLoader getResourceLoader() {
-		return this.resourceLoader;
-	}
+	private FileResourceFinder      fileFinder      = new FileResourceFinder( pathMatcher );
+	private VfsResourceFinder       vfsFinder       = new VfsResourceFinder( pathMatcher );
+	private JarResourceFinder       jarFinder       = new JarResourceFinder( pathMatcher );
+	private ClasspathResourceFinder classpathFinder = new ClasspathResourceFinder( resourceLoader );
 
 	@Override
 	public ClassLoader getClassLoader() {
-		return getResourceLoader().getClassLoader();
+		return resourceLoader.getClassLoader();
 	}
 
 	/**
-	 * Set the PathMatcher implementation to use for this
-	 * resource pattern resolver. Default is AntPathMatcher.
+	 * Set PathMatcher. (default is AntPathMatcher)
 	 */
 	public void setPathMatcher( PathMatcher pathMatcher ) {
-		Assert.notNull(pathMatcher, "PathMatcher must not be null");
+
+		Assert.notNull( pathMatcher, "PathMatcher must not be null" );
+
 		this.pathMatcher = pathMatcher;
-	}
 
-	/**
-	 * Return the PathMatcher that this resource pattern resolver uses.
-	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
-	}
+		fileFinder.setPathMatcher( pathMatcher );
+		vfsFinder.setPathMatcher( pathMatcher );
+		jarFinder.setPathMatcher( pathMatcher );
 
+	}
 
 	@Override
 	public Resource getResource( String location ) {
-		return getResourceLoader().getResource(location);
+		return resourceLoader.getResource(location);
 	}
 
 	@Override
-	public Set<Resource> getResources( String locationPattern ) throws IOException {
+	public Set<Resource> getResources( String pattern ) throws IOException {
 
-		Assert.notNull( locationPattern, "Location pattern must not be null" );
+		Assert.notNull( pattern, "Location pattern must not be null" );
 
-		log.trace( "location pattern : {}", locationPattern );
+		log.trace( "pattern : {}", pattern );
 
-		if ( locationPattern.startsWith( URL_PREFIX_CLASSPATH ) ) {
+		if ( pattern.startsWith( URL_PREFIX_CLASSPATH ) ) {
 			// a class path resource (multiple resources for same name possible)
-			if (getPathMatcher().isPattern(locationPattern.substring( URL_PREFIX_CLASSPATH.length()))) {
+			if ( pathMatcher.isPattern(pattern.substring(URL_PREFIX_CLASSPATH.length()))) {
 				// a class path resource pattern
-				return findPathMatchingResources(locationPattern);
+				return findPathMatchingResources(pattern);
 			} else {
 				// all class path resources with the given name
-				return findAllClassPathResources(locationPattern.substring( URL_PREFIX_CLASSPATH.length()));
+				return classpathFinder.findAll( pattern.substring( URL_PREFIX_CLASSPATH.length()) );
 			}
+
 		} else {
 			// Generally only look for a pattern after a prefix here,
 			// and on Tomcat only after the "*/" separator for its "war:" protocol.
-			int prefixEnd = (locationPattern.startsWith("war:") ? locationPattern.indexOf("*/") + 1 :
-					locationPattern.indexOf(':') + 1);
-			if( getPathMatcher().isPattern(locationPattern.substring(prefixEnd)) ) {
+			int prefixEnd = ( pattern.startsWith("war:") ? pattern.indexOf("*/") + 1 :
+					pattern.indexOf(':') + 1);
+			if( pathMatcher.isPattern(pattern.substring(prefixEnd)) ) {
 				// a file pattern
-				return findPathMatchingResources(locationPattern);
+				return findPathMatchingResources(pattern);
 			} else {
 				// a single resource with the given name
-				LinkedHashSet<Resource> resources = new LinkedHashSet<>();
-				resources.add( getResourceLoader().getResource( locationPattern ) );
+				Set<Resource> resources = new LinkedHashSet<>();
+				resources.add( getResource( pattern ) );
 				return resources;
 			}
 		}
+
 	}
 
-	/**
-	 * Find all class location resources with the given location via the ClassLoader.
-	 * Delegates to {@link #doFindAllClassPathResources(String)}.
-	 * @param location the absolute path within the classpath
-	 * @return the result as Resource array
-	 * @throws IOException in case of I/O errors
-	 * @see ClassLoader#getResources
-	 * @see #toUrlResource
-	 */
-	protected Set<Resource> findAllClassPathResources(String location) throws IOException {
-		String path = location;
-		if (path.startsWith("/")) {
-			path = path.substring(1);
-		}
-		Set<Resource> result = doFindAllClassPathResources(path);
-		if (log.isTraceEnabled()) {
-			log.trace("Resolved classpath location [" + location + "] to resources " + result);
-		}
-		return result;
-	}
 
 	/**
-	 * Find all class location resources with the given path via the ClassLoader.
-	 * Called by {@link #findAllClassPathResources(String)}.
-	 * @param path the absolute path within the classpath (never a leading slash)
-	 * @return a mutable Set of matching Resource instances
-	 * @since 4.1.1
+	 * Find all resources that match the given location pattern via the Ant-style PathMatcher.
+	 * Supports resources in jar files and zip files and in the file system.
+	 *
+	 * @param pattern location pattern to match
+	 * @return matched resources
+	 * @throws IOException occurs I/O errors
 	 */
-	protected Set<Resource> doFindAllClassPathResources( String path ) throws IOException {
-		Set<Resource> result = new LinkedHashSet<>(16);
-		ClassLoader cl = getClassLoader();
-		Enumeration<URL> urls = (cl != null ? cl.getResources(path) : ClassLoader.getSystemResources(path));
-		while ( urls.hasMoreElements() ) {
-			result.add( toUrlResource(urls.nextElement()) );
-		}
-		if ( "".equals(path) ) {
-			// The above result is likely to be incomplete, i.e. only containing file system references.
-			// We need to have pointers to each of the jar files on the classpath as well...
-			addAllClassLoaderJarRoots( cl, result );
-		}
-		return result;
-	}
+	protected Set<Resource> findPathMatchingResources( String pattern ) throws IOException {
 
-	/**
-	 * Convert the given URL as returned from the ClassLoader into a {@link Resource}.
-	 * <p>The default implementation simply creates a {@link UrlResource} instance.
-	 * @param url a URL as returned from the ClassLoader
-	 * @return the corresponding Resource object
-	 * @see ClassLoader#getResources
-	 */
-	protected Resource toUrlResource(URL url) {
-		return new UrlResource(url);
-	}
+		String rootDir    = getRootDir( pattern );
+		String subPattern = pattern.substring( rootDir.length() );
 
-	/**
-	 * Search all {@link URLClassLoader} URLs for jar file references and add them to the
-	 * given set of resources in the form of pointers to the root of the jar file content.
-	 * @param classLoader the ClassLoader to search (including its ancestors)
-	 * @param result the set of resources to add jar roots to
-	 * @since 4.1.1
-	 */
-	protected void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
-		if( classLoader instanceof URLClassLoader ) {
-			try {
-				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
-					try {
-						UrlResource jarResource = new UrlResource( Resources.URL_PREFIX_JAR + url + JAR_URL_SEPARATOR);
-						if (jarResource.exists()) {
-							result.add(jarResource);
-						}
-					} catch ( MalformedURLException e ) {
-						log.debug( "Cannot search for matching files underneath [{}] because it cannot be converted to a valid 'jar:' URL: {}",
-							url, e.getMessage() );
-					}
+		Set<Resource> result = new LinkedHashSet<>(16 );
+
+		for ( Resource root : getResources(rootDir) ) {
+
+			URL rootUrl = root.getURL();
+
+			if( isEquinoxUrl(rootUrl) ) {
+				URL unwrapped = EquinoxInvocater.unwrap( rootUrl );
+				if( unwrapped != null ) {
+					rootUrl = unwrapped;
 				}
-			} catch ( Exception e ) {
-				log.debug( "Cannot introspect jar files since ClassLoader [{}] does not support 'getURLs()': {}", classLoader, e );
+				root = new UrlResource( rootUrl );
 			}
-		}
 
-		if( classLoader == ClassLoader.getSystemClassLoader() ) {
-			// "java.class.path" manifest evaluation...
-			addClassPathManifestEntries( result );
-		}
-
-		if( classLoader != null ) {
-			try {
-				// Hierarchy traversal...
-				addAllClassLoaderJarRoots( classLoader.getParent(), result );
-			} catch ( Exception e ) {
-				log.debug( "Cannot introspect jar files in parent ClassLoader since [{}] does not support 'getParent()': {}", classLoader, e );
-			}
-		}
-	}
-
-	/**
-	 * Determine jar file references from the "java.class.path." manifest property and add them
-	 * to the given set of resources in the form of pointers to the root of the jar file content.
-	 * @param result the set of resources to add jar roots to
-	 * @since 4.3
-	 */
-	protected void addClassPathManifestEntries(Set<Resource> result) {
-		try {
-			String javaClassPathProperty = System.getProperty("java.class.path");
-			for (String path : Strings.split( javaClassPathProperty, File.separator.replace( "\\", "\\\\" )) ) {
-				try {
-					String filePath = new File(path).getAbsolutePath();
-					int prefixIndex = filePath.indexOf(':');
-					if (prefixIndex == 1) {
-						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
-						filePath = Strings.capitalize(filePath);
-					}
-					UrlResource jarResource = new UrlResource( Resources.URL_PREFIX_JAR +
-						URL_PREFIX_FILE + filePath + JAR_URL_SEPARATOR);
-					// Potentially overlapping with URLClassLoader.getURLs() result above!
-					if (!result.contains(jarResource) && !hasDuplicate(filePath, result) && jarResource.exists()) {
-						result.add(jarResource);
-					}
-				} catch ( MalformedURLException e ) {
-					log.debug( "Cannot search for matching files underneath [{}] because it cannot be converted to a valid 'jar:' URL: {}", path, e.getMessage() );
-				}
-			}
-		} catch ( Exception ex ) {
-			log.debug( "Failed to evaluate 'java.class.path' manifest entries: {}", ex );
-		}
-	}
-
-	/**
-	 * Check whether the given file path has a duplicate but differently structured entry
-	 * in the existing result, i.e. with or without a leading slash.
-	 * @param filePath the file path (with or without a leading slash)
-	 * @param result the current result
-	 * @return {@code true} if there is a duplicate (i.e. to ignore the given file path),
-	 * {@code false} to proceed with adding a corresponding resource to the current result
-	 */
-	private boolean hasDuplicate(String filePath, Set<Resource> result) {
-		if( result.isEmpty() )
-			return false;
-		String duplicatePath = (filePath.startsWith("/") ? filePath.substring(1) : "/" + filePath);
-		try {
-			return result.contains(new UrlResource( Resources.URL_PREFIX_JAR + URL_PREFIX_FILE +
-					duplicatePath + JAR_URL_SEPARATOR));
-		}
-		catch (MalformedURLException ex) {
-			// Ignore: just for testing against duplicate.
-			return false;
-		}
-	}
-
-	/**
-	 * Find all resources that match the given location pattern via the
-	 * Ant-style PathMatcher. Supports resources in jar files and zip files
-	 * and in the file system.
-	 * @param locationPattern the location pattern to match
-	 * @return the result as Resource array
-	 * @throws IOException in case of I/O errors
-	 * @see #doFindPathMatchingJarResources
-	 * @see #doFindPathMatchingFileResources
-	 */
-	protected Set<Resource> findPathMatchingResources( String locationPattern ) throws IOException {
-
-		String rootDirPath = getRootDir( locationPattern );
-		String subPattern  = locationPattern.substring( rootDirPath.length() );
-		Set<Resource> rootDirResources = getResources( rootDirPath );
-
-		Set<Resource> result = new LinkedHashSet<>(16);
-
-		log.trace( "location pattern : {}", locationPattern );
-		log.trace( "root dir path    : {}", rootDirPath );
-		log.trace( "sub pattern      : {}", subPattern );
-
-		log.trace( ">> found root dirs\n{}", rootDirResources );
-
-		for ( Resource rootDirResource : rootDirResources ) {
-
-			log.trace( "root dir resource : {}", rootDirResources );
-
-			URL rootDirUrl = rootDirResource.getURL();
-			if ( EQUINOX_RESOLVE_METHOD != null && rootDirUrl.getProtocol().startsWith("bundle") ) {
-				URL resolvedUrl = (URL) ClassReflector.invokeMethod( EQUINOX_RESOLVE_METHOD, null, rootDirUrl);
-				if (resolvedUrl != null) {
-					rootDirUrl = resolvedUrl;
-				}
-				rootDirResource = new UrlResource(rootDirUrl);
-			}
-			if( rootDirUrl.getProtocol().startsWith(URL_PROTOCOL_VFS) ) {
-				result.addAll( VfsResourceMatcher.findResources(rootDirUrl, subPattern, getPathMatcher()));
-			} else if ( Resources.isJarURL(rootDirUrl) ) {
-				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirUrl, subPattern));
+			if( isVfsURL(rootUrl) ) {
+				result.addAll( vfsFinder.find(rootUrl, subPattern) );
+			} else if ( isJarURL(rootUrl) ) {
+				result.addAll( jarFinder.find(root, rootUrl, subPattern) );
 			} else {
-				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
+				result.addAll( fileFinder.find(root, subPattern) );
 			}
 		}
-
-		log.trace( "Resolved location pattern [{}] to resources {}", locationPattern, result );
 
 		return result;
 
@@ -366,265 +164,17 @@ public class PathMatchingResourceLoader implements ResourcePatternResolver {
 	 * for example.
 	 * @param location the location to check
 	 * @return the part of the location that denotes the root directory
-	 * @see #retrieveMatchingFiles
 	 */
-	protected String getRootDir( String location ) {
+	private String getRootDir( String location ) {
 		int prefixEnd = location.indexOf(':') + 1;
 		int rootDirEnd = location.length();
-		while (rootDirEnd > prefixEnd && getPathMatcher().isPattern(location.substring(prefixEnd, rootDirEnd))) {
+		while (rootDirEnd > prefixEnd && pathMatcher.isPattern(location.substring(prefixEnd, rootDirEnd))) {
 			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 2) + 1;
 		}
 		if( rootDirEnd == 0 ) {
 			rootDirEnd = prefixEnd;
 		}
 		return location.substring(0, rootDirEnd);
-	}
-
-	/**
-	 * Find all resources in jar files that match the given location pattern
-	 * via the Ant-style PathMatcher.
-	 * @param rootDirResource the root directory as Resource
-	 * @param rootDirURL the pre-resolved root directory URL
-	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return a mutable Set of matching Resource instances
-	 * @throws IOException in case of I/O errors
-	 * @since 4.3
-	 * @see JarURLConnection
-	 */
-	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, URL rootDirURL, String subPattern)
-			throws IOException {
-
-		log.trace( "\n\t- rootDirResource : {}\n\t- rootDirUrl : {}\n\t- subPattern : {}", rootDirResource, rootDirURL, subPattern );
-
-		URLConnection con = rootDirURL.openConnection();
-		JarFile jarFile;
-		String jarFileUrl;
-		String rootEntryPath;
-		boolean closeJarFile;
-
-		if (con instanceof JarURLConnection) {
-			// Should usually be the case for traditional JAR files.
-			JarURLConnection jarCon = (JarURLConnection) con;
-			Resources.useCachesIfNecessary(jarCon);
-			jarFile = jarCon.getJarFile();
-			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
-			JarEntry jarEntry = jarCon.getJarEntry();
-			rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
-			closeJarFile = !jarCon.getUseCaches();
-		} else {
-			// No JarURLConnection -> need to resort to URL file parsing.
-			// We'll assume URLs of the format "jar:path!/entry", with the protocol
-			// being arbitrary as long as following the entry format.
-			// We'll also handle paths with and without leading "file:" prefix.
-			String urlFile = rootDirURL.getFile();
-			try {
-				int separatorIndex = urlFile.indexOf( WAR_URL_SEPARATOR );
-				if (separatorIndex == -1) {
-					separatorIndex = urlFile.indexOf( JAR_URL_SEPARATOR );
-				}
-				if (separatorIndex != -1) {
-					jarFileUrl = urlFile.substring(0, separatorIndex);
-					rootEntryPath = urlFile.substring(separatorIndex + 2);  // both separators are 2 chars
-					jarFile = getJarFile(jarFileUrl);
-				}
-				else {
-					jarFile = new JarFile(urlFile);
-					jarFileUrl = urlFile;
-					rootEntryPath = "";
-				}
-				closeJarFile = true;
-			} catch (ZipException ex) {
-				log.debug("Skipping invalid jar classpath entry [{}]", urlFile );
-				return Collections.emptySet();
-			}
-		}
-
-		try {
-			log.trace("Looking for matching resources in jar file [{}]", jarFileUrl );
-
-			if (!"".equals(rootEntryPath) && !rootEntryPath.endsWith("/")) {
-				// Root entry path must end with slash to allow for proper matching.
-				// The Sun JRE does not return a slash here, but BEA JRockit does.
-				rootEntryPath = rootEntryPath + "/";
-			}
-
-            log.trace( "- root entry path : {}", rootEntryPath );
-
-			Set<Resource> result = new LinkedHashSet<>(8);
-			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
-				JarEntry entry = entries.nextElement();
-				String entryPath = entry.getName();
-
-                log.trace( "- entry path : {}", entryPath );
-
-				if ( entryPath.startsWith(rootEntryPath) ) {
-					String relativePath = entryPath.substring(rootEntryPath.length());
-                    log.trace( "- relative path : {}", relativePath );
-					if (getPathMatcher().match(subPattern, relativePath)) {
-                        Resource relative = rootDirResource.createRelative( relativePath );
-                        log.trace( "- relative resource : {}", relative );
-                        result.add( relative );
-					}
-				}
-			}
-
-			log.trace( ">> found resources : {}", result );
-
-			return result;
-		}
-		finally {
-			if (closeJarFile) {
-				jarFile.close();
-			}
-		}
-	}
-
-	/**
-	 * Resolve the given jar file URL into a JarFile object.
-	 */
-	protected JarFile getJarFile(String jarFileUrl) throws IOException {
-		if( jarFileUrl.startsWith( URL_PREFIX_FILE ) ) {
-			try {
-				return new JarFile( Resources.toURI(jarFileUrl).getSchemeSpecificPart());
-			} catch (URISyntaxException ex) {
-				// Fallback for URLs that are not valid URIs (should hardly ever happen).
-				return new JarFile(jarFileUrl.substring( URL_PREFIX_FILE.length()));
-			}
-		} else {
-			return new JarFile(jarFileUrl);
-		}
-	}
-
-	/**
-	 * Find all resources in the file system that match the given location pattern
-	 * via the Ant-style PathMatcher.
-	 * @param rootDirResource the root directory as Resource
-	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return a mutable Set of matching Resource instances
-	 * @throws IOException in case of I/O errors
-	 * @see #retrieveMatchingFiles
-	 */
-	protected Set<Resource> doFindPathMatchingFileResources( Resource rootDirResource, String subPattern ) throws IOException {
-		try {
-			File rootDir = rootDirResource.getFile().getAbsoluteFile();
-			return doFindMatchingFileSystemResources( rootDir, subPattern );
-		} catch ( FileNotFoundException e ) {
-			log.debug("Cannot search for matching files underneath {} in the file system: {}", rootDirResource, e.getMessage() );
-			return Collections.emptySet();
-		} catch ( Exception e ) {
-			log.info("Failed to resolve {} in the file system: {}", rootDirResource, e );
-			return Collections.emptySet();
-		}
-	}
-
-	/**
-	 * Find all resources in the file system that match the given location pattern
-	 * via the Ant-style PathMatcher.
-	 * @param rootDir the root directory in the file system
-	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return a mutable Set of matching Resource instances
-	 * @throws IOException in case of I/O errors
-	 * @see #retrieveMatchingFiles
-	 */
-	protected Set<Resource> doFindMatchingFileSystemResources(File rootDir, String subPattern) throws IOException {
-		log.trace("Looking for matching resources in directory tree [{}]", rootDir.getPath() );
-		Set<File> matchingFiles = retrieveMatchingFiles(rootDir, subPattern);
-		Set<Resource> result = new LinkedHashSet<>(matchingFiles.size());
-		for (File file : matchingFiles) {
-			result.add(new FileSystemResource(file));
-		}
-		return result;
-	}
-
-	/**
-	 * Retrieve files that match the given path pattern,
-	 * checking the given directory and its subdirectories.
-	 * @param rootDir the directory to start from
-	 * @param pattern the pattern to match against,
-	 * relative to the root directory
-	 * @return a mutable Set of matching Resource instances
-	 * @throws IOException if directory contents could not be retrieved
-	 */
-	protected Set<File> retrieveMatchingFiles(File rootDir, String pattern) throws IOException {
-		if( !rootDir.exists() ) {
-			// Silently skip non-existing directories.
-			log.debug("Skipping [{}] because it does not exist", rootDir.getAbsolutePath() );
-			return Collections.emptySet();
-		}
-		if( !rootDir.isDirectory() ) {
-			// Complain louder if it exists but is no directory.
-			log.info("Skipping [{}] because it does not denote a directory", rootDir.getAbsolutePath() );
-			return Collections.emptySet();
-		}
-		if( !rootDir.canRead() ) {
-			log.info("Skipping search for matching files underneath directory [{}] because the application is not allowed to read the directory",
-				rootDir.getAbsolutePath() );
-			return Collections.emptySet();
-		}
-		String fullPattern = Strings.nvl(rootDir.getAbsolutePath()).replace(File.separator, "/");
-		if (!pattern.startsWith("/")) {
-			fullPattern += "/";
-		}
-		fullPattern = fullPattern + Strings.nvl(pattern).replace(File.separator, "/");
-		Set<File> result = new LinkedHashSet<>(8);
-		doRetrieveMatchingFiles(fullPattern, rootDir, result);
-		return result;
-	}
-
-	/**
-	 * Recursively retrieve files that match the given pattern,
-	 * adding them to the given result list.
-	 * @param fullPattern the pattern to match against,
-	 * with prepended root directory path
-	 * @param dir the current directory
-	 * @param result the Set of matching File instances to add to
-	 * @throws IOException if directory contents could not be retrieved
-	 */
-	protected void doRetrieveMatchingFiles(String fullPattern, File dir, Set<File> result) throws IOException {
-		log.trace("Searching directory [{}] for files matching pattern [{}]", dir.getAbsolutePath(), fullPattern );
-		for( File content : listDirectory(dir) ) {
-			String currPath = Strings.nvl(content.getAbsolutePath()).replace(File.separator, "/");
-			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {
-				if (!content.canRead()) {
-					log.debug("Skipping subdirectory [{}] because the application is not allowed to read the directory", dir.getAbsolutePath() );
-				} else {
-					doRetrieveMatchingFiles(fullPattern, content, result);
-				}
-			}
-			if (getPathMatcher().match(fullPattern, currPath)) {
-				result.add(content);
-			}
-		}
-	}
-
-	/**
-	 * Determine a sorted list of files in the given directory.
-	 * @param dir the directory to introspect
-	 * @return the sorted list of files (by default in alphabetical order)
-	 * @since 5.1
-	 * @see File#listFiles()
-	 */
-	private File[] listDirectory(File dir) {
-		File[] files = dir.listFiles();
-		if (files == null) {
-			log.info("Could not retrieve contents of directory [{}]", dir.getAbsolutePath() );
-			return new File[0];
-		}
-		Arrays.sort(files, Comparator.comparing(File::getName));
-		return files;
-	}
-
-
-	/**
-	 * Inner delegate class, avoiding a hard JBoss VFS API dependency at runtime.
-	 */
-	private static class VfsResourceMatcher {
-		public static Set<Resource> findResources( URL rootDir, String locationPattern, PathMatcher pathMatcher ) throws IOException {
-			Object root = VfsUtils.getRoot(rootDir);
-			VfsVisitor visitor = new VfsVisitor(VfsUtils.getPath(root), locationPattern, pathMatcher);
-			VfsUtils.visit(root, visitor);
-			return visitor.getResources();
-		}
 	}
 
 }
