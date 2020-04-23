@@ -116,7 +116,7 @@ public class Validator {
             return Array.getLength( value ) == 0;
         } else if( value instanceof InputStream ) {
             try {
-                return ((InputStream) value ).available() == 0;
+                return ((InputStream) value).available() == 0;
             } catch( IOException e ) {}
         } else if( value instanceof NList ) {
             return ((NList) value).size() == 0;
