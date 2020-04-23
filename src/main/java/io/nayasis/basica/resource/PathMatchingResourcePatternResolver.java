@@ -26,7 +26,7 @@ import io.nayasis.basica.resource.matcher.PathMatcher;
 import io.nayasis.basica.resource.resolver.ResourcePatternResolver;
 import io.nayasis.basica.resource.type.FileSystemResource;
 import io.nayasis.basica.resource.type.UrlResource;
-import io.nayasis.basica.resource.type.VfsPatternUtils;
+import io.nayasis.basica.resource.type.helper.VfsPatternUtils;
 import io.nayasis.basica.resource.type.VfsResource;
 import io.nayasis.basica.resource.type.interfaces.Resource;
 import io.nayasis.basica.resource.util.Resources;
@@ -54,8 +54,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipException;
 
-import static io.nayasis.basica.resource.util.Resources.CLASSPATH_URL_PREFIX;
-import static io.nayasis.basica.resource.util.Resources.FILE_URL_PREFIX;
+import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_CLASSPATH;
+import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_FILE;
 import static io.nayasis.basica.resource.util.Resources.JAR_URL_SEPARATOR;
 import static io.nayasis.basica.resource.util.Resources.URL_PROTOCOL_VFS;
 import static io.nayasis.basica.resource.util.Resources.WAR_URL_SEPARATOR;
@@ -131,14 +131,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		log.trace( "location pattern : {}", locationPattern );
 
-		if ( locationPattern.startsWith(CLASSPATH_URL_PREFIX) ) {
+		if ( locationPattern.startsWith( URL_PREFIX_CLASSPATH ) ) {
 			// a class path resource (multiple resources for same name possible)
-			if (getPathMatcher().isPattern(locationPattern.substring(CLASSPATH_URL_PREFIX.length()))) {
+			if (getPathMatcher().isPattern(locationPattern.substring( URL_PREFIX_CLASSPATH.length()))) {
 				// a class path resource pattern
 				return findPathMatchingResources(locationPattern);
 			} else {
 				// all class path resources with the given name
-				return findAllClassPathResources(locationPattern.substring(CLASSPATH_URL_PREFIX.length()));
+				return findAllClassPathResources(locationPattern.substring( URL_PREFIX_CLASSPATH.length()));
 			}
 		} else {
 			// Generally only look for a pattern after a prefix here,
@@ -223,7 +223,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			try {
 				for (URL url : ((URLClassLoader) classLoader).getURLs()) {
 					try {
-						UrlResource jarResource = new UrlResource( Resources.JAR_URL_PREFIX + url + JAR_URL_SEPARATOR);
+						UrlResource jarResource = new UrlResource( Resources.URL_PREFIX_JAR + url + JAR_URL_SEPARATOR);
 						if (jarResource.exists()) {
 							result.add(jarResource);
 						}
@@ -269,8 +269,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 						// Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
 						filePath = Strings.capitalize(filePath);
 					}
-					UrlResource jarResource = new UrlResource( Resources.JAR_URL_PREFIX +
-							FILE_URL_PREFIX + filePath + JAR_URL_SEPARATOR);
+					UrlResource jarResource = new UrlResource( Resources.URL_PREFIX_JAR +
+						URL_PREFIX_FILE + filePath + JAR_URL_SEPARATOR);
 					// Potentially overlapping with URLClassLoader.getURLs() result above!
 					if (!result.contains(jarResource) && !hasDuplicate(filePath, result) && jarResource.exists()) {
 						result.add(jarResource);
@@ -297,7 +297,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return false;
 		String duplicatePath = (filePath.startsWith("/") ? filePath.substring(1) : "/" + filePath);
 		try {
-			return result.contains(new UrlResource( Resources.JAR_URL_PREFIX + FILE_URL_PREFIX +
+			return result.contains(new UrlResource( Resources.URL_PREFIX_JAR + URL_PREFIX_FILE +
 					duplicatePath + JAR_URL_SEPARATOR));
 		}
 		catch (MalformedURLException ex) {
@@ -484,12 +484,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Resolve the given jar file URL into a JarFile object.
 	 */
 	protected JarFile getJarFile(String jarFileUrl) throws IOException {
-		if( jarFileUrl.startsWith(FILE_URL_PREFIX) ) {
+		if( jarFileUrl.startsWith( URL_PREFIX_FILE ) ) {
 			try {
 				return new JarFile( Resources.toURI(jarFileUrl).getSchemeSpecificPart());
 			} catch (URISyntaxException ex) {
 				// Fallback for URLs that are not valid URIs (should hardly ever happen).
-				return new JarFile(jarFileUrl.substring(FILE_URL_PREFIX.length()));
+				return new JarFile(jarFileUrl.substring( URL_PREFIX_FILE.length()));
 			}
 		} else {
 			return new JarFile(jarFileUrl);

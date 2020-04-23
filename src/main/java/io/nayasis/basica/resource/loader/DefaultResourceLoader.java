@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.nayasis.basica.resource.util.Resources.CLASSPATH_URL_PREFIX;
+import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_CLASSPATH;
 
 public class DefaultResourceLoader implements ResourceLoader {
 
@@ -139,8 +139,8 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 		if (location.startsWith("/")) {
 			return getResourceByPath(location);
-		} else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
-			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
+		} else if (location.startsWith( URL_PREFIX_CLASSPATH )) {
+			return new ClassPathResource(location.substring( URL_PREFIX_CLASSPATH.length()), getClassLoader());
 		} else {
 			try {
 				// Try to parse the location as a URL...

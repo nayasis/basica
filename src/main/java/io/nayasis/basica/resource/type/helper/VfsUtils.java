@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nayasis.basica.resource.type;
+package io.nayasis.basica.resource.type.helper;
 
 import io.nayasis.basica.exception.unchecked.BaseRuntimeException;
 import io.nayasis.basica.reflection.core.ClassReflector;

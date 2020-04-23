@@ -18,7 +18,7 @@ package io.nayasis.basica.resource.type.abstracts;
 
 import io.nayasis.basica.resource.type.ClassPathResource;
 import io.nayasis.basica.resource.type.UrlResource;
-import io.nayasis.basica.resource.type.VfsPatternUtils;
+import io.nayasis.basica.resource.type.helper.VfsPatternUtils;
 import io.nayasis.basica.resource.type.VfsResource;
 import io.nayasis.basica.resource.type.interfaces.Resource;
 import io.nayasis.basica.resource.util.Resources;

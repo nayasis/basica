@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.nayasis.basica.resource.type;
+package io.nayasis.basica.resource.type.helper;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -50,8 +50,8 @@ public abstract class VfsPatternUtils extends VfsUtils {
 
 	public static void visit(Object resource, InvocationHandler visitor) throws IOException {
 		Object visitorProxy = Proxy.newProxyInstance(
-				VIRTUAL_FILE_VISITOR_INTERFACE.getClassLoader(),
-				new Class<?>[] {VIRTUAL_FILE_VISITOR_INTERFACE}, visitor);
+			VIRTUAL_FILE_VISITOR_INTERFACE.getClassLoader(),
+			new Class<?>[] {VIRTUAL_FILE_VISITOR_INTERFACE}, visitor);
 		invokeVfsMethod(VIRTUAL_FILE_METHOD_VISIT, resource, visitorProxy);
 	}
 
