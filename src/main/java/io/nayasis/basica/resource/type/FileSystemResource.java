@@ -97,8 +97,8 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 */
 	public FileSystemResource(File file) {
 		Assert.notNull(file, "File must not be null");
-		this.path = PathModifier.clean(file.getPath());
-		this.file = file;
+		this.path     = PathModifier.clean( file.getPath() );
+		this.file     = file;
 		this.filePath = file.toPath();
 	}
 

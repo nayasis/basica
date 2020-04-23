@@ -17,28 +17,17 @@ import org.objenesis.ObjenesisStd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
+
+import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_CLASSPATH;
 
 
 /**
@@ -105,17 +94,6 @@ public class Classes {
 
 		return classLoader;
 
-	}
-
-	private Iterator list( ClassLoader classloader ) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		Class klass = classloader.getClass();
-		while ( klass != java.lang.ClassLoader.class ) {
-			klass = klass.getSuperclass();
-		}
-		Field fieldClasses = klass.getDeclaredField("classes");
-		fieldClasses.setAccessible(true);
-		Vector classes = (Vector) fieldClasses.get( classloader );
-		return classes.iterator();
 	}
 
 	/**
@@ -212,7 +190,7 @@ public class Classes {
 		}
 	}
 
-	public <T> T createInstance( Class<T> klass ) throws UncheckedClassCastException {
+	public <T> T newInstance( Class<T> klass ) throws UncheckedClassCastException {
 		try {
 			return klass.newInstance();
 		} catch( Exception e ) {
@@ -224,8 +202,8 @@ public class Classes {
         }
 	}
 
-    public <T> T createInstance( Type type ) throws ClassNotFoundException {
-		return (T) createInstance( getClass(type) );
+    public <T> T newInstance( Type type ) throws ClassNotFoundException {
+		return (T) newInstance( getClass(type) );
 	}
 
 	/**
@@ -291,7 +269,7 @@ public class Classes {
 	 * @param path resource path
 	 * @return true if resource is exist in class path.
 	 */
-	public boolean isResourceExisted( String path ) {
+	public boolean hasResource( String path ) {
 		return getClassLoader().getResource( refineResourceName(path) ) != null;
 	}
 
@@ -301,7 +279,7 @@ public class Classes {
 	 * @param path	resource path
 	 * @return resource input stream
 	 */
-	public InputStream getResourceAsStream( String path ) {
+	public InputStream getResourceStream( String path ) {
 		return getClassLoader().getResourceAsStream( refineResourceName(path) );
 	}
 
@@ -311,7 +289,7 @@ public class Classes {
 	 * @param url	resource URL
 	 * @return resource input stream
 	 */
-	public InputStream getResourceAsStream( URL url ) throws UncheckedIOException {
+	public InputStream getResourceStream( URL url ) throws UncheckedIOException {
 		if( url == null ) return null;
 		try {
 			return url.openStream();
@@ -388,7 +366,7 @@ public class Classes {
 
 		for( String ptn : pattern ) {
 			try {
-				Set<Resource> resources = resolver.getResources( String.format( "classpath:%s", ptn ) );
+				Set<Resource> resources = resolver.getResources( URL_PREFIX_CLASSPATH + ptn );
 				for( Resource resource : resources ) {
 					urls.add( resource.getURL() );
 				}
@@ -398,59 +376,6 @@ public class Classes {
 		}
 
 		return urls;
-
-	}
-
-	private FileSystem getFileSystem( URL url ) throws URISyntaxException {
-		if( "file".equals(url.getProtocol()) ) {
-			return FileSystems.getDefault();
-		} else {
-			try {
-				return FileSystems.getFileSystem( url.toURI() );
-			} catch ( FileSystemNotFoundException e ) {
-				try {
-					return FileSystems.newFileSystem( url.toURI(), Collections.emptyMap() );
-				} catch ( IOException ex ) {
-					throw new UncheckedIOException( ex );
-				}
-			}
-		}
-	}
-
-	private boolean match( Collection<PathMatcher> matchers, Path path ) {
-		for( PathMatcher matcher : matchers ) {
-			if( matcher.matches(path) )
-				return true;
-		}
-		return false;
-	}
-
-	private List<URL> getRootResources() {
-		List<URL> urls = new ArrayList<>();
-		try {
-			Enumeration<URL> resources = getClassLoader().getResources( "" );
-			while( resources.hasMoreElements() ) {
-				urls.add( resources.nextElement() );
-			}
-		} catch ( IOException e ) {
-			log.error( e.getMessage(), e );
-		}
-		return urls;
-	}
-
-	private Set<PathMatcher> toPathMatcher( FileSystem fileSystem, String... patterns ) {
-
-		Set<PathMatcher> matchers = new HashSet<>();
-		boolean inFile = fileSystem == FileSystems.getDefault();
-
-		for( String pattern : new HashSet<>( Arrays.asList( patterns )) ) {
-			if( Strings.isEmpty( pattern ) ) continue;
-			if( inFile )
-				pattern = refineResourceName( pattern );
-			matchers.add( fileSystem.getPathMatcher( "glob:" + pattern ) );
-		}
-
-		return matchers;
 
 	}
 
@@ -503,21 +428,21 @@ public class Classes {
 		Assert.notNull( name, "name mus not be null" );
 
 		// "java.lang.String[]" style arrays
-		if (name.endsWith( SUFFIX_ARRAY )) {
+		if( name.endsWith( SUFFIX_ARRAY ) ) {
 			String elementClassName = name.substring(0, name.length() - SUFFIX_ARRAY.length());
 			Class<?> elementClass = forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 
 		// "[Ljava.lang.String;" style arrays
-		if (name.startsWith( PREFIX_NON_PRIMITIVE_ARRAY ) && name.endsWith(";")) {
+		if( name.startsWith( PREFIX_NON_PRIMITIVE_ARRAY ) && name.endsWith(";") ) {
 			String elementName = name.substring( PREFIX_NON_PRIMITIVE_ARRAY.length(), name.length() - 1);
 			Class<?> elementClass = forName(elementName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 
 		// "[[I" or "[[Ljava.lang.String;" style arrays
-		if ( name.startsWith( PREFIX_INTERNAL_ARRAY ) ) {
+		if( name.startsWith( PREFIX_INTERNAL_ARRAY ) ) {
 			String elementName = name.substring( PREFIX_INTERNAL_ARRAY.length());
 			Class<?> elementClass = forName( elementName, classLoader );
 			return Array.newInstance(elementClass, 0).getClass();

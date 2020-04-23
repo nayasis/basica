@@ -42,7 +42,7 @@ public class Cloner {
             return cloneArray( object, cloned );
         }
 
-        Object clone = Classes.createInstance( klass );
+        Object clone = Classes.newInstance( klass );
         cloned.put( object, clone );
 
         for( Field field : ClassReflector.getFields(klass) ) {
@@ -151,7 +151,7 @@ public class Cloner {
                         if( Types.isArray(srcVal) ) {
                             trgVal = Array.newInstance( trgType.getComponentType(), Array.getLength(srcVal) );
                         } else {
-                            trgVal = Classes.createInstance( trgType );
+                            trgVal = Classes.newInstance( trgType );
                         }
                     }
                     copyProperties( srcVal, trgVal );
