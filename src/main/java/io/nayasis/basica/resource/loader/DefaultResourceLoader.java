@@ -91,7 +91,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @since 4.3
 	 * @see #getProtocolResolvers()
 	 */
-	public void addProtocolResolver(ProtocolResolver resolver) {
+	public void addProtocolResolver( ProtocolResolver resolver ) {
 		Assert.notNull(resolver, "ProtocolResolver must not be null");
 		this.protocolResolvers.add(resolver);
 	}
@@ -127,19 +127,20 @@ public class DefaultResourceLoader implements ResourceLoader {
 
 
 	@Override
-	public Resource getResource(String location) {
+	public Resource getResource( String location ) {
+
 		Assert.notNull(location, "Location must not be null");
 
-		for (ProtocolResolver protocolResolver : this.protocolResolvers) {
+		for( ProtocolResolver protocolResolver : this.protocolResolvers ) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
 				return resource;
 			}
 		}
 
-		if (location.startsWith("/")) {
+		if ( location.startsWith("/") ) {
 			return getResourceByPath(location);
-		} else if (location.startsWith( URL_PREFIX_CLASSPATH )) {
+		} else if ( location.startsWith( URL_PREFIX_CLASSPATH ) ) {
 			return new ClassPathResource(location.substring( URL_PREFIX_CLASSPATH.length()), getClassLoader());
 		} else {
 			try {

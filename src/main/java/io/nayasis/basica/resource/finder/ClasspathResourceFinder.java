@@ -1,5 +1,6 @@
 package io.nayasis.basica.resource.finder;
 
+import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.resource.loader.ResourceLoader;
 import io.nayasis.basica.resource.type.UrlResource;
@@ -30,21 +31,23 @@ public class ClasspathResourceFinder {
 
     /**
      * Find all class location resources with the given location via the ClassLoader.
-     * Delegates to {@link #doFindAllClassPathResources(String)}.
+     * Delegates to {@link #findAllClassPathResources(String)}.
      * @param location the absolute path within the classpath
      * @return the result as Resource array
      * @throws IOException in case of I/O errors
      * @see ClassLoader#getResources
      */
     public Set<Resource> findAll( String location ) throws IOException {
+
         String path = location;
-        if (path.startsWith("/")) {
+        if ( path.startsWith("/") ) {
             path = path.substring(1);
         }
-        Set<Resource> result = doFindAllClassPathResources(path);
-        if (log.isTraceEnabled()) {
-            log.trace("Resolved classpath location [" + location + "] to resources " + result);
-        }
+
+        Set<Resource> result = findAllClassPathResources( path );
+
+        log.trace( "Resolved classpath location [{}] to resources {}", location, result );
+
         return result;
     }
 
@@ -54,7 +57,7 @@ public class ClasspathResourceFinder {
      * @return a mutable Set of matching Resource instances
      * @since 4.1.1
      */
-    protected Set<Resource> doFindAllClassPathResources( String path ) throws IOException {
+    private Set<Resource> findAllClassPathResources( String path ) throws IOException {
         Set<Resource> result = new LinkedHashSet<>(16);
         ClassLoader cl = getClassLoader();
         Enumeration<URL> urls = (cl != null ? cl.getResources(path) : ClassLoader.getSystemResources(path));
@@ -151,16 +154,14 @@ public class ClasspathResourceFinder {
      * @return {@code true} if there is a duplicate (i.e. to ignore the given file path),
      * {@code false} to proceed with adding a corresponding resource to the current result
      */
-    private boolean hasDuplicate(String filePath, Set<Resource> result) {
+    private boolean hasDuplicate( String filePath, Set<Resource> result ) {
         if( result.isEmpty() )
             return false;
         String duplicatePath = (filePath.startsWith("/") ? filePath.substring(1) : "/" + filePath);
         try {
             return result.contains(new UrlResource( Resources.URL_PREFIX_JAR + URL_PREFIX_FILE +
                 duplicatePath + URL_SEPARATOR_JAR ));
-        }
-        catch (MalformedURLException ex) {
-            // Ignore: just for testing against duplicate.
+        } catch ( MalformedURLException e ) {
             return false;
         }
     }

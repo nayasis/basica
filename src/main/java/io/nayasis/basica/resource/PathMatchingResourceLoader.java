@@ -16,6 +16,7 @@
 
 package io.nayasis.basica.resource;
 
+import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.resource.finder.ClasspathResourceFinder;
 import io.nayasis.basica.resource.finder.FileResourceFinder;
 import io.nayasis.basica.resource.finder.JarResourceFinder;
@@ -56,18 +57,15 @@ public class PathMatchingResourceLoader implements ResourcePatternResolver {
 	}
 
 	/**
-	 * Set PathMatcher. (default is AntPathMatcher)
+	 * Set PathMatcher.
+	 * default is AntPathMatcher.
 	 */
 	public void setPathMatcher( PathMatcher pathMatcher ) {
-
-		Assert.notNull( pathMatcher, "PathMatcher must not be null" );
-
+		Assert.notNull( pathMatcher, "[pathMatcher] must not be null" );
 		this.pathMatcher = pathMatcher;
-
 		fileFinder.setPathMatcher( pathMatcher );
 		vfsFinder.setPathMatcher( pathMatcher );
 		jarFinder.setPathMatcher( pathMatcher );
-
 	}
 
 	@Override
@@ -78,15 +76,13 @@ public class PathMatchingResourceLoader implements ResourcePatternResolver {
 	@Override
 	public Set<Resource> getResources( String pattern ) throws IOException {
 
-		Assert.notNull( pattern, "Location pattern must not be null" );
+		if( Strings.isEmpty(pattern) ) return new LinkedHashSet<>();
 
-		log.trace( "pattern : {}", pattern );
-
-		if ( pattern.startsWith( URL_PREFIX_CLASSPATH ) ) {
+		if ( isClasspath(pattern) ) {
 			// a class path resource (multiple resources for same name possible)
 			if ( pathMatcher.isPattern(pattern.substring(URL_PREFIX_CLASSPATH.length()))) {
 				// a class path resource pattern
-				return findPathMatchingResources(pattern);
+				return findResources(pattern);
 			} else {
 				// all class path resources with the given name
 				return classpathFinder.findAll( pattern.substring( URL_PREFIX_CLASSPATH.length()) );
@@ -99,34 +95,38 @@ public class PathMatchingResourceLoader implements ResourcePatternResolver {
 				pattern.indexOf(':') + 1);
 			if( pathMatcher.isPattern(pattern.substring(prefixEnd)) ) {
 				// a file pattern
-				return findPathMatchingResources(pattern);
+				return findResources(pattern);
 			} else {
 				// a single resource with the given name
 				Set<Resource> resources = new LinkedHashSet<>();
-				resources.add( getResource( pattern ) );
+				resources.add( getResource(pattern) );
 				return resources;
 			}
 		}
 
 	}
 
+	private boolean isClasspath( String pattern ) {
+		return pattern.startsWith( URL_PREFIX_CLASSPATH );
+	}
 
 	/**
-	 * Find all resources that match the given location pattern via the Ant-style PathMatcher.
-	 * Supports resources in jar files and zip files and in the file system.
+	 * find all resources matched with given pattern.
 	 *
-	 * @param pattern location pattern to match
-	 * @return matched resources
+	 * <p>it could find resources in JAR, ZIP, File system.
+	 *
+	 * @param pattern 	pattern to match
+	 * @return	matched resources
 	 * @throws IOException occurs I/O errors
 	 */
-	protected Set<Resource> findPathMatchingResources( String pattern ) throws IOException {
+	private Set<Resource> findResources( String pattern ) throws IOException {
 
-		String rootDir    = getRootDir( pattern );
-		String subPattern = pattern.substring( rootDir.length() );
+		String ptnRoot   = getRootDir( pattern );
+		String ptnRemain = pattern.substring( ptnRoot.length() );
 
 		Set<Resource> result = new LinkedHashSet<>(16 );
 
-		for ( Resource root : getResources(rootDir) ) {
+		for ( Resource root : getResources(ptnRoot) ) {
 
 			URL rootUrl = root.getURL();
 
@@ -139,12 +139,13 @@ public class PathMatchingResourceLoader implements ResourcePatternResolver {
 			}
 
 			if( Resources.isVfsURL(rootUrl) ) {
-				result.addAll( vfsFinder.find(rootUrl, subPattern) );
+				result.addAll( vfsFinder.find(rootUrl, ptnRemain) );
 			} else if ( Resources.isJarURL(rootUrl) ) {
-				result.addAll( jarFinder.find(root, rootUrl, subPattern) );
+				result.addAll( jarFinder.find(root, rootUrl, ptnRemain) );
 			} else {
-				result.addAll( fileFinder.find(root, subPattern) );
+				result.addAll( fileFinder.find(root, ptnRemain) );
 			}
+
 		}
 
 		return result;
@@ -152,26 +153,28 @@ public class PathMatchingResourceLoader implements ResourcePatternResolver {
 	}
 
 	/**
-	 * Determine the root directory for the given location.
-	 * <p>Used for determining the starting point for file matching,
-	 * resolving the root directory location to a {@code java.io.File}
-	 * and passing it into {@code retrieveMatchingFiles}, with the
-	 * remainder of the location as pattern.
-	 * <p>Will return "/WEB-INF/" for the pattern "/WEB-INF/*.xml",
-	 * for example.
-	 * @param location the location to check
-	 * @return the part of the location that denotes the root directory
+	 * extract root directory for given path to determine file matching starting point.
+	 *
+	 * <p>ex. "classpath:/WEB-INF/*.xml" returns "classpath:/WEB-INF"
+	 *
+	 * @param path
+	 * @return
 	 */
-	private String getRootDir( String location ) {
-		int prefixEnd = location.indexOf(':') + 1;
-		int rootDirEnd = location.length();
-		while (rootDirEnd > prefixEnd && pathMatcher.isPattern(location.substring(prefixEnd, rootDirEnd))) {
-			rootDirEnd = location.lastIndexOf('/', rootDirEnd - 2) + 1;
+	public String getRootDir( String path ) {
+
+		int prefixEnd  = path.indexOf(':') + 1;
+		int rootDirEnd = path.length();
+
+		// climb up directory until remain path is not matched with pattern
+		while( rootDirEnd > prefixEnd && pathMatcher.isPattern(path.substring(prefixEnd, rootDirEnd)) ) {
+			rootDirEnd = path.lastIndexOf('/', rootDirEnd - 2) + 1;
 		}
-		if( rootDirEnd == 0 ) {
+
+		if( rootDirEnd == 0 )
 			rootDirEnd = prefixEnd;
-		}
-		return location.substring(0, rootDirEnd);
+
+		return path.substring( 0, rootDirEnd );
+
 	}
 
 }
