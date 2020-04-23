@@ -1,6 +1,7 @@
 package io.nayasis.basica.base;
 
 import io.nayasis.basica.model.NList;
+import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.ZERO;
 
 /**
  * Type Check Utility
@@ -31,9 +33,10 @@ import static java.math.BigDecimal.ONE;
  * @author nayasis@gmail.com
  * @since 2015-08-20
  */
+@UtilityClass
 public class Types {
 
-    private final static Set<Class<?>> IMMUTABLE = new HashSet() {{
+    private final Set<Class<?>> IMMUTABLE = new HashSet() {{
         add( void.class );       add( Void.class );
         add( char.class );       add( Character.class );
         add( boolean.class );    add( Boolean.class );
@@ -53,15 +56,15 @@ public class Types {
         add( Class.class );
     }};
 
-    private static boolean isEmpty( Class klass ) {
+    private boolean isEmpty( Class klass ) {
         return klass == null || klass == Object.class;
     }
 
-    private static boolean isEmpty( Object instance ) {
+    private boolean isEmpty( Object instance ) {
         return instance == null || isEmpty( instance.getClass() );
     }
 
-    private static boolean checkParents( Class<?> klass, Class<?>... checkTargets ) {
+    private boolean checkParents( Class<?> klass, Class<?>... checkTargets ) {
         if( isEmpty(klass) ) return false;
         Set<Class<?>> parents = Classes.findParents( klass );
         for( Class<?> target : checkTargets ) {
@@ -70,7 +73,7 @@ public class Types {
         return false;
     }
 
-    private static boolean checkType( Class<?> klass, Class<?>... types ) {
+    private boolean checkType( Class<?> klass, Class<?>... types ) {
         if( isEmpty(klass) ) return false;
         for( Class type : types ) {
             if( klass == type ) return true;
@@ -78,171 +81,171 @@ public class Types {
         return false;
     }
 
-    public static boolean isMap( Class klass ) {
+    public boolean isMap( Class klass ) {
         return checkParents( klass, Map.class, Dictionary.class );
     }
 
-    public static boolean isMap( Object instance ) {
+    public boolean isMap( Object instance ) {
         return ! isEmpty(instance) && isMap( instance.getClass() );
     }
 
-    public static boolean isCollection( Class klass ) {
+    public boolean isCollection( Class klass ) {
         return checkParents( klass, AbstractCollection.class, NList.class );
     }
 
-    public static boolean isCollection( Object instance ) {
+    public boolean isCollection( Object instance ) {
         return ! isEmpty(instance) && isCollection( instance.getClass() );
     }
 
-    public static boolean isArray( Class klass ) {
+    public boolean isArray( Class klass ) {
         return klass != null && klass.isArray();
     }
 
-    public static boolean isArray( Object instance ) {
+    public boolean isArray( Object instance ) {
         return instance != null && isArray( instance.getClass() );
     }
 
-    public static boolean isArrayOrCollection( Class klass ) {
+    public boolean isArrayOrCollection( Class klass ) {
         return isArray( klass ) || isCollection( klass );
     }
 
-    public static boolean isArrayOrCollection( Object instance ) {
+    public boolean isArrayOrCollection( Object instance ) {
         return isArray( instance ) || isCollection( instance );
     }
 
-    public static boolean isBoolean( Object instance ) {
+    public boolean isBoolean( Object instance ) {
         return instance != null && isBoolean( instance.getClass() );
     }
 
-    public static boolean isBoolean( Class klass ) {
+    public boolean isBoolean( Class klass ) {
         return checkType( klass, Boolean.class, boolean.class );
     }
 
-    public static boolean isInt( Class klass ) {
+    public boolean isInt( Class klass ) {
         return checkType( klass, Integer.class, int.class );
     }
 
-    public static boolean isInt( Object instance ) {
+    public boolean isInt( Object instance ) {
         return instance != null && isInt( instance.getClass() );
     }
 
-    public static boolean isShort( Class klass ) {
+    public boolean isShort( Class klass ) {
         return checkType( klass, Short.class, short.class );
     }
 
-    public static boolean isShort( Object instance ) {
+    public boolean isShort( Object instance ) {
         return instance != null && isShort( instance.getClass() );
     }
 
-    public static boolean isByte( Class klass ) {
+    public boolean isByte( Class klass ) {
         return checkType( klass, Byte.class, byte.class );
     }
 
-    public static boolean isByte( Object instance ) {
+    public boolean isByte( Object instance ) {
         return instance != null && isByte( instance.getClass() );
     }
 
-    public static boolean isIntLike( Class klass ) {
+    public boolean isIntLike( Class klass ) {
         // byte < short < int < long
         return isInt( klass ) || isLong( klass ) || isShort( klass ) || isByte(klass);
     }
 
-    public static boolean isIntLike( Object instance ) {
+    public boolean isIntLike( Object instance ) {
         return instance != null && isIntLike( instance.getClass() );
     }
 
-    public static boolean isInt( String value ) {
+    public boolean isInt( String value ) {
         try {
             return new BigDecimal( value ).remainder( ONE )
-                .compareTo( BigDecimal.ZERO ) == 0;
+                .compareTo( ZERO ) == 0;
         } catch( Exception e ) {
             return false;
         }
     }
 
-    public static boolean isPositiveInt( String value ) {
+    public boolean isPositiveInt( String value ) {
         try {
             BigDecimal number = new BigDecimal( value );
-            if( number.compareTo( BigDecimal.ZERO ) <= 0 ) return false;
-            return number.remainder( ONE ).compareTo( BigDecimal.ZERO ) == 0;
+            if( number.compareTo( ZERO ) <= 0 ) return false;
+            return number.remainder( ONE ).compareTo( ZERO ) == 0;
         } catch( Exception e ) {
             return false;
         }
     }
 
-    public static boolean isLong( Class klass ) {
+    public boolean isLong( Class klass ) {
         return checkType( klass, Long.class, long.class );
     }
 
-    public static boolean isLong( Object instance ) {
+    public boolean isLong( Object instance ) {
         return instance != null && isLong( instance.getClass() );
     }
 
-    public static boolean isFloat( Class klass ) {
+    public boolean isFloat( Class klass ) {
         return checkType( klass, Float.class, float.class );
     }
 
-    public static boolean isFloat( Object instance ) {
+    public boolean isFloat( Object instance ) {
         return instance != null && isFloat( instance.getClass() );
     }
 
-    public static boolean isDouble( Class klass ) {
+    public boolean isDouble( Class klass ) {
         return checkType( klass, Double.class, double.class );
     }
 
-    public static boolean isDouble( Object instance ) {
+    public boolean isDouble( Object instance ) {
         return instance != null && isDouble( instance.getClass() );
     }
 
-    public static boolean isBigDecimal( Class klass ) {
+    public boolean isBigDecimal( Class klass ) {
         return checkType( klass, BigDecimal.class );
     }
 
-    public static boolean isBigDecimal( Object instance ) {
+    public boolean isBigDecimal( Object instance ) {
         return instance != null && isBigDecimal( instance.getClass() );
     }
 
-    public static boolean isBigInteger( Class klass ) {
+    public boolean isBigInteger( Class klass ) {
         return checkType( klass, BigInteger.class );
     }
 
-    public static boolean isBigInteger( Object instance ) {
+    public boolean isBigInteger( Object instance ) {
         return instance != null && isBigInteger( instance.getClass() );
     }
 
-    public static boolean isChar( Class klass ) {
+    public boolean isChar( Class klass ) {
         return checkType( klass, Characters.class, char.class );
     }
 
-    public static boolean isChar( Object instance ) {
+    public boolean isChar( Object instance ) {
         return instance != null && isChar( instance.getClass() );
     }
 
-    public static boolean isStringLike( Class klass ) {
+    public boolean isStringLike( Class klass ) {
         return checkType( klass, String.class, StringBuffer.class, StringBuilder.class );
     }
 
-    public static boolean isStringLike( Object instance ) {
+    public boolean isStringLike( Object instance ) {
         return instance != null && isStringLike( instance.getClass() );
     }
 
-    public static boolean isString( Class klass ) {
+    public boolean isString( Class klass ) {
         return checkType( klass, String.class );
     }
 
-    public static boolean isString( Object instance ) {
+    public boolean isString( Object instance ) {
         return instance != null && isStringLike( instance.getClass() );
     }
 
-    public static boolean isNumeric( Class klass ) {
+    public boolean isNumeric( Class klass ) {
         return isInt( klass ) || isLong( klass ) || isShort( klass ) || isByte(klass) || isFloat( klass ) || isDouble( klass ) || isBigDecimal( klass ) || isBigInteger( klass );
     }
 
-    public static boolean isNumeric( Object instance ) {
+    public boolean isNumeric( Object instance ) {
         return instance != null && isNumeric( instance.getClass() );
     }
 
-    public static boolean isNumeric( String value ) {
+    public boolean isNumeric( String value ) {
         try {
             new BigDecimal( value );
             return true;
@@ -251,31 +254,31 @@ public class Types {
         }
     }
 
-    public static boolean isImmutable( Class klass ) {
+    public boolean isImmutable( Class klass ) {
         return klass != null && IMMUTABLE.contains( klass );
     }
 
-    public static boolean isImmutable( Object object ) {
+    public boolean isImmutable( Object object ) {
         return object != null && IMMUTABLE.contains( object.getClass() );
     }
 
-    public static boolean isPrimitive( Class klass ) {
+    public boolean isPrimitive( Class klass ) {
         return klass != null && klass.isPrimitive();
     }
 
-    public static boolean isPrimitive( Object instance ) {
+    public boolean isPrimitive( Object instance ) {
         return instance != null && isPrimitive( instance.getClass() );
     }
 
-    public static boolean isEnum( Class klass ) {
+    public boolean isEnum( Class klass ) {
         return klass.isEnum();
     }
 
-    public static boolean isEnum( Object instance ) {
+    public boolean isEnum( Object instance ) {
         return instance != null && isEnum( instance.getClass() );
     }
 
-    public static <T> List<T> toList( Enumeration<T> instance ) {
+    public <T> List<T> toList( Enumeration<T> instance ) {
         if( instance == null ) return new ArrayList();
         List<T> list = new ArrayList<>();
         while ( instance.hasMoreElements() ) {
@@ -284,7 +287,7 @@ public class Types {
         return list;
     }
 
-    public static <T> List<T> toList( Iterator<T> instance ) {
+    public <T> List<T> toList( Iterator<T> instance ) {
         if( instance == null ) return new ArrayList();
         List<T> list = new ArrayList<>();
         while ( instance.hasNext() ) {
@@ -293,22 +296,22 @@ public class Types {
         return list;
     }
 
-    public static <T> List<T> toList( Collection<T> instance ) {
+    public <T> List<T> toList( Collection<T> instance ) {
         if( instance == null ) return new ArrayList();
         return new ArrayList<>( instance );
     }
 
-    public static <T> List<T> toList( Iterable<T> instance ) {
+    public <T> List<T> toList( Iterable<T> instance ) {
         if( instance == null ) return new ArrayList();
         return toList( instance.iterator() );
     }
 
-    public static <T> List<T> toList( NList instance ) {
+    public <T> List<T> toList( NList instance ) {
         if( instance == null ) return new ArrayList();
         return (List<T>) instance.toList();
     }
 
-    public static List toList( Object instance ) {
+    public List toList( Object instance ) {
         if( instance == null ) return new ArrayList();
         if( isArray(instance) ) {
             return arrayToList( instance );
@@ -323,23 +326,23 @@ public class Types {
         }
     }
 
-    public static <T> Collection<T> toCollection( Collection<T> instance ) {
+    public <T> Collection<T> toCollection( Collection<T> instance ) {
         return toList( instance );
     }
 
-    public static <T> Collection<T> toCollection( Iterable<T> instance ) {
+    public <T> Collection<T> toCollection( Iterable<T> instance ) {
         return toList( instance );
     }
 
-    public static <T> Collection<T> toCollection( NList instance ) {
+    public <T> Collection<T> toCollection( NList instance ) {
         return toList( instance );
     }
 
-    public static Collection toCollection( Object value ) {
+    public Collection toCollection( Object value ) {
         return toList( value );
     }
 
-    private static List arrayToList( Object object ) {
+    private List arrayToList( Object object ) {
         List list = new ArrayList();
         int size = Array.getLength( object );
         for( int i=0; i < size; i++ ) {
@@ -348,12 +351,12 @@ public class Types {
         return list;
     }
 
-    public static <T> T[] toArray( Collection<T> list, Class<T> returnType ) {
+    public <T> T[] toArray( Collection<T> list, Class<T> returnType ) {
         T[] array = (T[]) Array.newInstance( returnType, 0 );
         return list.toArray( array );
     }
 
-    public static String toString( Object val ) {
+    public String toString( Object val ) {
         if( val == null ) return null;
         if( isEnum(val) ) {
             return ((Enum)val).name();
@@ -362,7 +365,7 @@ public class Types {
         }
     }
 
-    public static Integer toInt( Object value ) throws NumberFormatException {
+    public Integer toInt( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return (Integer)value;
         if( isLong(value)       ) return ((Long)value).intValue();
@@ -381,7 +384,7 @@ public class Types {
         }
     }
 
-    public static Long toLong( Object value ) throws NumberFormatException {
+    public Long toLong( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return ((Integer)value).longValue();
         if( isLong(value)       ) return (Long)value;
@@ -400,7 +403,7 @@ public class Types {
         }
     }
 
-    public static Float toFloat( Object value ) throws NumberFormatException {
+    public Float toFloat( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return ((Integer)value).floatValue();
         if( isLong(value)       ) return ((Long)value).floatValue();
@@ -419,7 +422,7 @@ public class Types {
         }
     }
 
-    public static Double toDouble( Object value ) throws NumberFormatException {
+    public Double toDouble( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return ((Integer)value).doubleValue();
         if( isLong(value)       ) return ((Long)value).doubleValue();
@@ -438,7 +441,7 @@ public class Types {
         }
     }
 
-    public static Byte toByte( Object value ) throws NumberFormatException {
+    public Byte toByte( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return ((Integer)value).byteValue();
         if( isLong(value)       ) return ((Long)value).byteValue();
@@ -457,7 +460,7 @@ public class Types {
         }
     }
 
-    public static Short toShort( Object value ) throws NumberFormatException {
+    public Short toShort( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return ((Integer)value).shortValue();
         if( isLong(value)       ) return ((Long)value).shortValue();
@@ -476,7 +479,7 @@ public class Types {
         }
     }
 
-    public static Character toChar( Object value ) {
+    public Character toChar( Object value ) {
         if( value == null ) return null;
         if( isInt(value)        ) return Character.valueOf((char)((Integer)value).intValue());
         if( isLong(value)       ) return Character.valueOf((char)((Long)value).intValue());
@@ -492,7 +495,7 @@ public class Types {
         return  string.isEmpty() ? null : string.charAt(0);
     }
 
-    public static BigDecimal toBigDecimal( Object value ) {
+    public BigDecimal toBigDecimal( Object value ) {
         if( value == null ) return null;
         if( isInt(value)        ) return new BigDecimal((Integer)value);
         if( isLong(value)       ) return new BigDecimal((Long)value);
@@ -511,7 +514,7 @@ public class Types {
         }
     }
 
-    public static BigInteger toBigInteger( Object value ) {
+    public BigInteger toBigInteger( Object value ) {
         if( value == null ) return null;
         if( isNumeric(value) ) return BigInteger.valueOf( toLong(value) );
         try {
@@ -521,11 +524,11 @@ public class Types {
         }
     }
 
-    public static Boolean toBoolean( Object value ) throws NumberFormatException {
+    public Boolean toBoolean( Object value ) throws NumberFormatException {
         return toBoolean( value, false );
     }
 
-    public static Boolean toBoolean( Object value, boolean emptyToTrue ) throws NumberFormatException {
+    public Boolean toBoolean( Object value, boolean emptyToTrue ) throws NumberFormatException {
         if( value == null ) {
             return emptyToTrue ? true : false;
         }
@@ -537,7 +540,7 @@ public class Types {
         return Strings.toBoolean( value, emptyToTrue );
     }
 
-    public static Object castPrimitive( Object val, Class castType ) {
+    public Object castPrimitive( Object val, Class castType ) {
 
         if( isString(castType) ) {
             return val.toString();
@@ -567,7 +570,7 @@ public class Types {
 
     }
 
-    public static <T> Class<T> wrap( Class<T> type ) {
+    public <T> Class<T> wrap( Class<T> type ) {
         if (type == int.class)     return (Class<T>) Integer.class;
         if (type == long.class)    return (Class<T>) Long.class;
         if (type == byte.class)    return (Class<T>) Byte.class;
@@ -580,7 +583,7 @@ public class Types {
         return type;
     }
 
-    public static <T> Class<T> unwrap( Class<T> type ) {
+    public <T> Class<T> unwrap( Class<T> type ) {
         if (type == Integer.class)   return (Class<T>) int.class;
         if (type == Long.class)      return (Class<T>) long.class;
         if (type == Byte.class)      return (Class<T>) byte.class;
