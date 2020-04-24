@@ -1,6 +1,7 @@
 package io.nayasis.basica.base;
 
 import io.nayasis.basica.base.format.Formatter;
+import io.nayasis.basica.exception.Exceptions;
 import io.nayasis.basica.exception.unchecked.EncodingException;
 import io.nayasis.basica.exception.unchecked.UncheckedClassNotFoundException;
 import lombok.experimental.UtilityClass;
@@ -13,8 +14,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -1396,13 +1395,12 @@ public class Strings {
 
 	/**
 	 * convert Throwable(Exception or Error) stacktrace to String
+	 *
 	 * @param e throwable
 	 * @return stacktrace
 	 */
-	public String fromThrowable( Throwable e ) {
-		StringWriter writer = new StringWriter();
-		e.printStackTrace( new PrintWriter(writer) );
-		return writer.toString();
+	public String toString( Throwable e ) {
+		return Exceptions.toString( e );
 	}
 
 	/**

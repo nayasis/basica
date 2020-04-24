@@ -1,10 +1,11 @@
 package io.nayasis.basica.exception;
 
-import ch.qos.logback.classic.spi.ThrowableProxy;
-import ch.qos.logback.classic.spi.ThrowableProxyUtil;
+import io.nayasis.basica.exception.helper.ProxyThrowables;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,31 +23,33 @@ public class Exceptions {
 
     private String filter;
 
+    private boolean hasLogback = true;
+
     /**
      * get filter
      *
-     * @return regular expression to exclude stack-traces
+     * @return regular expression to exclude stacktrace.
      */
     public String getFilter() {
         return filter;
     }
 
     /**
-     * set filter to exclude
+     * set filter excluding stacktrace.
      *
-     * @param filter    regular expression to exclude stack-traces
+     * @param regexp    regular expression excluding stacktrace.
      * @return  Throwables
      */
-    public Exceptions setFilter( String filter ) {
-        Exceptions.filter = filter;
+    public Exceptions setFilter( String regexp ) {
+        Exceptions.filter = regexp;
         return instance;
     }
 
     /**
-     * filter stack traces in exception
+     * filter stacktrace in exception
      *
-     * @param exception exception to exclude stack-traces by filter
-     * @return  exception having stack-traces filtered.
+     * @param exception exception to exclude stacktrace
+     * @return  exception excluding stacktrace by filter regular expression.
      */
     public Throwable filter( Throwable exception ) {
 
@@ -99,10 +102,21 @@ public class Exceptions {
      * @return
      */
     public String toString( Throwable exception ) {
+
         if( exception == null ) return "";
-        ThrowableProxy proxy = new ThrowableProxy( filter(exception) );
-        proxy.calculatePackagingData();
-        return ThrowableProxyUtil.asString( proxy );
+
+        if( hasLogback ) {
+            try {
+                return new ProxyThrowables().toString( exception );
+            } catch ( Throwable e ) {
+                hasLogback = false;
+            }
+        }
+
+        StringWriter writer = new StringWriter();
+        exception.printStackTrace( new PrintWriter(writer) );
+        return writer.toString();
+
     }
 
 }
