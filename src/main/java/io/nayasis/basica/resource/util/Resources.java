@@ -62,7 +62,7 @@ public class Resources {
 		if ( resourceLocation == null ) {
 			return false;
 		}
-		if ( resourceLocation.startsWith( URL_PREFIX_CLASSPATH ) ) {
+		if ( resourceLocation.startsWith(URL_PREFIX_CLASSPATH) ) {
 			return true;
 		}
 		try {
@@ -270,11 +270,10 @@ public class Resources {
 			String jarFile = urlFile.substring(0, separatorIndex);
 			try {
 				return new URL(jarFile);
-			}
-			catch (MalformedURLException ex) {
+			} catch ( MalformedURLException ex ) {
 				// Probably no protocol in original jar URL, like "jar:C:/mypath/myjar.jar".
 				// This usually indicates that the jar file resides in the file system.
-				if (!jarFile.startsWith("/")) {
+				if( !jarFile.startsWith("/") ) {
 					jarFile = "/" + jarFile;
 				}
 				return new URL( URL_PREFIX_FILE + jarFile);
@@ -300,7 +299,7 @@ public class Resources {
 		String urlFile = jarUrl.getFile();
 
 		int endIndex = urlFile.indexOf( URL_SEPARATOR_WAR );
-		if (endIndex != -1) {
+		if( endIndex != -1 ) {
 			// Tomcat's "war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
 			String warFile = urlFile.substring(0, endIndex);
 			if (URL_PROTOCOL_WAR.equals(jarUrl.getProtocol())) {

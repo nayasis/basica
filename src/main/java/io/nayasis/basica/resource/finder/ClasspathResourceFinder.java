@@ -1,11 +1,9 @@
 package io.nayasis.basica.resource.finder;
 
-import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.resource.loader.ResourceLoader;
 import io.nayasis.basica.resource.type.UrlResource;
 import io.nayasis.basica.resource.type.interfaces.Resource;
-import io.nayasis.basica.resource.util.Resources;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -17,8 +15,9 @@ import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static io.nayasis.basica.resource.util.Resources.URL_SEPARATOR_JAR;
 import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_FILE;
+import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_JAR;
+import static io.nayasis.basica.resource.util.Resources.URL_SEPARATOR_JAR;
 
 @Slf4j
 public class ClasspathResourceFinder {
@@ -85,7 +84,7 @@ public class ClasspathResourceFinder {
             try {
                 for (URL url : ((URLClassLoader) classLoader).getURLs()) {
                     try {
-                        UrlResource jarResource = new UrlResource( Resources.URL_PREFIX_JAR + url + URL_SEPARATOR_JAR );
+                        UrlResource jarResource = new UrlResource( URL_PREFIX_JAR + url + URL_SEPARATOR_JAR );
                         if ( jarResource.exists() ) {
                             result.add(jarResource);
                         }
@@ -131,7 +130,7 @@ public class ClasspathResourceFinder {
                         // Possibly "c:" drive prefix on Windows, to be upper-cased for proper duplicate detection
                         filePath = Strings.capitalize(filePath);
                     }
-                    UrlResource jarResource = new UrlResource( Resources.URL_PREFIX_JAR +
+                    UrlResource jarResource = new UrlResource( URL_PREFIX_JAR +
                         URL_PREFIX_FILE + filePath + URL_SEPARATOR_JAR );
                     // Potentially overlapping with URLClassLoader.getURLs() result above!
                     if (!result.contains(jarResource) && !hasDuplicate(filePath, result) && jarResource.exists()) {
@@ -157,9 +156,9 @@ public class ClasspathResourceFinder {
     private boolean hasDuplicate( String filePath, Set<Resource> result ) {
         if( result.isEmpty() )
             return false;
-        String duplicatePath = (filePath.startsWith("/") ? filePath.substring(1) : "/" + filePath);
+        String duplicatePath = filePath.startsWith("/") ? filePath.substring(1) : "/" + filePath;
         try {
-            return result.contains(new UrlResource( Resources.URL_PREFIX_JAR + URL_PREFIX_FILE +
+            return result.contains(new UrlResource( URL_PREFIX_JAR + URL_PREFIX_FILE +
                 duplicatePath + URL_SEPARATOR_JAR ));
         } catch ( MalformedURLException e ) {
             return false;

@@ -149,11 +149,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	protected URL resolveURL() {
 		if (this.clazz != null) {
 			return this.clazz.getResource(this.path);
-		}
-		else if (this.classLoader != null) {
+		} else if (this.classLoader != null) {
 			return this.classLoader.getResource(this.path);
-		}
-		else {
+		} else {
 			return ClassLoader.getSystemResource(this.path);
 		}
 	}
@@ -168,14 +166,11 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		InputStream is;
 		if (this.clazz != null) {
 			is = this.clazz.getResourceAsStream(this.path);
-		}
-		else if (this.classLoader != null) {
+		} else if (this.classLoader != null) {
 			is = this.classLoader.getResourceAsStream(this.path);
-		}
-		else {
+		} else {
 			is = ClassLoader.getSystemResourceAsStream(this.path);
-		}
-		if (is == null) {
+		} if (is == null) {
 			throw new FileNotFoundException(getDescription() + " cannot be opened because it does not exist");
 		}
 		return is;

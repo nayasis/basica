@@ -11,7 +11,6 @@ import static io.nayasis.basica.file.Files.FOLDER_SEPARATOR_WINDOWS;
 public class PathModifier {
 
     private static final String PATH_PARENT = "..";
-
     private static final String PATH_CURRENT = ".";
 
     public static String clean( String path ) {
@@ -48,17 +47,14 @@ public class PathModifier {
             String element = pathArray.get(i);
             if ( PATH_CURRENT.equals(element)) {
                 // Points to current directory - drop it.
-            }
-            else if ( PATH_PARENT.equals(element)) {
+            } else if ( PATH_PARENT.equals(element)) {
                 // Registering top path found.
                 tops++;
-            }
-            else {
+            } else {
                 if (tops > 0) {
                     // Merging path element with element corresponding to top path.
                     tops--;
-                }
-                else {
+                } else {
                     // Normal path element found.
                     pathElements.add(0, element);
                 }
