@@ -17,28 +17,17 @@ import org.objenesis.ObjenesisStd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
+
+import static io.nayasis.basica.resource.util.Resources.URL_PREFIX_CLASSPATH;
 
 
 /**
@@ -105,17 +94,6 @@ public class Classes {
 
 		return classLoader;
 
-	}
-
-	private Iterator list( ClassLoader classloader ) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		Class klass = classloader.getClass();
-		while ( klass != java.lang.ClassLoader.class ) {
-			klass = klass.getSuperclass();
-		}
-		Field fieldClasses = klass.getDeclaredField("classes");
-		fieldClasses.setAccessible(true);
-		Vector classes = (Vector) fieldClasses.get( classloader );
-		return classes.iterator();
 	}
 
 	/**
@@ -231,14 +209,14 @@ public class Classes {
 	/**
 	 * Check if a class was extended or implemented by found class
 	 *
-	 * @param klass  		class to inspect
-	 * @param extendKlass	class to be extended in inspect class
+	 * @param klass  	class to inspect
+	 * @param extend	class to be extended in inspect class
 	 * @return true if inspect class is extended of implemented by found class
 	 */
-	public boolean isExtendedBy( Class<?> klass, Class<?>... extendKlass ) {
-		if( klass == null || extendKlass.length == 0 ) return false;
+	public boolean hasExtend( Class<?> klass, Class<?>... extend ) {
+		if( klass == null || extend.length == 0 ) return false;
 		Set<Class<?>> parents = findParents( klass );
-		for( Class<?> target : extendKlass ) {
+		for( Class<?> target : extend ) {
 			if( klass == target ) return true;
 			if( Modifier.isFinal(target.getModifiers()) ) continue;
 			if( parents.contains( target ) ) return true;
@@ -249,14 +227,14 @@ public class Classes {
 	/**
 	 * Check if a class was extended or implemented by found class
 	 *
-	 * @param klass  		class to inspect
-	 * @param extendKlass	class to be extended in inspect class
+	 * @param klass  	class to inspect
+	 * @param extend	class to be extended in inspect class
 	 * @return true if inspect class is extended of implemented by found class
 	 */
-	public boolean isExtendedBy( Class<?> klass, Collection<Class<?>> extendKlass ) {
-		if( klass == null || Validator.isEmpty(extendKlass) ) return false;
+	public boolean hasExtend( Class<?> klass, Collection<Class<?>> extend ) {
+		if( klass == null || Validator.isEmpty(extend) ) return false;
 		Set<Class<?>> parents = findParents( klass );
-		for( Class<?> target : extendKlass ) {
+		for( Class<?> target : extend ) {
 			if( klass == target ) return true;
 			if( Modifier.isFinal(target.getModifiers()) ) continue;
 			if( parents.contains( target ) ) return true;
@@ -268,22 +246,22 @@ public class Classes {
 	 * Check if an instnace was extended or implemented by found class
 	 *
 	 * @param instance  instance to inspect
-	 * @param extendKlass	   class to be extended in inspect instance
+	 * @param extend	class to be extended in inspect instance
 	 * @return true if inspect instance is extended of implemented by found class
 	 */
-	public boolean isExtendedBy( Object instance, Class<?>... extendKlass ) {
-		return instance != null && isExtendedBy( instance.getClass(), extendKlass );
+	public boolean hasExtend( Object instance, Class<?>... extend ) {
+		return instance != null && hasExtend( instance.getClass(), extend );
 	}
 
 	/**
 	 * Check if an instnace was extended or implemented by found class
 	 *
 	 * @param instance  instance to inspect
-	 * @param extendKlass	   class to be extended in inspect instance
+	 * @param extend	class to be extended in inspect instance
 	 * @return true if inspect instance is extended of implemented by found class
 	 */
-	public boolean isExtendedBy( Object instance, Collection<Class<?>> extendKlass ) {
-		return instance != null && isExtendedBy( instance.getClass(), extendKlass );
+	public boolean hasExtend( Object instance, Collection<Class<?>> extend ) {
+		return instance != null && hasExtend( instance.getClass(), extend );
 	}
 
 	/**
@@ -291,7 +269,7 @@ public class Classes {
 	 * @param path resource path
 	 * @return true if resource is exist in class path.
 	 */
-	public boolean isResourceExisted( String path ) {
+	public boolean hasResource( String path ) {
 		return getClassLoader().getResource( refineResourceName(path) ) != null;
 	}
 
@@ -301,7 +279,7 @@ public class Classes {
 	 * @param path	resource path
 	 * @return resource input stream
 	 */
-	public InputStream getResourceAsStream( String path ) {
+	public InputStream getResourceStream( String path ) {
 		return getClassLoader().getResourceAsStream( refineResourceName(path) );
 	}
 
@@ -311,7 +289,7 @@ public class Classes {
 	 * @param url	resource URL
 	 * @return resource input stream
 	 */
-	public InputStream getResourceAsStream( URL url ) throws UncheckedIOException {
+	public InputStream getResourceStream( URL url ) throws UncheckedIOException {
 		if( url == null ) return null;
 		try {
 			return url.openStream();
@@ -388,7 +366,7 @@ public class Classes {
 
 		for( String ptn : pattern ) {
 			try {
-				Set<Resource> resources = resolver.getResources( String.format( "classpath:%s", ptn ) );
+				Set<Resource> resources = resolver.getResources( URL_PREFIX_CLASSPATH + ptn );
 				for( Resource resource : resources ) {
 					urls.add( resource.getURL() );
 				}
@@ -398,59 +376,6 @@ public class Classes {
 		}
 
 		return urls;
-
-	}
-
-	private FileSystem getFileSystem( URL url ) throws URISyntaxException {
-		if( "file".equals(url.getProtocol()) ) {
-			return FileSystems.getDefault();
-		} else {
-			try {
-				return FileSystems.getFileSystem( url.toURI() );
-			} catch ( FileSystemNotFoundException e ) {
-				try {
-					return FileSystems.newFileSystem( url.toURI(), Collections.emptyMap() );
-				} catch ( IOException ex ) {
-					throw new UncheckedIOException( ex );
-				}
-			}
-		}
-	}
-
-	private boolean match( Collection<PathMatcher> matchers, Path path ) {
-		for( PathMatcher matcher : matchers ) {
-			if( matcher.matches(path) )
-				return true;
-		}
-		return false;
-	}
-
-	private List<URL> getRootResources() {
-		List<URL> urls = new ArrayList<>();
-		try {
-			Enumeration<URL> resources = getClassLoader().getResources( "" );
-			while( resources.hasMoreElements() ) {
-				urls.add( resources.nextElement() );
-			}
-		} catch ( IOException e ) {
-			log.error( e.getMessage(), e );
-		}
-		return urls;
-	}
-
-	private Set<PathMatcher> toPathMatcher( FileSystem fileSystem, String... patterns ) {
-
-		Set<PathMatcher> matchers = new HashSet<>();
-		boolean inFile = fileSystem == FileSystems.getDefault();
-
-		for( String pattern : new HashSet<>( Arrays.asList( patterns )) ) {
-			if( Strings.isEmpty( pattern ) ) continue;
-			if( inFile )
-				pattern = refineResourceName( pattern );
-			matchers.add( fileSystem.getPathMatcher( "glob:" + pattern ) );
-		}
-
-		return matchers;
 
 	}
 
@@ -472,52 +397,45 @@ public class Classes {
 	}
 
 	/**
-	 * Replacement for {@code Class.forName()}.
-	 * it can return array class names (e.g. "String[]").
-	 * Furthermore, it is also capable of resolving inner class names in Java source
-	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
-	 * @param name 			name of the Class
-	 * @return a class instance for the supplied name
-	 * @throws ClassNotFoundException if the class was not found
-	 * @throws LinkageError if the class file could not be loaded
+	 * get class for name.
+	 * it could understand array class name (ex. "String[]") and inner class's source name (ex. java.lang.Thread.State instread of "java.lang.Thread@State" )
+	 *
+	 * @param name	class name
+	 * @return	class instance
+	 * @throws ClassNotFoundException	if class was not found
+	 * @throws LinkageError	if class file could not be loaded
 	 */
 	public Class<?> forName( String name ) throws ClassNotFoundException, LinkageError {
 		return forName( name, null );
 	}
 
-
 	/**
-	 * Replacement for {@code Class.forName()}.
-	 * it can return array class names (e.g. "String[]").
-	 * Furthermore, it is also capable of resolving inner class names in Java source
-	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
-	 * @param name 			name of the Class
-	 * @param classLoader 	class loader to use
-	 * 						(may be {@code null}, which indicates the default class loader)
-	 * @return a class instance for the supplied name
-	 * @throws ClassNotFoundException if the class was not found
-	 * @throws LinkageError if the class file could not be loaded
+	 * get class for name.
+	 * it could understand array class name (ex. "String[]") and inner class's source name (ex. java.lang.Thread.State instread of "java.lang.Thread@State" )
+	 *
+	 * @param name			class name
+	 * @param classLoader	class loader
+	 * @return	class instance
+	 * @throws ClassNotFoundException	if class was not found
+	 * @throws LinkageError	if class file could not be loaded
 	 */
 	public Class<?> forName( String name, ClassLoader classLoader ) throws ClassNotFoundException, LinkageError {
 
-		Assert.notNull( name, "name mus not be null" );
+		Assert.notNull( name, "[name] can't be null" );
 
-		// "java.lang.String[]" style arrays
-		if (name.endsWith( SUFFIX_ARRAY )) {
+		if( name.endsWith( SUFFIX_ARRAY ) ) {
 			String elementClassName = name.substring(0, name.length() - SUFFIX_ARRAY.length());
 			Class<?> elementClass = forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 
-		// "[Ljava.lang.String;" style arrays
-		if (name.startsWith( PREFIX_NON_PRIMITIVE_ARRAY ) && name.endsWith(";")) {
+		if( name.startsWith( PREFIX_NON_PRIMITIVE_ARRAY ) && name.endsWith(";") ) {
 			String elementName = name.substring( PREFIX_NON_PRIMITIVE_ARRAY.length(), name.length() - 1);
 			Class<?> elementClass = forName(elementName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 
-		// "[[I" or "[[Ljava.lang.String;" style arrays
-		if ( name.startsWith( PREFIX_INTERNAL_ARRAY ) ) {
+		if( name.startsWith( PREFIX_INTERNAL_ARRAY ) ) {
 			String elementName = name.substring( PREFIX_INTERNAL_ARRAY.length());
 			Class<?> elementClass = forName( elementName, classLoader );
 			return Array.newInstance(elementClass, 0).getClass();

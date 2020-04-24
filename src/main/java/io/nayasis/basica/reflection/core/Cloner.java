@@ -166,7 +166,7 @@ public class Cloner {
     private Object castedSource( Object source, Object target ) {
         Class<?> sourceClass = source.getClass();
         Class<?> targetClass = target.getClass();
-        if( Classes.isExtendedBy(targetClass,sourceClass) || Classes.isExtendedBy(sourceClass,targetClass) ) {
+        if( Classes.hasExtend(targetClass,sourceClass) || Classes.hasExtend(sourceClass,targetClass) ) {
             return source;
         } else {
             return Reflector.toBeanFrom( source, targetClass );

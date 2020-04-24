@@ -19,8 +19,8 @@ public class ClassesTest {
 
     @Test
     public void isResourceExisted() {
-        assertTrue( Classes.isResourceExisted( "/xml/Deformed.xml" ) );
-        assertFalse( Classes.isResourceExisted( "/xml/Deformed.xm" ) );
+        assertTrue( Classes.hasResource( "/xml/Deformed.xml" ) );
+        assertFalse( Classes.hasResource( "/xml/Deformed.xm" ) );
     }
 
     @Test
@@ -31,7 +31,7 @@ public class ClassesTest {
 
         for ( URL url : urls ) {
             log.debug( "url : {}", url );
-            InputStream inputStream = Classes.getResourceAsStream(url);
+            InputStream inputStream = Classes.getResourceStream(url);
             Assertions.assertNotNull( inputStream );
             Assertions.assertTrue( Strings.isNotEmpty(Files.readFrom(inputStream)) );
         }

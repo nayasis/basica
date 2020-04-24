@@ -35,20 +35,20 @@ import java.util.jar.JarFile;
 public class Resources {
 
 	public static final String URL_PREFIX_CLASSPATH = "classpath:";
-	public static final String URL_PREFIX_FILE = "file:";
-	public static final String URL_PREFIX_JAR = "jar:";
-	public static final String WAR_URL_PREFIX = "war:";
-	public static final String URL_PROTOCOL_FILE = "file";
-	public static final String URL_PROTOCOL_JAR = "jar";
-	public static final String URL_PROTOCOL_WAR = "war";
-	public static final String URL_PROTOCOL_ZIP = "zip";
-	public static final String URL_PROTOCOL_WSJAR = "wsjar";
-	public static final String URL_PROTOCOL_VFSZIP = "vfszip";
+	public static final String URL_PREFIX_FILE      = "file:";
+	public static final String URL_PREFIX_JAR       = "jar:";
+	public static final String URL_PREFIX_WAR       = "war:";
+	public static final String URL_PROTOCOL_FILE    = "file";
+	public static final String URL_PROTOCOL_JAR     = "jar";
+	public static final String URL_PROTOCOL_WAR     = "war";
+	public static final String URL_PROTOCOL_ZIP     = "zip";
+	public static final String URL_PROTOCOL_WSJAR   = "wsjar";
+	public static final String URL_PROTOCOL_VFSZIP  = "vfszip";
 	public static final String URL_PROTOCOL_VFSFILE = "vfsfile";
-	public static final String URL_PROTOCOL_VFS = "vfs";
-	public static final String JAR_FILE_EXTENSION = ".jar";
-	public static final String JAR_URL_SEPARATOR = "!/";
-	public static final String WAR_URL_SEPARATOR = "*/";
+	public static final String URL_PROTOCOL_VFS     = "vfs";
+	public static final String FILE_EXTENSION_JAR   = ".jar";
+	public static final String URL_SEPARATOR_JAR    = "!/";
+	public static final String URL_SEPARATOR_WAR    = "*/";
 
 	/**
 	 * Return whether the given resource location is a URL:
@@ -121,7 +121,7 @@ public class Resources {
 	 */
 	public File getFile( String resourceLocation ) throws FileNotFoundException {
 		Assert.notNull(resourceLocation, "Resource location must not be null");
-		if (resourceLocation.startsWith( URL_PREFIX_CLASSPATH )) {
+		if ( resourceLocation.startsWith( URL_PREFIX_CLASSPATH ) ) {
 			String path = resourceLocation.substring( URL_PREFIX_CLASSPATH.length());
 			String description = "class path resource [" + path + "]";
 			ClassLoader cl = Classes.getClassLoader();
@@ -240,6 +240,10 @@ public class Resources {
 			|| URL_PROTOCOL_WSJAR.equals(protocol);
 	}
 
+	public boolean isVfsURL( URL url ) {
+		return url != null && url.getProtocol().startsWith(URL_PROTOCOL_VFS);
+	}
+
 	/**
 	 * Determine whether the given URL points to a jar file itself,
 	 * that is, has protocol "file" and ends with the ".jar" extension.
@@ -248,8 +252,8 @@ public class Resources {
 	 * @since 4.1
 	 */
 	public boolean isJarFileURL( URL url ) {
-		return URL_PROTOCOL_FILE.equals(url.getProtocol())
-			&& url.getPath().toLowerCase().endsWith(JAR_FILE_EXTENSION);
+		return url != null && URL_PROTOCOL_FILE.equals(url.getProtocol())
+			&& url.getPath().toLowerCase().endsWith( FILE_EXTENSION_JAR );
 	}
 
 	/**
@@ -261,7 +265,7 @@ public class Resources {
 	 */
 	public URL extractJarFileURL( URL jarUrl ) throws MalformedURLException {
 		String urlFile = jarUrl.getFile();
-		int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
+		int separatorIndex = urlFile.indexOf( URL_SEPARATOR_JAR );
 		if (separatorIndex != -1) {
 			String jarFile = urlFile.substring(0, separatorIndex);
 			try {
@@ -275,8 +279,7 @@ public class Resources {
 				}
 				return new URL( URL_PREFIX_FILE + jarFile);
 			}
-		}
-		else {
+		} else {
 			return jarUrl;
 		}
 	}
@@ -296,16 +299,16 @@ public class Resources {
 
 		String urlFile = jarUrl.getFile();
 
-		int endIndex = urlFile.indexOf(WAR_URL_SEPARATOR);
+		int endIndex = urlFile.indexOf( URL_SEPARATOR_WAR );
 		if (endIndex != -1) {
 			// Tomcat's "war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
 			String warFile = urlFile.substring(0, endIndex);
 			if (URL_PROTOCOL_WAR.equals(jarUrl.getProtocol())) {
 				return new URL(warFile);
 			}
-			int startIndex = warFile.indexOf(WAR_URL_PREFIX);
+			int startIndex = warFile.indexOf( URL_PREFIX_WAR );
 			if (startIndex != -1) {
-				return new URL(warFile.substring(startIndex + WAR_URL_PREFIX.length()));
+				return new URL(warFile.substring(startIndex + URL_PREFIX_WAR.length()));
 			}
 		}
 
@@ -347,16 +350,16 @@ public class Resources {
 		connection.setUseCaches( connection.getClass().getSimpleName().startsWith("JNLP") );
 	}
 
-	public JarFile getJarFile( String jarFileUrl ) throws IOException {
-		if( jarFileUrl.startsWith( URL_PREFIX_FILE ) ) {
+	public JarFile getJarFile( String url ) throws IOException {
+		if( url.startsWith( URL_PREFIX_FILE ) ) {
 			try {
-				return new JarFile( Resources.toURI(jarFileUrl).getSchemeSpecificPart());
+				return new JarFile( Resources.toURI(url).getSchemeSpecificPart());
 			} catch ( URISyntaxException e ) {
 				// Fallback for URLs that are not valid URIs (should hardly ever happen).
-				return new JarFile( jarFileUrl.substring( URL_PREFIX_FILE.length()) );
+				return new JarFile( url.substring( URL_PREFIX_FILE.length()) );
 			}
 		} else {
-			return new JarFile(jarFileUrl);
+			return new JarFile(url);
 		}
 	}
 

@@ -25,7 +25,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static java.math.BigDecimal.ONE;
-import static java.math.BigDecimal.ZERO;
 
 /**
  * Type Check Utility
@@ -36,7 +35,7 @@ import static java.math.BigDecimal.ZERO;
 @UtilityClass
 public class Types {
 
-    private final Set<Class<?>> IMMUTABLE = new HashSet() {{
+    private final static Set<Class<?>> IMMUTABLE = new HashSet() {{
         add( void.class );       add( Void.class );
         add( char.class );       add( Character.class );
         add( boolean.class );    add( Boolean.class );
@@ -157,7 +156,7 @@ public class Types {
     public boolean isInt( String value ) {
         try {
             return new BigDecimal( value ).remainder( ONE )
-                .compareTo( ZERO ) == 0;
+                .compareTo( BigDecimal.ZERO ) == 0;
         } catch( Exception e ) {
             return false;
         }
@@ -166,8 +165,8 @@ public class Types {
     public boolean isPositiveInt( String value ) {
         try {
             BigDecimal number = new BigDecimal( value );
-            if( number.compareTo( ZERO ) <= 0 ) return false;
-            return number.remainder( ONE ).compareTo( ZERO ) == 0;
+            if( number.compareTo( BigDecimal.ZERO ) <= 0 ) return false;
+            return number.remainder( ONE ).compareTo( BigDecimal.ZERO ) == 0;
         } catch( Exception e ) {
             return false;
         }
@@ -278,68 +277,40 @@ public class Types {
         return instance != null && isEnum( instance.getClass() );
     }
 
-    public <T> List<T> toList( Enumeration<T> instance ) {
-        if( instance == null ) return new ArrayList();
-        List<T> list = new ArrayList<>();
-        while ( instance.hasMoreElements() ) {
-            list.add( instance.nextElement() );
-        }
-        return list;
-    }
-
-    public <T> List<T> toList( Iterator<T> instance ) {
-        if( instance == null ) return new ArrayList();
-        List<T> list = new ArrayList<>();
-        while ( instance.hasNext() ) {
-            list.add( instance.next() );
-        }
-        return list;
-    }
-
-    public <T> List<T> toList( Collection<T> instance ) {
-        if( instance == null ) return new ArrayList();
-        return new ArrayList<>( instance );
-    }
-
-    public <T> List<T> toList( Iterable<T> instance ) {
-        if( instance == null ) return new ArrayList();
-        return toList( instance.iterator() );
-    }
-
-    public <T> List<T> toList( NList instance ) {
-        if( instance == null ) return new ArrayList();
-        return (List<T>) instance.toList();
-    }
-
     public List toList( Object instance ) {
+
         if( instance == null ) return new ArrayList();
-        if( isArray(instance) ) {
+
+        if( instance instanceof Collection ) {
+            return new ArrayList<>( (Collection) instance );
+        } else if( instance instanceof NList ) {
+            return ((NList) instance).toList();
+        } else if( isArray(instance) ) {
             return arrayToList( instance );
         } else if( instance instanceof Enumeration ) {
-            return toList( (Enumeration) instance );
+            Enumeration enumeration = (Enumeration) instance;
+            List list = new ArrayList();
+            while ( enumeration.hasMoreElements() ) {
+                list.add( enumeration.nextElement() );
+            }
+            return list;
         } else if( instance instanceof Iterator ) {
-            return toList( (Iterator) instance );
+            Iterator iterator = (Iterator) instance;
+            List list = new ArrayList();
+            while( iterator.hasNext() ) {
+                list.add( iterator.next() );
+            }
+            return list;
         } else if( instance instanceof Iterable ) {
-            return toList( (Iterable) instance );
+            Iterator iterator = ((Iterable) instance).iterator();
+            List list = new ArrayList();
+            while( iterator.hasNext() ) {
+                list.add( iterator.next() );
+            }
+            return list;
         } else {
             return new ArrayList( Arrays.asList(instance) );
         }
-    }
-
-    public <T> Collection<T> toCollection( Collection<T> instance ) {
-        return toList( instance );
-    }
-
-    public <T> Collection<T> toCollection( Iterable<T> instance ) {
-        return toList( instance );
-    }
-
-    public <T> Collection<T> toCollection( NList instance ) {
-        return toList( instance );
-    }
-
-    public Collection toCollection( Object value ) {
-        return toList( value );
     }
 
     private List arrayToList( Object object ) {
@@ -354,6 +325,10 @@ public class Types {
     public <T> T[] toArray( Collection<T> list, Class<T> returnType ) {
         T[] array = (T[]) Array.newInstance( returnType, 0 );
         return list.toArray( array );
+    }
+
+    public Collection toCollection( Object value ) {
+        return toList( value );
     }
 
     public String toString( Object val ) {
@@ -583,7 +558,7 @@ public class Types {
         return type;
     }
 
-    public <T> Class<T> unwrap( Class<T> type ) {
+    public static <T> Class<T> unwrap( Class<T> type ) {
         if (type == Integer.class)   return (Class<T>) int.class;
         if (type == Long.class)      return (Class<T>) long.class;
         if (type == Byte.class)      return (Class<T>) byte.class;

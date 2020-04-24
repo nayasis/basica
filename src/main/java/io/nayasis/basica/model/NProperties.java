@@ -1,5 +1,6 @@
 package io.nayasis.basica.model;
 
+import io.nayasis.basica.base.Classes;
 import io.nayasis.basica.base.Strings;
 import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.Files;
@@ -36,7 +37,7 @@ public class NProperties extends Properties {
     }
 
     public NProperties load( URL url ) throws UncheckedIOException {
-        return loadProperties( Files.getResourceAsStream(url) );
+        return loadProperties( Classes.getResourceStream(url) );
     }
 
     public NProperties load( File file ) throws UncheckedIOException {

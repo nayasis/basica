@@ -12,7 +12,7 @@ public class ExcelsTest {
     @Test
     void readFrom() {
 
-        NList sheet = Excels.readFrom(Classes.getResourceAsStream("/file/option.xlsx"), "run");
+        NList sheet = Excels.readFrom(Classes.getResourceStream("/file/option.xlsx"), "run");
 
         log.debug( "\n{}", sheet );
 
