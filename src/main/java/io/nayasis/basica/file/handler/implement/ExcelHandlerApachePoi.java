@@ -106,15 +106,15 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 	}
 
 	@Override
-	public NList readFrom( InputStream inputStream, String sheetName ) throws UncheckedIOException {
-		return readFrom( inputStream, ( workbook, result ) -> {
-			result.put( sheetName, readFrom( workbook, workbook.getSheetIndex( sheetName ) ) );
-		} ).get( sheetName );
+	public NList read( InputStream stream, String sheet ) throws UncheckedIOException {
+		return readFrom( stream, ( workbook, result ) -> {
+			result.put( sheet, readFrom( workbook, workbook.getSheetIndex( sheet ) ) );
+		} ).get( sheet );
 	}
 
 	@Override
-	public NList readFirstSheetFrom( InputStream inputStream ) throws UncheckedIOException {
-		Map<String, NList> sheets = readFrom( inputStream, ( workbook, result ) -> {
+	public NList readSheet( InputStream stream ) throws UncheckedIOException {
+		Map<String, NList> sheets = readFrom( stream, ( workbook, result ) -> {
 			Sheet sheet = workbook.getSheetAt( 0 );
 			if( sheet != null ) {
 				result.put( "FirstSheet", readFrom( workbook, 0 ) );
@@ -124,8 +124,8 @@ public class ExcelHandlerApachePoi extends ExcelHandler {
 	}
 
 	@Override
-	public Map<String, NList> readFrom( InputStream inputStream ) throws UncheckedIOException {
-		return readFrom( inputStream, ( workbook, result ) -> {
+	public Map<String, NList> read( InputStream stream ) throws UncheckedIOException {
+		return readFrom( stream, ( workbook, result ) -> {
 			for( int sheetIndex = 0, limit = workbook.getNumberOfSheets(); sheetIndex < limit; sheetIndex++ ) {
 				result.put( workbook.getSheetName( sheetIndex ), readFrom(workbook, sheetIndex) );
 			}

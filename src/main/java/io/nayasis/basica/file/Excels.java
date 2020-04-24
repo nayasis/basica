@@ -3,7 +3,6 @@ package io.nayasis.basica.file;
 import io.nayasis.basica.exception.unchecked.UncheckedIOException;
 import io.nayasis.basica.file.handler.ExcelHandler;
 import io.nayasis.basica.file.handler.implement.ExcelHandlerApachePoi;
-import io.nayasis.basica.file.handler.implement.ExcelHandlerJxl;
 import io.nayasis.basica.model.NList;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -24,57 +24,27 @@ import java.util.Map;
 @UtilityClass
 public class Excels {
 
+	private static final String ERROR_MESSAGE = "There is no dependency to Apache POI [org.apache.poi.poi-ooxml:4.1.2]";
+
 	private ExcelHandler excelHandler = null;
 
-	private ExcelHandler getHandler() {
+	private boolean hasApachePoi = true;
+
+	private ExcelHandler getHandler() throws LinkageError {
 
 		if( excelHandler != null ) return excelHandler;
 
-		StringBuilder error = new StringBuilder();
-
-		try {
-
-			excelHandler = new ExcelHandlerApachePoi();
-			log.info( "Excels use [Apache Poi Library]" );
-			return excelHandler;
-
-		} catch( Throwable e ) {
-			error.append(
-				"Excels can not use [Apache Poi Library] because it is not imported or re-imported.\n" +
-				"\t- Maven dependency is like below.\n" +
-				"\t\t<dependency>\n" +
-				"\t\t  <groupId>org.apache.poi</groupId>\n" +
-				"\t\t  <artifactId>poi-ooxml</artifactId>\n" +
-				"\t\t  <version>4.1.2</version>\n" +
-				"\t\t</dependency>\n"
-			);
+		if( hasApachePoi ) {
+			try {
+				excelHandler = new ExcelHandlerApachePoi();
+				return excelHandler;
+			} catch( Throwable e ) {
+				hasApachePoi = false;
+				throw new LinkageError( ERROR_MESSAGE, e );
+			}
+		} else {
+			throw new LinkageError( ERROR_MESSAGE );
 		}
-
-		try {
-
-			excelHandler = new ExcelHandlerJxl();
-			log.info( "Excels use [JExcel Library]" );
-			return excelHandler;
-
-		} catch( Throwable e ) {
-			error.append(
-				"Excels can not use [JExcel Library] because it is not imported or re-imported.\n" +
-				"\t- Maven dependency is like below.\n" +
-				"\t\t<dependency>\n" +
-				"\t\t  <groupId>net.sourceforge.jexcelapi</groupId>\n" +
-				"\t\t  <artifactId>jxl</artifactId>\n" +
-				"\t\t  <version>2.6.12</version>\n" +
-				"\t\t</dependency>\n"
-			);
-		}
-
-		if( excelHandler == null ) {
-			NoClassDefFoundError throwable = new NoClassDefFoundError( "There is no excel libaray like ApachePoi or Jxl." );
-			throwable.initCause( new LinkageError( error.toString() ) );
-			throw throwable;
-		}
-
-		return excelHandler;
 
 	}
 
@@ -86,8 +56,8 @@ public class Excels {
 	 *                  value type is allowed only List or NList.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( File excelFile, Map<String, ?> sheets ) throws UncheckedIOException {
-		getHandler().writeTo( excelFile, sheets );
+	public void writeTo( File excelFile, Map<String,?> sheets ) throws UncheckedIOException {
+		getHandler().write( excelFile, sheets );
 	}
 
 	/**
@@ -99,379 +69,379 @@ public class Excels {
 	 * @throws UncheckedIOException    File I/O Exception
 	 */
 	public void writeTo( File excelFile, String sheetName, NList sheet ) throws UncheckedIOException {
-		getHandler().writeTo( excelFile, sheetName, sheet );
+		getHandler().write( excelFile, sheetName, sheet );
 	}
 
 	/**
 	 * Write data to excelFile
 	 *
-	 * @param excelFile		excel file to write data
-	 * @param sheetName		sheet name of excel file to write
-	 * @param sheet			grid data
+	 * @param excel		excel file to write data
+	 * @param sheet		sheet name of excel file to write
+	 * @param data			grid data
 	 * @throws UncheckedIOException    File I/O Exception
 	 */
-	public void writeTo( File excelFile, String sheetName, List<?> sheet ) throws UncheckedIOException {
-		getHandler().writeTo( excelFile, sheetName, sheet );
+	public void writeTo( File excel, String sheet, Collection<?> data ) throws UncheckedIOException {
+		getHandler().write( excel, sheet, data );
 	}
 
 	/**
 	 * Write data to excel file in sheet named 'Sheet1'
 	 *
-	 * @param excelFile excel file to write
+	 * @param excel excel file to write
 	 * @param sheet grid data
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( File excelFile, NList sheet ) throws UncheckedIOException {
-		getHandler().writeTo( excelFile, sheet );
+	public void writeTo( File excel, NList sheet ) throws UncheckedIOException {
+		getHandler().write( excel, sheet );
 	}
 
 	/**
 	 * Write data to excel file in sheet named 'Sheet1'
 	 *
-	 * @param excelFile excel file to write
+	 * @param excel excel file to write
 	 * @param sheet grid data
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( File excelFile, List sheet ) throws UncheckedIOException {
-		getHandler().writeTo( excelFile, sheet );
+	public void writeTo( File excel, Collection sheet ) throws UncheckedIOException {
+		getHandler().write( excel, sheet );
 	}
 
 	/**
 	 * Write data to excel file
 	 *
-	 * @param excelFile excel file to write data
+	 * @param file excel file to write data
 	 * @param sheets	key is sheetName and value is grid data.<br>
 	 *                  value type is allowed only List or NList.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( String excelFile, Map<String, ?> sheets ) throws UncheckedIOException {
-	    writeTo( new File( excelFile ), sheets );
+	public void writeTo( String file, Map<String,?> sheets ) throws UncheckedIOException {
+	    writeTo( new File( file ), sheets );
 	}
 
 	/**
 	 * Write data to excelFile
 	 *
-	 * @param excelFile		excel file to write data
-	 * @param sheetName		sheet name of excel file to write
-	 * @param sheet			grid data
+	 * @param file		excel file to write data
+	 * @param sheet		sheet name of excel file to write
+	 * @param data			grid data
 	 * @throws UncheckedIOException    File I/O Exception
 	 */
-	public void writeTo( String excelFile, String sheetName, NList sheet ) throws UncheckedIOException {
-		writeTo( new File( excelFile ), sheetName, sheet );
+	public void writeTo( String file, String sheet, NList data ) throws UncheckedIOException {
+		writeTo( new File( file ), sheet, data );
 	}
 
 	/**
 	 * Write data to excelFile
 	 *
-	 * @param excelFile		excel file to write data
-	 * @param sheetName		sheet name of excel file to write
-	 * @param sheet			grid data
+	 * @param file		excel file to write data
+	 * @param sheet		sheet name of excel file to write
+	 * @param data			grid data
 	 * @throws UncheckedIOException    File I/O Exception
 	 */
-	public void writeTo( String excelFile, String sheetName, List sheet ) throws UncheckedIOException {
-		writeTo( new File( excelFile ), sheetName, sheet );
+	public void writeTo( String file, String sheet, List data ) throws UncheckedIOException {
+		writeTo( new File(file), sheet, data );
 	}
 
 	/**
 	 * Write data to excel file in sheet named 'Sheet1'
 	 *
-	 * @param excelFile excel file to write
-	 * @param sheet grid data
+	 * @param file excel file to write
+	 * @param data grid data
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( String excelFile, NList sheet ) throws UncheckedIOException {
-		writeTo( new File( excelFile ), sheet );
+	public void writeTo( String file, NList data ) throws UncheckedIOException {
+		writeTo( new File( file ), data );
 	}
 
 	/**
 	 * Write data to excel file in sheet named 'Sheet1'
 	 *
-	 * @param excelFile excel file to write
-	 * @param sheet grid data
+	 * @param file excel file to write
+	 * @param data grid data
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( String excelFile, List sheet ) throws UncheckedIOException {
-		writeTo( new File( excelFile ), sheet );
+	public void writeTo( String file, Collection data ) throws UncheckedIOException {
+		writeTo( new File( file ), data );
 	}
 
 	/**
 	 * Read data from excel file
 	 *
-	 * @param excelFile		excel file to read
-	 * @param sheetName		sheet name of excel file to read
+	 * @param file		excel file to read
+	 * @param sheet		sheet name of excel file to read
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-    public NList readFrom( File excelFile, String sheetName ) throws UncheckedIOException {
-    	return getHandler().readFrom( excelFile, sheetName );
+    public NList readFrom( File file, String sheet ) throws UncheckedIOException {
+    	return getHandler().read( file, sheet );
     }
 
 	/**
 	 * Read data from excel file
 	 *
-	 * @param excelFile		excel file to read
-	 * @param sheetName		sheet name of excel file to read
-	 * @param toClass		generic type of list's class
+	 * @param file		excel file to read
+	 * @param sheet		sheet name of excel file to read
+	 * @param type		generic type of list's class
 	 * @param <T> 			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> List<T> readFrom( File excelFile, String sheetName, Class<T> toClass ) throws UncheckedIOException {
-		return getHandler().readFrom( excelFile, sheetName, toClass );
+	public <T> List<T> readFrom( File file, String sheet, Class<T> type ) throws UncheckedIOException {
+		return getHandler().read( file, sheet, type );
 	}
 
 	/**
 	 * Read all sheets from excel file
 	 *
-	 * @param excelFile excel file to read.
+	 * @param file excel file to read.
 	 * @return key is sheetName and value is grid data.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-    public Map<String, NList> readFrom( File excelFile ) throws UncheckedIOException {
-    	return getHandler().readFrom( excelFile );
+    public Map<String, NList> readFrom( File file ) throws UncheckedIOException {
+    	return getHandler().read( file );
     }
 
 	/**
 	 * Read data from excel file
 	 *
-	 * @param excelFile		excel file to read
-	 * @param toClass		generic type of list's class
+	 * @param file		excel file to read
+	 * @param type		generic type of list's class
 	 * @param <T> 			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> Map<String, List<T>> readFrom( File excelFile, Class<T> toClass ) throws UncheckedIOException {
-		return getHandler().readFrom( excelFile, toClass );
+	public <T> Map<String, List<T>> readFrom( File file, Class<T> type ) throws UncheckedIOException {
+		return getHandler().read( file, type );
 	}
 
 	/**
 	 * Read first sheet from excel file
 	 *
-	 * @param excelFile excel file to read
+	 * @param file excel file to read
 	 * @return grid data from first sheet
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public NList readFirstSheetFrom( File excelFile ) throws UncheckedIOException {
-		return getHandler().readFirstSheetFrom( excelFile );
+	public NList readFirstSheetFrom( File file ) throws UncheckedIOException {
+		return getHandler().readSheet( file );
 	}
 
 	/**
 	 * Read first sheet from excel file
 	 *
-	 * @param excelFile		excel file to read
-	 * @param toClass		generic type of list's class
+	 * @param file		excel file to read
+	 * @param type		generic type of list's class
 	 * @param <T> 			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> List<T> readFirstSheetFrom( File excelFile, Class<T> toClass ) throws UncheckedIOException {
-		return getHandler().readFirstSheetFrom( excelFile, toClass );
+	public <T> List<T> readFirstSheetFrom( File file, Class<T> type ) throws UncheckedIOException {
+		return getHandler().readSheet( file, type );
 	}
 
 	/**
 	 * Read data from excel file
 	 *
-	 * @param excelFile		excel file to read
-	 * @param sheetName		sheet name of excel file to read
+	 * @param file		excel file to read
+	 * @param sheet		sheet name of excel file to read
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-    public NList readFrom( String excelFile, String sheetName ) throws UncheckedIOException {
-        return readFrom( new File(excelFile), sheetName );
+    public NList readFrom( String file, String sheet ) throws UncheckedIOException {
+        return readFrom( new File(file), sheet );
     }
 
 	/**
 	 * Read sheet from excel file
 	 *
-	 * @param excelFile		excel file to read
-	 * @param sheetName		sheet name of excel file to read
-	 * @param toClass		generic type of list's class
+	 * @param file		excel file to read
+	 * @param sheet		sheet name of excel file to read
+	 * @param type		generic type of list's class
 	 * @param <T> 			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> List<T> readFrom( String excelFile, String sheetName, Class<T> toClass ) throws UncheckedIOException {
-		return readFrom( new File(excelFile), sheetName, toClass );
+	public <T> List<T> readFrom( String file, String sheet, Class<T> type ) throws UncheckedIOException {
+		return readFrom( new File(file), sheet, type );
 	}
 
 	/**
 	 * Read all sheets from excel file
 	 *
-	 * @param excelFile excel file to read.
+	 * @param file excel file to read.
 	 * @return key is sheetName and value is grid data.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-    public Map<String, NList> readFrom( String excelFile ) throws UncheckedIOException {
-    	return readFrom( new File(excelFile) );
+    public Map<String, NList> readFrom( String file ) throws UncheckedIOException {
+    	return readFrom( new File(file) );
     }
 
 	/**
 	 * Read all sheet from excel file
 	 *
-	 * @param excelFile excel file to read.
-	 * @param toClass	generic type of list's class
+	 * @param file excel file to read.
+	 * @param type	generic type of list's class
 	 * @param <T>		expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> Map<String, List<T>> readFrom( String excelFile, Class<T> toClass ) throws UncheckedIOException {
-		return readFrom( new File(excelFile), toClass );
+	public <T> Map<String, List<T>> readFrom( String file, Class<T> type ) throws UncheckedIOException {
+		return readFrom( new File(file), type );
 	}
 
 	/**
 	 * Read first sheet from excel file
 	 *
-	 * @param excelFile excel file to read
+	 * @param file excel file to read
 	 * @return grid data from first sheet
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public NList readFirstSheetFrom( String excelFile ) throws UncheckedIOException {
-		return readFirstSheetFrom( new File( excelFile ) );
+	public NList readFirstSheetFrom( String file ) throws UncheckedIOException {
+		return readFirstSheetFrom( new File( file ) );
 	}
 
 	/**
 	 * Read first sheet from excel file
 	 *
-	 * @param excelFile 	excel file to read
+	 * @param file 	excel file to read
 	 * @param toClass		generic type of list's class
 	 * @param <T> 			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> List<T> readFirstSheetFrom( String excelFile, Class<T> toClass ) throws UncheckedIOException {
-		return readFirstSheetFrom( new File(excelFile), toClass );
+	public <T> List<T> readFirstSheetFrom( String file, Class<T> toClass ) throws UncheckedIOException {
+		return readFirstSheetFrom( new File(file), toClass );
 	}
 
 	/**
 	 * Write data to excel file
 	 *
-	 * @param outputStream output stream to write data
+	 * @param stream output stream to write data
 	 * @param sheets      	key is sheetName and value is grid data.<br>
 	 *                      value type is allowed only List or NList.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( OutputStream outputStream, Map<String, ?> sheets ) throws UncheckedIOException {
-		getHandler().writeTo( outputStream, sheets );
+	public void writeTo( OutputStream stream, Map<String,?> sheets ) throws UncheckedIOException {
+		getHandler().write( stream, sheets );
 	}
 
 	/**
 	 * Write data to excelFile
 	 *
-	 * @param outputStream 	output stream to write data
-	 * @param sheetName		sheet name of excel file to write
-	 * @param sheet			grid data
+	 * @param stream 	output stream to write data
+	 * @param sheet		sheet name of excel file to write
+	 * @param data			grid data
 	 * @throws UncheckedIOException    File I/O Exception
 	 */
-	public void writeTo( OutputStream outputStream, String sheetName, NList sheet ) throws UncheckedIOException {
-		getHandler().writeTo( outputStream, sheetName, sheet );
+	public void writeTo( OutputStream stream, String sheet, NList data ) throws UncheckedIOException {
+		getHandler().write( stream, sheet, data );
 	}
 
 	/**
 	 * Write data to excelFile
 	 *
-	 * @param outputStream 	output stream to write data
-	 * @param sheetName		sheet name of excel file to write
-	 * @param sheet			grid data
+	 * @param stream 	output stream to write data
+	 * @param sheet		sheet name of excel file to write
+	 * @param data			grid data
 	 * @throws UncheckedIOException    File I/O Exception
 	 */
-	public void writeTo( OutputStream outputStream, String sheetName, List<?> sheet ) throws UncheckedIOException {
-		getHandler().writeTo( outputStream, sheetName, sheet );
+	public void writeTo( OutputStream stream, String sheet, List<?> data ) throws UncheckedIOException {
+		getHandler().write( stream, sheet, data );
 	}
 
 	/**
 	 * Write data to excel file in sheet named 'Sheet1'
 	 *
-	 * @param outputStream	output stream to write data
-	 * @param sheet		grid data
+	 * @param stream	output stream to write data
+	 * @param data		grid data
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( OutputStream outputStream, NList sheet ) throws UncheckedIOException {
-		getHandler().writeTo( outputStream, sheet );
+	public void writeTo( OutputStream stream, NList data ) throws UncheckedIOException {
+		getHandler().write( stream, data );
 	}
 
 	/**
 	 * Write data to excel file in sheet named 'Sheet1'
 	 *
-	 * @param outputStream	output stream to write data
-	 * @param sheet			grid data
+	 * @param stream	output stream to write data
+	 * @param data			grid data
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public void writeTo( OutputStream outputStream, List<?> sheet ) throws UncheckedIOException {
-		getHandler().writeTo( outputStream, sheet );
+	public void writeTo( OutputStream stream, Collection<?> data ) throws UncheckedIOException {
+		getHandler().write( stream, data );
 	}
 
 	/**
 	 * Read data from excel file
 	 *
-	 * @param inputStream	input stream to read data
-	 * @param sheetName		sheet name of excel file to read
+	 * @param stream	input stream to read data
+	 * @param sheet		sheet name of excel file to read
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public NList readFrom( InputStream inputStream, String sheetName ) throws UncheckedIOException {
-		return getHandler().readFrom( inputStream, sheetName );
+	public NList readFrom( InputStream stream, String sheet ) throws UncheckedIOException {
+		return getHandler().read( stream, sheet );
 	}
 
 	/**
 	 * Read sheet from input stream
 	 *
-	 * @param inputStream	input stream to read data
-	 * @param sheetName		sheet name of excel file to read
+	 * @param stream	input stream to read data
+	 * @param sheet		sheet name of excel file to read
 	 * @param toClass		generic type of list's class
 	 * @param <T>			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> List<T> readFrom( InputStream inputStream, String sheetName, Class<T> toClass ) throws UncheckedIOException {
-		return getHandler().readFrom( inputStream, sheetName, toClass );
+	public <T> List<T> readFrom( InputStream stream, String sheet, Class<T> toClass ) throws UncheckedIOException {
+		return getHandler().read( stream, sheet, toClass );
 	}
 
 	/**
 	 * Read all sheets from excel file
 	 *
-	 * @param inputStream	input stream to read data
+	 * @param stream	input stream to read data
 	 * @return key is sheetName and value is grid data.
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public Map<String, NList> readFrom( InputStream inputStream ) throws UncheckedIOException {
-		return getHandler().readFrom( inputStream );
+	public Map<String, NList> readFrom( InputStream stream ) throws UncheckedIOException {
+		return getHandler().read( stream );
 	}
 
 	/**
 	 * Read all sheet from input stream
 	 *
-	 * @param inputStream	input stream to read data
-	 * @param toClass		generic type of list's class
+	 * @param stream	input stream to read data
+	 * @param type		generic type of list's class
 	 * @param <T>			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> Map<String, List<T>> readFrom( InputStream inputStream, Class<T> toClass ) throws UncheckedIOException {
-		return getHandler().readFrom( inputStream, toClass );
+	public <T> Map<String, List<T>> readFrom( InputStream stream, Class<T> type ) throws UncheckedIOException {
+		return getHandler().read( stream, type );
 	}
 
 	/**
 	 * Read first sheet from excel file
 	 *
-	 * @param inputStream	input stream to read data
+	 * @param stream	input stream to read data
 	 * @return grid data from first sheet
 	 * @throws UncheckedIOException file I/O exception
 	 */
-	public NList readFirstSheetFrom( InputStream inputStream ) throws UncheckedIOException {
-		return getHandler().readFirstSheetFrom( inputStream );
+	public NList readSheetFrom( InputStream stream ) throws UncheckedIOException {
+		return getHandler().readSheet( stream );
 	}
 
 	/**
 	 * Read sheet from input stream
 	 *
-	 * @param inputStream	input stream to read data
-	 * @param toClass		generic type of list's class
+	 * @param stream	input stream to read data
+	 * @param type		generic type of list's class
 	 * @param <T> 			expected class of return
 	 * @return grid data
 	 * @throws UncheckedIOException  File I/O Exception
 	 */
-	public <T> List<T> readFirstSheetFrom( InputStream inputStream, Class<T> toClass ) throws UncheckedIOException {
-		return getHandler().readFirstSheetFrom( inputStream, toClass );
+	public <T> List<T> readSheetFrom( InputStream stream, Class<T> type ) throws UncheckedIOException {
+		return getHandler().readSheet( stream, type );
 	}
 
 	/**
@@ -492,8 +462,8 @@ public class Excels {
 	 * @param <T>		expected class of return
 	 * @return data as toClass generic type
 	 */
-	public <T> Map<String, List<T>> toBeanList( Map<String, NList> data, Class<T> toClass ) {
-		return getHandler().toBeanList( data, toClass );
+	public <T> Map<String, List<T>> toMap( Map<String, NList> data, Class<T> toClass ) {
+		return getHandler().toMap( data, toClass );
 	}
 
 }
