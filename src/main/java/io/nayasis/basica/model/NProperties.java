@@ -33,7 +33,7 @@ public class NProperties extends Properties {
     }
 
     public NProperties load( String filePath ) throws UncheckedIOException {
-        return loadProperties( Files.toStream(filePath) );
+        return loadProperties( Files.toInputStream(filePath) );
     }
 
     public NProperties load( URL url ) throws UncheckedIOException {
@@ -41,11 +41,11 @@ public class NProperties extends Properties {
     }
 
     public NProperties load( File file ) throws UncheckedIOException {
-        return loadProperties( Files.toStream(file) );
+        return loadProperties( Files.toInputStream(file) );
     }
 
     public NProperties load( Path path ) throws UncheckedIOException {
-        return loadProperties( Files.toStream(path) );
+        return loadProperties( Files.toInputStream(path) );
     }
 
     private NProperties loadProperties( InputStream inputStream ) throws UncheckedIOException {
