@@ -27,10 +27,10 @@ public class BaseRuntimeException extends RuntimeException implements Serializab
     /**
      * Constructor
      *
-     * @param rootCause root cause
+     * @param cause root cause
      */
-    public BaseRuntimeException( Throwable rootCause ) {
-        super( rootCause );
+    public BaseRuntimeException( Throwable cause ) {
+        super( cause );
     }
 
     /**

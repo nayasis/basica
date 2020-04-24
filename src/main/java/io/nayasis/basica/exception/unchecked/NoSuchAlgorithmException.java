@@ -15,16 +15,16 @@ public class NoSuchAlgorithmException extends BaseRuntimeException {
         super();
     }
 
-    public NoSuchAlgorithmException( Throwable rootCause ) {
-        super( rootCause );
+    public NoSuchAlgorithmException( Throwable cause ) {
+        super( cause );
     }
 
-    public NoSuchAlgorithmException( String message, Object... messageParam ) {
-        super( message, messageParam );
+    public NoSuchAlgorithmException( String message, Object... param ) {
+        super( message, param );
     }
 
-    public NoSuchAlgorithmException( Throwable rootCause, String message, Object... messageParam ) {
-    	super( rootCause, message, messageParam );
+    public NoSuchAlgorithmException( Throwable cause, String message, Object... param ) {
+    	super( cause, message, param );
     }
 
 }
