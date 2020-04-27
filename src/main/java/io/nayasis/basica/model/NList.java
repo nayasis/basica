@@ -235,6 +235,8 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
             if( currHeader.containsKey(key) ) {
                 buffer.put( key, currHeader.get(key) );
                 currHeader.remove(key);
+            } else {
+                buffer.put( key, 0 );
             }
         }
 

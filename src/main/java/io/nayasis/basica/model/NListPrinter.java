@@ -19,6 +19,7 @@ public class NListPrinter {
     private static final int    LIMIT_CNT           = 500;
     private static final int    MAX_COLUMN_LENGTH   = 255;
     private static final String NEW_LINE            = "-------------------------------------------------------------";
+    public static final String MESSAGE_NO_DATA = "NO DATA";
 
     private NList nlist;
 
@@ -85,20 +86,6 @@ public class NListPrinter {
 
     }
 
-
-//    private String getValue( int i, Object key ) {
-//
-//        Object val = nlist.getRow(i).get(key);
-//
-//        if( val == null ) return null;
-//        if( val instanceof Map ) {
-//            if( ((Map) val ).isEmpty() ) return "{{}}";
-//        }
-//
-//        return toDisplayString( val );
-//
-//    }
-
     private String toDisplayString( Object val ) {
 
         if( val == null ) return "";
@@ -141,14 +128,25 @@ public class NListPrinter {
             StringBuffer sb = new StringBuffer();
             sb.append( '+' );
 
-            for( Object key : width.keySet() ) {
-                for( int i = 0, iCnt = width.get(key) ; i <= iCnt; i++ ) {
+            if( width.isEmpty() ) {
+
+                for( int i = 0, iCnt = MESSAGE_NO_DATA.length() + 2; i < iCnt; i++ ) {
                     sb.append( '-' );
                 }
-                sb.append( "+" );
+
+                sb.append( '+' );
+
+            } else {
+                for( Object key : width.keySet() ) {
+                    for( int i = 0, iCnt = width.get(key) ; i <= iCnt; i++ ) {
+                        sb.append( '-' );
+                    }
+                    sb.append( '+' );
+                }
             }
 
-            sb.append( "\n" );
+
+            sb.append( '\n' );
 
             return sb.toString();
 
@@ -193,7 +191,7 @@ public class NListPrinter {
 
             if( body.isEmpty() ) {
                 sb.append( "| " );
-                sb.append( Strings.dprpad( "NO DATA", newline.length() - 3, ' ' ) );
+                sb.append( Strings.dprpad( MESSAGE_NO_DATA, newline.length() - 4, ' ' ) );
                 sb.append( "|\n" );
             } else {
                 for( Map<Object,String> row : body ) {

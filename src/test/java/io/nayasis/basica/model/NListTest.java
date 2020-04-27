@@ -18,4 +18,17 @@ public class NListTest {
 
     }
 
+    @Test
+    public void printNoData() {
+        NList list = new NList();
+        log.debug( "\n{}", list );
+    }
+
+    @Test
+    public void printNoDataWithHeader() {
+        NList list = new NList();
+        list.addKey( "name", "age", "country" );
+        log.debug( "\n{}", list );
+    }
+
 }
