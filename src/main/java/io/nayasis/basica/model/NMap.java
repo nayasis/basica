@@ -77,7 +77,7 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
 
     @Override
     public NMap clone() {
-        return Reflector.clone( this );
+        return (NMap) super.clone();
     }
 
     /**
@@ -149,9 +149,8 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
      *
      * @return self instance
      */
-    public NMap rebuildKeyToJsonPath() {
+    public NMap buildKeyToJsonPath() {
         return new JsonPathMapper().toJsonPath( this );
     }
-
 
 }

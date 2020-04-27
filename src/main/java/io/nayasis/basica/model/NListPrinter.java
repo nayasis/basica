@@ -1,9 +1,14 @@
 package io.nayasis.basica.model;
 
+import io.nayasis.basica.base.Characters;
 import io.nayasis.basica.base.Strings;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Printer to show as grid table
@@ -11,193 +16,201 @@ import java.util.Map;
  */
 public class NListPrinter {
 
-    private static final int     LIMIT_CNT_toString = 5_000;
-    private static final int     MAX_COLUMN_LENGTH  = 255;
-    private static final String  NEW_LINE           = "-------------------------------------------------------------";
+    private static final int    LIMIT_CNT           = 500;
+    private static final int    MAX_COLUMN_LENGTH   = 255;
+    private static final String NEW_LINE            = "-------------------------------------------------------------";
 
-    private NList nlist = null;
+    private NList nlist;
 
     public NListPrinter( NList nlist ) {
         this.nlist = nlist;
     }
 
     /**
-     * Print NList data
+     * convert too String
      *
-     * @param printHeader if true, print header
-     * @param printAllRow if true, print all row
+     * @param header    if true, print header
+     * @param all       if true, print all row
      * @return grid data contents
      */
-    public String toString( boolean printHeader, boolean printAllRow ) {
-
+    public String toString( boolean header, boolean all ) {
         nlist.refreshKey();
+        return toPrintable( nlist, header, header, all ? Integer.MAX_VALUE : LIMIT_CNT ).toString();
+    }
 
-        StringBuilder sb = new StringBuilder();
+    private Printable toPrintable( NList data, boolean includeHeader, boolean includeAlias, int count ) {
 
-        if( nlist.keySize() == 0 ) {
+        Printable p = new Printable();
 
-            sb.append(NEW_LINE).append( "\n" )
-              .append("    NO DATA\n")
-              .append(NEW_LINE).append( "\n" );
+        for( Object key : data.keySet() ) {
+
+            int width = 0;
+
+            if( includeHeader ) {
+                String header = toDisplayString( key );
+                p.header.put( key, header );
+                width = Math.max( width, header.length() );
+            }
+
+            if( includeAlias && data.hasAlias() ) {
+                String alias = toDisplayString( data.getAlias( key ) );
+                p.alias.put( key, alias );
+                width = Math.max( width, alias.length() );
+            }
+
+            p.width.put( key, width );
+
+        }
+
+        for( int i = 0, iCnt = Math.min(count,data.size()); i < iCnt; i++ ) {
+
+            NMap row = data.getRow( i );
+            Map<Object,String> map = new HashMap<>();
+
+            for( Object key : data.keySet() ) {
+
+                String txt = toDisplayString( row.get(key) );
+                map.put( key, txt );
+
+                int width = Math.max( p.width.get(key), txt.length() );
+                p.width.put( key, width );
+
+            }
+
+            p.body.add( map );
+
+        }
+
+        return p;
+
+    }
+
+
+//    private String getValue( int i, Object key ) {
+//
+//        Object val = nlist.getRow(i).get(key);
+//
+//        if( val == null ) return null;
+//        if( val instanceof Map ) {
+//            if( ((Map) val ).isEmpty() ) return "{{}}";
+//        }
+//
+//        return toDisplayString( val );
+//
+//    }
+
+    private String toDisplayString( Object val ) {
+
+        if( val == null ) return "";
+        if( val instanceof Map ) {
+            if( ((Map) val ).isEmpty() ) return "{{}}";
+        }
+
+        String txt = val.toString().replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
+
+        if( txt.length() > MAX_COLUMN_LENGTH ) {
+            txt = txt.substring( 0, MAX_COLUMN_LENGTH );
+        }
+
+        if( ! Characters.isFontWidthModified() ) return txt;
+
+        double count = 0; StringBuilder sb = new StringBuilder();
+
+        for( int i = 0, iCnt = txt.length(); i < iCnt; i++ ) {
+            char c = txt.charAt( i );
+            count += Characters.getFontWidth( c );
+            if( count > MAX_COLUMN_LENGTH ) {
+                return sb.toString();
+            }
+            sb.append( c );
+        }
+
+        return sb.toString();
+
+    }
+
+    private class Printable {
+
+        List<Map<Object,String>> body   = new ArrayList<>();
+        Map<Object,Integer>      width  = new LinkedHashMap<>();
+        Map<Object,String>       header = new HashMap<>();
+        Map<Object,String>       alias  = new HashMap<>();
+
+        public String getNewLine() {
+
+            StringBuffer sb = new StringBuffer();
+            sb.append( '+' );
+
+            for( Object key : width.keySet() ) {
+                for( int i = 0, iCnt = width.get(key) ; i <= iCnt; i++ ) {
+                    sb.append( '-' );
+                }
+                sb.append( "+" );
+            }
+
+            sb.append( "\n" );
 
             return sb.toString();
 
         }
 
-        Map<Object,Integer> columnWidthList = getColumnWidth();
-
-        String newLine = getNewLine( columnWidthList );
-
-        if( printHeader ) {
-            sb.append( newLine );
-            printKey( sb, columnWidthList );
-            printAlias( sb, columnWidthList );
+        public Set<Object> keySet() {
+            return width.keySet();
         }
 
-        sb.append( newLine );
-        printData( sb, columnWidthList, printAllRow );
-        sb.append( newLine );
 
-        return sb.toString();
+        public String toString() {
 
-    }
+            StringBuilder sb = new StringBuilder();
 
-    private void printKey( StringBuilder writer, Map<Object, Integer> columnWidthList ) {
-        for( Object key : nlist.header.keySet() ) {
-            writer.append( "| " );
-            writer.append( Strings.dprpad(key, columnWidthList.get(key), ' ') );
-        }
-        writer.append( "|\n" );
-    }
+            String newline = getNewLine();
 
-    /**
-     * 별칭 출력
-     *
-     * @param writer
-     * @param columnWidthList
-     */
-    private void printAlias( StringBuilder writer, Map<Object, Integer> columnWidthList ) {
+            if( ! header.isEmpty() ) {
 
-        // alias 출력여부 체크
-        boolean printable = false;
+                sb.append( newline );
 
-        for( Object key : nlist.header.keySet() ) {
-            if( nlist.alias.containsKey(key) ) {
-                printable = true;
-                break;
+                for( Object key : keySet() ) {
+                    sb.append( "| " );
+                    sb.append( Strings.dprpad( header.get(key), width.get(key), ' ' ) );
+                }
+                sb.append( "|\n" );
+
             }
-        }
 
-        if( ! printable ) return;
+            if( ! alias.isEmpty() ) {
 
-        // alias 출력
-        for( Object key : nlist.header.keySet() ) {
+                sb.append( newline );
 
-            writer.append( "| " );
+                for( Object key : keySet() ) {
+                    sb.append( "| " );
+                    sb.append( Strings.dprpad( alias.get(key), width.get(key), ' ' ) );
+                }
+                sb.append( "|\n" );
 
-            if( nlist.alias.containsKey(key) ) {
-                writer.append( Strings.dprpad(String.format( "(%s)", nlist.alias.get(key) ), columnWidthList.get(key), ' ') );
+            }
 
+            sb.append( newline );
+
+            if( body.isEmpty() ) {
+                sb.append( "| " );
+                sb.append( Strings.dprpad( "NO DATA", newline.length() - 3, ' ' ) );
+                sb.append( "|\n" );
             } else {
-                writer.append( Strings.dprpad("", columnWidthList.get(key), ' ') );
+                for( Map<Object,String> row : body ) {
+                    for( Object key : keySet() ) {
+                        sb.append( "| " );
+                        sb.append( Strings.dprpad( row.get(key), width.get(key), ' ' ) );
+                    }
+                    sb.append( "|\n" );
+                }
             }
 
-        }
+            sb.append( newline );
 
-        writer.append( "|\n" );
+            return sb.toString();
 
-    }
-
-
-
-    private void printData( StringBuilder writer, Map<Object, Integer> columnWidthList, boolean printAllRow ) {
-
-        int printCnt = printAllRow ? nlist.size() : Math.min(nlist.size(), LIMIT_CNT_toString);
-
-        for( int i = 0; i < printCnt; i++ ) {
-
-            for( Object key : nlist.header.keySet() ) {
-                writer.append("| ");
-                writer.append( Strings.dprpad(getValue(i, key), columnWidthList.get(key), ' ') );
-            }
-
-            writer.append( "|\n" );
-        }
-
-
-        if( printCnt < nlist.size() ) {
-
-            String newLine = getNewLine( columnWidthList );
-            int    innerLineLength = newLine.length() - 4;
-
-            writer.append( newLine );
-            writer.append( "| " ).append( Strings.dprpad( String.format("Omit [%d] cnt", nlist.size() - printCnt), innerLineLength, ' ') ).append( "|\n" );
-            writer.append( "| " ).append( Strings.dprpad("If you want to see all,",      innerLineLength, ' ') ).append( "|\n" );
-            writer.append( "| " ).append( Strings.dprpad("Use toDebugString() instead.", innerLineLength, ' ') ).append( "|\n" );
 
         }
-
-    }
-
-    private Object getValue(int i, Object key) {
-
-        Object val = nlist.get(key, i);
-
-        if( val == null ) {
-            return val;
-        } else if( val instanceof Map ) {
-            if( ((Map) val ).isEmpty() ) return "{-}";
-        }
-
-        String txt = val.toString().replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
-        if( txt.length() > MAX_COLUMN_LENGTH ) {
-            txt = txt.substring( 0, MAX_COLUMN_LENGTH );
-        }
-        while( Strings.getDisplayLength(txt) > MAX_COLUMN_LENGTH ) {
-            txt = txt.substring( 0, txt.length() - 1 );
-        }
-        return txt;
-
-    }
-
-    private String getNewLine( Map<Object,Integer> columnsWidth ) {
-
-        StringBuffer sb = new StringBuffer();
-        sb.append( '+' );
-
-        for( Object key : columnsWidth.keySet() ) {
-            for( int i = 0, iCnt = columnsWidth.get(key) ; i <= iCnt; i++ ) {
-                sb.append( '-' );
-            }
-            sb.append( "+" );
-        }
-
-        sb.append( "\n" );
-
-        return sb.toString();
-
-    }
-
-    private Map<Object, Integer> getColumnWidth() {
-
-        Map<Object,Integer> list = new LinkedHashMap<Object, Integer>();
-
-        for( Object key : nlist.keySet() ) {
-
-            int columnWidth = 0;
-
-            columnWidth = Math.max( columnWidth, Strings.getDisplayLength( key ) );
-            columnWidth = Math.max( columnWidth, Strings.getDisplayLength( nlist.alias.get(key) ) ) + 2; // (%s)
-
-            for( NMap row : nlist.body ) {
-                columnWidth = Math.max(  columnWidth, Math.min(MAX_COLUMN_LENGTH, Strings.getDisplayLength(row.get(key))) );
-            }
-
-            list.put( key, columnWidth );
-
-        }
-
-        return list;
 
     }
 

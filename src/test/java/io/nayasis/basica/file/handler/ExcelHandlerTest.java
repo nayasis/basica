@@ -31,7 +31,7 @@ public class ExcelHandlerTest {
             log.debug( "\n{}", sheet );
 
             assertEquals( 2, sheet.size() );
-            assertEquals( "[name, age, city]", sheet.getAliases().toString() );
+            assertEquals( "[name, age, city]", sheet.keySet().toString() );
             assertEquals( 45, sheet.getRow( 0).get( "age" ) );
             assertEquals( "jake", sheet.getRow( 1).get( "name" ) );
 
@@ -61,7 +61,7 @@ public class ExcelHandlerTest {
 
             for( NList sheet : sheets.values() ) {
                 assertEquals( 2, sheet.size() );
-                assertEquals( "[name, age, city]", sheet.getAliases().toString() );
+                assertEquals( "[name, age, city]", sheet.keySet().toString() );
                 assertEquals( 45, sheet.getRow( 0).get( "age" ) );
                 assertEquals( "jake", sheet.getRow( 1).get( "name" ) );
             }

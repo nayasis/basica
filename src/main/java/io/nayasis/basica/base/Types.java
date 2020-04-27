@@ -515,32 +515,32 @@ public class Types {
         return Strings.toBoolean( value, emptyToTrue );
     }
 
-    public Object castPrimitive( Object val, Class castType ) {
+    public <T> T castPrimitive( Object val, Class<T> castType ) {
 
         if( isString(castType) ) {
-            return val.toString();
+            return (T) val.toString();
         } else if( isBoolean(castType) ) {
-            return toBoolean(val);
+            return (T) toBoolean(val);
         } else if( isInt(castType) ) {
-            return toInt(val);
+            return (T) toInt(val);
         } else if( isLong(castType) ) {
-            return toLong(val);
+            return (T) toLong(val);
         } else if( isShort(castType) ) {
-            return toShort(val);
+            return (T) toShort(val);
         } else if( isByte(castType) ) {
-            return toByte(val);
+            return (T) toByte(val);
         } else if( isChar(castType) ) {
-            return toChar(val);
+            return (T) toChar(val);
         } else if( isDouble(castType) ) {
-            return toDouble(val);
+            return (T) toDouble(val);
         } else if( isFloat(castType) ) {
-            return toFloat(val);
+            return (T) toFloat(val);
         } else if( isBigDecimal(castType) ) {
-            return toBigDecimal(val);
+            return (T) toBigDecimal(val);
         } else if( isBigInteger(castType) ) {
-            return toBigInteger(val);
+            return (T) toBigInteger(val);
         } else {
-            return val;
+            return (T) val;
         }
 
     }
