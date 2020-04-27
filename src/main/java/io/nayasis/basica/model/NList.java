@@ -145,7 +145,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     /**
-     * get alias list
+     * get all alias
      *
      * @return list's aliases
      */

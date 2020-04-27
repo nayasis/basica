@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static io.nayasis.basica.base.Strings.nvl;
-
 @Slf4j
 public class ApachePoiReader {
 
@@ -97,22 +95,22 @@ public class ApachePoiReader {
 		Sheet sheet = workbook.getSheetAt( index );
 		if( sheet == null ) return result;
 
-		Map<Integer,String> header = getHeader( sheet, readHeader );
-		result.addKey( header.values() );
+		Header header = getHeader( sheet, readHeader );
+		result.addKey( header.body.values() );
 
 		FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
-		for( int i = 0, iCnt = sheet.getPhysicalNumberOfRows(); i < iCnt; i++ ) {
+		for( int i = header.has ? 1 : 0, iCnt = sheet.getPhysicalNumberOfRows(); i < iCnt; i++ ) {
 
 			NMap data = new NMap();
 			Row row = sheet.getRow( i );
 
-			for( int c = 0; c < header.size(); c++ ) {
+			for( int c = 0; c < header.body.size(); c++ ) {
 
 				Cell cell = row.getCell( c );
 				if( cell == null ) continue;
 
-				String key = nvl( header.get(c), c );
+				String key = Strings.nvl( header.body.get(c), c );
 				data.put( key, getValue(cell,evaluator) );
 
 			}
@@ -149,9 +147,9 @@ public class ApachePoiReader {
 		}
 	}
 
-	private Map<Integer,String> getHeader( Sheet sheet, boolean readHeader ) {
+	private Header getHeader( Sheet sheet, boolean readHeader ) {
 
-		Map<Integer,String> header = new LinkedHashMap<>();
+		Header header = new Header();
 
 		int count = getColumnCount( sheet );
 		if( count == 0 ) return header;
@@ -162,12 +160,13 @@ public class ApachePoiReader {
 			try {
 				for( int i = 0; i < count; i++ ) {
 					Cell cell = row.getCell( i );
-					header.put( i, readHeader ? nvl(i) : cell.getStringCellValue() );
+					header.body.put( i, readHeader ? cell.getStringCellValue() : Strings.nvl(i) );
 				}
+				header.has = true;
 			} catch ( NullPointerException e ) {
-				header.clear();
+				header.body.clear();
 				for( int i = 0; i < count; i++ ) {
-					header.put( i, nvl(i) );
+					header.body.put( i, Strings.nvl(i) );
 				}
 			}
 		}
@@ -229,5 +228,10 @@ public class ApachePoiReader {
         return DateUtil.isADateFormat( formatIndex, format) ;
 
     }
+
+    private class Header {
+		Map<Integer,String> body = new LinkedHashMap<>();
+		boolean has = false;
+	}
 
 }
