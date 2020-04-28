@@ -2,8 +2,10 @@ package io.nayasis.basica.model;
 
 import io.nayasis.basica.base.Characters;
 import io.nayasis.basica.base.Strings;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,34 +16,83 @@ import java.util.Set;
  * Printer to show as grid table
  *
  */
+@Slf4j
 public class NListPrinter {
 
-    private static final int    LIMIT_CNT           = 500;
-    private static final int    MAX_COLUMN_LENGTH   = 255;
-    private static final String NEW_LINE            = "-------------------------------------------------------------";
-    public static final String MESSAGE_NO_DATA = "NO DATA";
+    private NList list;
 
-    private NList nlist;
+    private int showCount      = 500;
+    private int maxColumnWidth = 255;
 
-    public NListPrinter( NList nlist ) {
-        this.nlist = nlist;
+    /**
+     * constructor
+     *
+     * @param list  data to print
+     */
+    public NListPrinter( NList list ) {
+        this.list = list;
     }
 
     /**
-     * convert too String
+     * get row counts to print
      *
-     * @param header    if true, print header
-     * @param all       if true, print all row
-     * @return grid data contents
+     * @return  row counts
      */
-    public String toString( boolean header, boolean all ) {
-        nlist.refreshKey();
-        return toPrintable( nlist, header, header, all ? Integer.MAX_VALUE : LIMIT_CNT ).toString();
+    public int showCounts() {
+        return showCount;
     }
 
-    private Printable toPrintable( NList data, boolean includeHeader, boolean includeAlias, int count ) {
+    /**
+     * set row counts to print
+     *
+     * @param showCount counts to print (default: 500)
+     * @return self
+     */
+    public NListPrinter showCounts( int showCount ) {
+        if( showCount > 0 )
+            this.showCount = showCount;
+        return this;
+    }
+
+    /**
+     * get max column width to print
+     * @return max column width
+     */
+    public int maxColumnWidth() {
+        return maxColumnWidth;
+    }
+
+    /**
+     * set max column width to print
+     *
+     * @param maxColumnWidth    width (default: 255)
+     * @return
+     */
+    public NListPrinter maxColumnWidth( int maxColumnWidth ) {
+        if( maxColumnWidth > 0 )
+            this.maxColumnWidth = maxColumnWidth;
+        return this;
+    }
+
+    /**
+     * convert to string
+     *
+     * @param header    if true, print header
+     * @param alias     if true, print alias
+     * @return grid data contents
+     */
+    public String toString( boolean header, boolean alias ) {
+        return toPrintable( list, header, alias ).toString();
+    }
+
+    private Printable toPrintable( NList data, boolean includeHeader, boolean includeAlias ) {
 
         Printable p = new Printable();
+
+        if( data.body.isEmpty() && ! data.keySet().isEmpty() ) {
+            data = data.clone();
+            data.addData( data.getKey( 0), Printable.MESSAGE_NO_DATA );
+        }
 
         for( Object key : data.keySet() ) {
 
@@ -50,20 +101,20 @@ public class NListPrinter {
             if( includeHeader ) {
                 String header = toDisplayString( key );
                 p.header.put( key, header );
-                width = Math.max( width, header.length() );
+                width = Math.max( width, Strings.getDisplayLength(header) );
             }
 
             if( includeAlias && data.hasAlias() ) {
                 String alias = toDisplayString( data.getAlias( key ) );
                 p.alias.put( key, alias );
-                width = Math.max( width, alias.length() );
+                width = Math.max( width, Strings.getDisplayLength(alias) );
             }
 
             p.width.put( key, width );
 
         }
 
-        for( int i = 0, iCnt = Math.min(count,data.size()); i < iCnt; i++ ) {
+        for( int i = 0, iCnt = Math.min( showCounts(),data.size()); i < iCnt; i++ ) {
 
             NMap row = data.getRow( i );
             Map<Object,String> map = new HashMap<>();
@@ -73,7 +124,7 @@ public class NListPrinter {
                 String txt = toDisplayString( row.get(key) );
                 map.put( key, txt );
 
-                int width = Math.max( p.width.get(key), txt.length() );
+                int width = Math.max( p.width.get(key), Strings.getDisplayLength(txt) );
                 p.width.put( key, width );
 
             }
@@ -88,15 +139,10 @@ public class NListPrinter {
 
     private String toDisplayString( Object val ) {
 
-        if( val == null ) return "";
-        if( val instanceof Map ) {
-            if( ((Map) val ).isEmpty() ) return "{{}}";
-        }
+        String txt = toString( val );
 
-        String txt = val.toString().replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
-
-        if( txt.length() > MAX_COLUMN_LENGTH ) {
-            txt = txt.substring( 0, MAX_COLUMN_LENGTH );
+        if( txt.length() > maxColumnWidth() ) {
+            txt = txt.substring( 0, maxColumnWidth() );
         }
 
         if( ! Characters.isFontWidthModified() ) return txt;
@@ -106,7 +152,7 @@ public class NListPrinter {
         for( int i = 0, iCnt = txt.length(); i < iCnt; i++ ) {
             char c = txt.charAt( i );
             count += Characters.getFontWidth( c );
-            if( count > MAX_COLUMN_LENGTH ) {
+            if( count > maxColumnWidth() ) {
                 return sb.toString();
             }
             sb.append( c );
@@ -116,7 +162,19 @@ public class NListPrinter {
 
     }
 
+    private String toString( Object val ) {
+        if( val == null ) return "";
+        if( val instanceof Map ) {
+            if( ((Map) val ).isEmpty() ) return "{}";
+        } else if( val instanceof Collection ) {
+            if( ((Collection)val).isEmpty() ) return "[]";
+        }
+        return val.toString().replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
+    }
+
     private class Printable {
+
+        private static final String MESSAGE_NO_DATA = "NO DATA";
 
         List<Map<Object,String>> body   = new ArrayList<>();
         Map<Object,Integer>      width  = new LinkedHashMap<>();
@@ -129,24 +187,12 @@ public class NListPrinter {
             sb.append( '+' );
 
             if( width.isEmpty() ) {
-
-                for( int i = 0, iCnt = MESSAGE_NO_DATA.length() + 2; i < iCnt; i++ ) {
-                    sb.append( '-' );
-                }
-
-                sb.append( '+' );
-
+                sb.append( Strings.line('-', MESSAGE_NO_DATA.length() + 2 ) ).append( '+' );
             } else {
                 for( Object key : width.keySet() ) {
-                    for( int i = 0, iCnt = width.get(key) ; i <= iCnt; i++ ) {
-                        sb.append( '-' );
-                    }
-                    sb.append( '+' );
+                    sb.append( Strings.line('-', width.get(key) + 2 ) ).append( '+' );
                 }
             }
-
-
-            sb.append( '\n' );
 
             return sb.toString();
 
@@ -156,7 +202,6 @@ public class NListPrinter {
             return width.keySet();
         }
 
-
         public String toString() {
 
             StringBuilder sb = new StringBuilder();
@@ -164,12 +209,9 @@ public class NListPrinter {
             String newline = getNewLine();
 
             if( ! header.isEmpty() ) {
-
-                sb.append( newline );
-
-                for( Object key : keySet() ) {
-                    sb.append( "| " );
-                    sb.append( Strings.dprpad( header.get(key), width.get(key), ' ' ) );
+                sb.append( newline ).append( '\n' );
+                for ( Object key : keySet() ) {
+                    sb.append( wrap( header.get(key), width.get(key) ) );
                 }
                 sb.append( "|\n" );
 
@@ -177,27 +219,23 @@ public class NListPrinter {
 
             if( ! alias.isEmpty() ) {
 
-                sb.append( newline );
+                sb.append( newline ).append( '\n' );
 
                 for( Object key : keySet() ) {
-                    sb.append( "| " );
-                    sb.append( Strings.dprpad( alias.get(key), width.get(key), ' ' ) );
+                    sb.append( wrap( alias.get(key), width.get(key) ) );
                 }
                 sb.append( "|\n" );
 
             }
 
-            sb.append( newline );
+            sb.append( newline ).append( '\n' );
 
             if( body.isEmpty() ) {
-                sb.append( "| " );
-                sb.append( Strings.dprpad( MESSAGE_NO_DATA, newline.length() - 4, ' ' ) );
-                sb.append( "|\n" );
+                sb.append( wrap(MESSAGE_NO_DATA) ).append( "|\n" );
             } else {
                 for( Map<Object,String> row : body ) {
                     for( Object key : keySet() ) {
-                        sb.append( "| " );
-                        sb.append( Strings.dprpad( row.get(key), width.get(key), ' ' ) );
+                        sb.append( wrap( row.get(key), width.get(key) ) );
                     }
                     sb.append( "|\n" );
                 }
@@ -207,7 +245,18 @@ public class NListPrinter {
 
             return sb.toString();
 
+        }
 
+        private StringBuilder wrap( String value ) {
+            return wrap( value, value.length() );
+        }
+
+        private StringBuilder wrap( String value, int length ) {
+            StringBuilder sb = new StringBuilder();
+            sb.append( '|' ).append( ' ' );
+            sb.append( Strings.dprpad( value, length, ' ' ) );
+            sb.append( ' ' );
+            return sb;
         }
 
     }

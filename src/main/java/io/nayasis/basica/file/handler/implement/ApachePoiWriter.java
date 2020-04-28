@@ -101,7 +101,7 @@ public class ApachePoiWriter {
 		if( writeHeader ) {
 			Row row = sheet.createRow( r++ );
 			CellStyle style = getHeaderStyle( workbook );
-			for( String alias : data.getAliases().values() ) {
+			for( String alias : data.getAliases() ) {
 				Cell cell = row.createCell( c++ );
 				cell.setCellValue( alias );
 				cell.setCellStyle( style );

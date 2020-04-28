@@ -93,8 +93,8 @@ public class ExcelHandlerTest {
 
         NList sheet = new NList();
 
-        sheet.add( "name", "nayasis" ).add( "age", 45 ).add( "city", "seoul" );
-        sheet.add( "name", "jake" ).add( "age", 9 ).add( "city", "sungnam" );
+        sheet.addData( "name", "nayasis" ).addData( "age", 45 ).addData( "city", "seoul" );
+        sheet.addData( "name", "jake" ).addData( "age", 9 ).addData( "city", "sungnam" );
 
         return sheet;
 

@@ -92,12 +92,12 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
         NList result = new NList();
 
         for( Object key : keySet() ) {
-            result.add( "key", key );
+            result.addData( "key", key );
             Object val = get( key );
             if( showType ) {
-                result.add( "type", val == null ? null : val.getClass().getTypeName() );
+                result.addData( "type", val == null ? null : val.getClass().getTypeName() );
             }
-            result.add( "val", val );
+            result.addData( "val", val );
         }
 
         return result.toString( showHeader, true );

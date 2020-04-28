@@ -94,19 +94,19 @@ public class Reflector {
         for( Field field : ClassReflector.getFields(bean) ) {
         	if( ! field.isAccessible() ) field.setAccessible( true );
 			String typeName = field.getType().getName();
-        	result.add( "field", field.getName() );
-			result.add( "type", typeName );
+        	result.addData( "field", field.getName() );
+			result.addData( "type", typeName );
         	try {
         		switch( typeName ) {
         			case "[C" :
-        				result.add( "value", "[" + new String( (char[]) field.get( bean ) ) + "]" );
+        				result.addData( "value", "[" + new String( (char[]) field.get( bean ) ) + "]" );
         				break;
         			default :
-        				result.add( "value", field.get( bean ) );
+        				result.addData( "value", field.get( bean ) );
 
         		}
         	} catch( IllegalArgumentException | IllegalAccessException e ) {
-        		result.add( "value", e.getMessage() );
+        		result.addData( "value", e.getMessage() );
             }
         }
         return result.toString();

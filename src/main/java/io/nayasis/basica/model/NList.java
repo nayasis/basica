@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Multiple Data aggregated with NMap
+ * Multiple data structure consisted with NMap
  *
  * @author nayasis@gmail.com
  */
@@ -83,56 +83,15 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     /**
-     * add alias corresponding to keyset
-     *
-     * @param alias alias list
+     * set alias corresponding to header key
+     * @param key       header key
+     * @param alias     alias
      * @return self instance
      */
-    public NList addAlias( Object... alias ) {
-
-        int startIndex = this.alias.size();
-
-        Iterator<Object> iterator = header.keySet().iterator();
-
-        for( int i = 0; i < startIndex; i++ ) {
-            if( ! iterator.hasNext() ) return this;
-            iterator.next();
+    public NList setAlias( String key, String alias ) {
+        if( header.containsKey(key) ) {
+            this.alias.put( key, alias );
         }
-
-        for( Object text : alias ) {
-            if( ! iterator.hasNext() ) break;
-            this.alias.put( iterator.next(), Strings.nvl( text ) );
-        }
-
-        return this;
-
-    }
-
-    /**
-     * set alias of key
-     * @param key       key to named alias
-     * @param alias     alias corresponding key
-     * @param overwrite if false, do not assign alias to key already assigned.
-     * @return self instance
-     */
-    public NList setAlias( Object key, Object alias, boolean overwrite ) {
-    	if( containsKey(key) ) {
-            if( overwrite || ! this.alias.containsKey( key ) ) {
-                this.alias.put( key, Strings.nvl( alias ) );
-            }
-        }
-        return this;
-    }
-
-    /**
-     * set alias
-     *
-     * @param key   key
-     * @param alias alias
-     * @return self instance
-     */
-    public NList setAlias( Object key, String alias ) {
-    	setAlias( key, alias, true );
         return this;
     }
 
@@ -149,14 +108,14 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     /**
      * get all alias
      *
-     * @return all aliases.<p>key is data's header key, value is alias corresponding header key.
+     * @return all aliases.
      */
-    public Map<Object,String> getAliases() {
-        Map<Object,String> aliases = new LinkedHashMap<>();
+    public List<String> getAliases() {
+        List<String> list = new ArrayList<>();
     	for( Object key : header.keySet() ) {
-    		aliases.put( key, getAlias(key) );
+    		list.add( getAlias(key) );
     	}
-    	return aliases;
+    	return list;
     }
 
     /**
@@ -196,17 +155,32 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     /**
-     * get key header size
+     * get key by given column index
      *
-     * @return size of key header
+     * @param column column index
+     * @return key
+     */
+    public Object getKey( int column ) {
+        if( 0 > column || column >= keySize() )
+            throw new IndexOutOfBoundsException( String.format( "Header index[%d] is out of bounds from 0 to %d", column, keySize() ) );
+        Iterator<Object> iterator = header.keySet().iterator();
+        for( int i = 0; i < column; i++ )
+            iterator.next();
+        return iterator.next();
+    }
+
+    /**
+     * get key size
+     *
+     * @return size of key
      */
     public int keySize() {
         return header.size();
     }
 
     /**
-     * get key header
-     * @return key header
+     * get key set
+     * @return key set
      */
     public Set<Object> keySet() {
         return header.keySet();
@@ -254,13 +228,13 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     /**
-     * add row
+     * append data
      *
      * @param key   key
      * @param value value
      * @return self instance
      */
-    public NList add( Object key, Object value ) {
+    public NList addData( Object key, Object value ) {
 
     	int dataSize  = size( key );
     	int totalSize = size();
@@ -496,28 +470,6 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     /**
-     * set data in row
-     *
-     * @param key       key
-     * @param rowIndex  row index
-     * @param value     value
-     * @return self instance
-     */
-    public NList set( Object key, int rowIndex, Object value ) throws IndexOutOfBoundsException {
-        NMap data;
-        try {
-            data = body.get( rowIndex );
-        } catch ( IndexOutOfBoundsException e ) {
-            throw new IndexOutOfBoundsException( String.format( "key:%s, row:%d", key, rowIndex ) );
-        }
-        data.put( key, value );
-        if( ! containsKey(key) ) {
-        	header.put( key, rowIndex + 1 );
-        }
-        return this;
-    }
-
-    /**
      * set row data
      * @param index          row index
      * @param value   data (Bean, map, json)
@@ -544,6 +496,28 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
             if( ! containsKey(key) )
                 header.put( key, rowIndex + 1 );
         }
+    }
+
+    /**
+     * set data in row
+     *
+     * @param row       row index
+     * @param key       key
+     * @param value     value
+     * @return self instance
+     */
+    public NList setDataByKey( int row, Object key, Object value ) throws IndexOutOfBoundsException {
+        NMap data;
+        try {
+            data = body.get( row );
+        } catch ( IndexOutOfBoundsException e ) {
+            throw new IndexOutOfBoundsException( String.format("Invalid access (row:%d, key:%s)",row,key) );
+        }
+        data.put( key, value );
+        if( ! containsKey(key) ) {
+            header.put( key, row + 1 );
+        }
+        return this;
     }
 
     /**
@@ -588,6 +562,18 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     /**
+     * get value
+     *
+     * @param row       row index
+     * @param key       header key
+     * @return value
+     */
+    public Object getDataByKey( int row, Object key ) {
+        NMap data = body.get( row );
+        return data == null ? null : data.get(key);
+    }
+
+    /**
      * check if header contains the specified key.
      *
      * @param key   key to inspect
@@ -605,21 +591,6 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      */
     public boolean contains( NMap row ) {
         return body.contains(row);
-    }
-
-    /**
-     * get key by sequence
-     *
-     * @param column column index
-     * @return key
-     */
-    public Object getKey( int column ) {
-        if( 0 > column || column >= keySize() )
-            throw new IndexOutOfBoundsException( String.format( "Index[%d] is out of bounds from 0 to %d", column, keySize() ) );
-        Iterator<Object> iterator = header.keySet().iterator();
-        for( int i = 0; i < column; i++ )
-            iterator.next();
-        return iterator.next();
     }
 
     /**
@@ -747,12 +718,12 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     /**
-     * print data only first 1000 rows
+     * print data only first 500 rows
      *
      * @return grid data
      */
     public String toString() {
-    	return new NListPrinter(this).toString(true, false);
+        return toString( true, false );
     }
 
     /**
@@ -763,7 +734,24 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @return debug string
      */
     public String toString( boolean header, boolean all ) {
-        return new NListPrinter(this).toString(header, all);
+        return toString( header, header, -1, all ? Integer.MAX_VALUE : -1 );
+    }
+
+    /**
+     * convert to string
+     *
+     * @param header            if true, print header
+     * @param alias             if true, print alias
+     * @param maxColumnWidth    maximum column width ( minus : use default(255) )
+     * @param showCounts        row counts to show ( minus : use default(500) )
+     * @return  grid contents
+     */
+    public String toString( boolean header, boolean alias, int maxColumnWidth, int showCounts ) {
+        refreshKey();
+        return new NListPrinter( this )
+            .maxColumnWidth( maxColumnWidth )
+            .showCounts( showCounts )
+            .toString( header, alias );
     }
 
     /* (non-Javadoc)

@@ -99,14 +99,14 @@ public class StopWatch implements Serializable {
 
 		NList list = new NList();
 		for( Log log : logs ) {
-			list.add( "ms",   String.format( "%6d", log.timeMillis ) );
-			list.add( "%",    String.format("%3d", log.percent )     );
-			list.add( "Task", log.taskName );
+			list.addData( "ms",   String.format( "%6d", log.timeMillis ) );
+			list.addData( "%",    String.format("%3d", log.percent )     );
+			list.addData( "Task", log.taskName );
 		}
 
-		list.add( "ms",   String.format( "%6d", (long) total ) );
-		list.add( "%",    ""                                   );
-		list.add( "Task", "TOTAL"                              );
+		list.addData( "ms",   String.format( "%6d", (long) total ) );
+		list.addData( "%",    ""                                   );
+		list.addData( "Task", "TOTAL"                              );
 
 		return list.toString( true, true );
 
