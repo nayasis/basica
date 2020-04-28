@@ -29,7 +29,7 @@ import java.util.List;
 public class RsaEncrypter {
 
     private static final int ENCRYPTION_SPLIT_BYTE = 53;
-    private static final int DECRIPTION_SPLIT_SIZE = 88;
+    private static final int DECRYPTION_SPLIT_SIZE = 88;
 
     public KeyPair generateKey() throws NoSuchAlgorithmException {
 
@@ -74,7 +74,7 @@ public class RsaEncrypter {
         StringBuilder sb = new StringBuilder();
         try {
             Cipher cipher = getCipher( privateKey );
-            for( String word : splitBySize(value, DECRIPTION_SPLIT_SIZE) ) {
+            for( String word : splitBySize(value, DECRYPTION_SPLIT_SIZE ) ) {
                 byte[] bytes     = Base64.decodeBase64( word.getBytes() );
                 byte[] decrypted = cipher.doFinal( bytes );
                 sb.append( new String( decrypted ) );
