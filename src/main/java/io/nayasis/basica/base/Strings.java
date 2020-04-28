@@ -1417,4 +1417,18 @@ public class Strings {
 		return false;
 	}
 
+	/**
+	 * get line string consisted with a given character.
+	 * @param ch		line character
+	 * @param length	line length
+	 * @return line string
+	 */
+	public String line( char ch, int length ) {
+		StringBuilder sb = new StringBuilder();
+		for( int i = 0; i < length; i++ ) {
+			sb.append( ch );
+		}
+		return sb.toString();
+	}
+
 }
