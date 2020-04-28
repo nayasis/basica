@@ -134,20 +134,27 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      */
     public NList addKey( Object... key ) {
         for( Object val : key ) {
-        	if( ! containsKey(val) ) {
-        		this.header.put( val, 0 );
-        	}
+            if( val == null ) continue;
+            if( val instanceof Collection ) {
+                addKey( (Collection) val );
+            } else if( Types.isArray(val) ) {
+                addKey( Types.toList(val)  );
+            } else {
+                if( ! containsKey(val) ) {
+                    this.header.put( val, 0 );
+                }
+            }
         }
         return this;
     }
 
     /**
-     * add keys in header
+     * add key in header
      *
      * @param keys  keys
      * @return  self instance
      */
-    public NList addKeys( Collection keys ) {
+    public NList addKey( Collection keys ) {
         if( Validator.isNotEmpty(keys) ) {
             keys.forEach( key -> addKey(key) );
         }
