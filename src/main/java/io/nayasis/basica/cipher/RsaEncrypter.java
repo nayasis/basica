@@ -29,7 +29,7 @@ import java.util.List;
 public class RsaEncrypter {
 
     private static final int ENCRYPTION_SPLIT_BYTE = 53;
-    private static final int DECRIPTION_SPLIT_SIZE = 88;
+    private static final int DECRYPTION_SPLIT_SIZE = 88;
 
     public KeyPair generateKey() throws NoSuchAlgorithmException {
 
@@ -54,7 +54,7 @@ public class RsaEncrypter {
         StringBuilder sb = new StringBuilder();
         try {
             Cipher cipher = getCipher( publicKey );
-            for( String word : splitByByte(value, ENCRYPTION_SPLIT_BYTE) ) {
+            for( String word : byteSplit(value, ENCRYPTION_SPLIT_BYTE) ) {
                 byte[] encrypted = cipher.doFinal( word.getBytes() );
                 sb.append( Base64.encodeBase64String( encrypted ) );
             }
@@ -74,7 +74,7 @@ public class RsaEncrypter {
         StringBuilder sb = new StringBuilder();
         try {
             Cipher cipher = getCipher( privateKey );
-            for( String word : splitBySize(value, DECRIPTION_SPLIT_SIZE) ) {
+            for( String word : sizeSplit(value, DECRYPTION_SPLIT_SIZE ) ) {
                 byte[] bytes     = Base64.decodeBase64( word.getBytes() );
                 byte[] decrypted = cipher.doFinal( bytes );
                 sb.append( new String( decrypted ) );
@@ -105,7 +105,7 @@ public class RsaEncrypter {
         }
     }
 
-    private List<String> splitByByte( String value, int maxBytes ) {
+    private List<String> byteSplit( String value, int maxBytes ) {
 
         value = Strings.nvl( value );
 
@@ -134,7 +134,7 @@ public class RsaEncrypter {
 
     }
 
-    private List<String> splitBySize( String value, int size ) {
+    private List<String> sizeSplit( String value, int size ) {
 
         value = Strings.nvl( value );
 
