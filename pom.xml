@@ -4,11 +4,12 @@
   <groupId>io.nayasis</groupId>
   <artifactId>basica</artifactId>
   <version>0.3.2</version>
+  <packaging>jar</packaging>
+
   <name>basica</name>
-  <description>
-    basic utility
-  </description>
+  <description>basic utility</description>
   <url>http://github.com/nayasis/basica</url>
+
   <licenses>
     <license>
       <name>Apache-2.0</name>
@@ -18,23 +19,20 @@
   </licenses>
   <developers>
     <developer>
-      <name>Jung Hwasu</name>
+      <name>nayasis</name>
       <email>nayasis@gmail.com</email>
-      <roles>
-        <role>author</role>
-        <role>developer</role>
-      </roles>
     </developer>
   </developers>
   <scm>
-    <url>github.com/nayasis/basica.git</url>
-    <connection>scm:git:ssh://github.com/nayasis/basica.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/nayasis/basica.git</developerConnection>
+    <url>https://github.com/nayasis/basica</url>
   </scm>
-  <issueManagement>
-    <system>GitHub Issue Management</system>
-    <url>https://github.com/nayasis/basica/issues</url>
-  </issueManagement>
+  <distributionManagement>
+    <repository>
+      <id>bintray-nayasis</id>
+      <url>https://bintray.com/api/v1/maven/nayasis/utility/basica/;publish=1</url>
+    </repository>
+  </distributionManagement>
+
 
   <properties>
     <java.version>1.8</java.version>
@@ -157,7 +155,7 @@
         <executions>
           <execution>
             <id>attach-javadocs</id>
-            <phase>deploy</phase>
+            <phase>verify</phase>
             <goals>
               <goal>jar</goal>
             </goals>
