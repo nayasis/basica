@@ -514,16 +514,14 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @return self instance
      */
     public NList setDataByKey( int row, Object key, Object value ) throws IndexOutOfBoundsException {
-        NMap data;
-        try {
-            data = body.get( row );
-        } catch ( IndexOutOfBoundsException e ) {
-            throw new IndexOutOfBoundsException( String.format("Invalid access (row:%d, key:%s)",row,key) );
+        Assert.beTrue( containsKey(key), "key({}) is not exist.", key );
+        NMap data = body.get( row );
+        if( data == null ) {
+            data = new NMap();
+            body.set( row, data );
         }
         data.put( key, value );
-        if( ! containsKey(key) ) {
-            header.put( key, row + 1 );
-        }
+        header.put( key, Math.max(header.get(key), row + 1) );
         return this;
     }
 
@@ -536,16 +534,10 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @return self instance
      */
     public NList setData( int row, int column, Object value ) {
-        Object key  = getKey( column );
-        NMap   data = body.get( row );
-        if( data == null ) {
-            data = new NMap();
-            body.set( row, data );
-        }
-        data.put( key, value );
-        return this;
+        Object key = getKey( column );
+        Assert.notNull( key, "column(index:{}) is not exist.", column );
+        return setDataByKey( row, key, value );
     }
-
 
     /**
      * Get row data
