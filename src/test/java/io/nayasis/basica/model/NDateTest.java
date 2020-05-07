@@ -18,6 +18,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class NDateTest {
 
     @Test
+    public void init() {
+
+        assertEquals( "2020-05-01 00:00:00", new NDate("2020-05").toString() );
+        assertEquals( "2020-05-01 00:00:00", new NDate("2020-05", "YYYY-MM-DD").toString() );
+        assertEquals( "2020-05-01 00:00:00", new NDate("2020-05", "YYYY-MM").toString() );
+        assertEquals( "2020-05-01 00:00:00", new NDate("05/2020", "MM/yyyy").toString() );
+
+    }
+
+    @Test
+    public void beginningAndEnd() {
+
+        NDate date = new NDate( "2020-05-07" );
+
+        assertEquals( "2020-05-01 00:00:00", date.beginningOfMonth().toString() );
+        assertEquals( "2020-05-31 23:59:59", date.endOfMonth().toString() );
+        assertEquals( "2020-05-03 00:00:00", date.beginningOfWeek().toString() );
+        assertEquals( "2020-05-09 23:59:59", date.endOfWeek().toString() );
+
+    }
+
+    @Test
     public void setDateFromLocalDateTime() {
 
         LocalDateTime nowLocal = LocalDateTime.now();

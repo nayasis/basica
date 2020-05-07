@@ -414,7 +414,7 @@ public class NDate implements Serializable {
     /**
      * get week day
      *
-     * @return week day ( 1:sunday, 2:monday, 3:thuesday, 4:wednesday, 5:thursday, 6:friday, 7:saturdays )
+     * @return weekday ( 1:sunday, 2:monday, 3:tuesday, 4:wednesday, 5:thursday, 6:friday, 7:saturday )
      */
     public int getWeekDay() {
         return currentTime.get( Calendar.DAY_OF_WEEK );
@@ -620,7 +620,7 @@ public class NDate implements Serializable {
      * System.out.println( date.beginningOfMonth() ); → '2012.02.01 00:00:00'
      * </pre>
      *
-     * @return new NDate to be setted with beginning of month date
+     * @return new NDate set to beginning of month date
      */
     public NDate beginningOfMonth() {
 
@@ -641,7 +641,7 @@ public class NDate implements Serializable {
      * System.out.println( date.endOfMonth() ); → '2012.02.29 23:59:59.999'
      * </pre>
      *
-     * @return new NDate to be setted with end of month date
+     * @return new NDate set to end of month date
      *
      */
     public NDate endOfMonth() {
@@ -654,6 +654,24 @@ public class NDate implements Serializable {
 
         return new NDate( newDate );
 
+    }
+
+    /**
+     * get beginning of week day from current date.
+     *
+     * @return new NDate set to beginning of weekday (sunday)
+     */
+    public NDate beginningOfWeek() {
+        return addDay( 1 - getWeekDay() );
+    }
+
+    /**
+     * get end of week day from current date.
+     *
+     * @return new NDate set to end of weekday (saturday)
+     */
+    public NDate endOfWeek() {
+        return addDay( 7 - getWeekDay() + 1 ).addMillisecond( -1 );
     }
 
     /**

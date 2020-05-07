@@ -15,7 +15,7 @@ public class NDateParser {
     public Date toDate( String date, String format ) throws ParseException {
 
         try {
-            if( Strings.isNotEmpty(format) )
+            if( Strings.isNotEmpty(format) && ! format.equals( format.toUpperCase() ) )
                 return parse( date, format );
         } catch ( Exception e ) {}
 
