@@ -1,7 +1,6 @@
 package com.github.nayasis.basica.model;
 
 import com.github.nayasis.basica.base.Characters;
-import com.github.nayasis.basica.model.NList;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,17 +28,17 @@ public class NListPrinterTest {
         log.debug( "\n{}", list );
         log.debug( "\n{}", list.toString( false, false ) );
 
-        Assertions.assertEquals("+------------+-----------------------------------------+\n" +
-            "| key        | val                                     |\n" +
-            "+------------+-----------------------------------------+\n" +
-            "| 이것은 KEY | これは VALUE                            |\n" +
-            "+------------+-----------------------------------------+\n" +
+        Assertions.assertEquals("+------------+-------------------------------------------------+\n" +
+            "| key        | val                                             |\n" +
+            "+------------+-------------------------------------------------+\n" +
+            "| 이것은 KEY | これは VALUE                                    |\n" +
+            "+------------+-------------------------------------------------+\n" +
             "| controller | com.github.nayasis.model.NMapTest.printString() |\n" +
-            "+------------+-----------------------------------------+", list.toString() );
+            "+------------+-------------------------------------------------+", list.toString() );
 
-        Assertions.assertEquals( "+------------+-----------------------------------------+\n" +
+        Assertions.assertEquals( "+------------+-------------------------------------------------+\n" +
             "| controller | com.github.nayasis.model.NMapTest.printString() |\n" +
-            "+------------+-----------------------------------------+", list.toString(false,false) );
+            "+------------+-------------------------------------------------+", list.toString(false,false) );
 
     }
 

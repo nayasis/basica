@@ -1,7 +1,6 @@
 package com.github.nayasis.basica.cipher;
 
 import com.github.nayasis.basica.base.Strings;
-import com.github.nayasis.basica.cipher.RsaEncrypter;
 import com.github.nayasis.basica.cipher.vo.KeyPair;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ public class RsaEncrypterTest {
 
     @Test
     public void longText() {
-        checkValidation( "basica 한글 鄭柱虎 merong GTA VI ファイナルファンタジー 1234567890 maxbyte 53 is possible to encrypt." );
+        checkValidation( "basica 한글 鄭柱虎 merong GTA VI ファイナルファンタジー 1234567890 max byte 53 is possible to encrypt." );
     }
 
     private void printLine() {
@@ -32,16 +31,16 @@ public class RsaEncrypterTest {
 
     private void checkValidation( String plainText ) {
 
-        RsaEncrypter encryptor = new RsaEncrypter();
+        RsaEncrypter encrypter = new RsaEncrypter();
 
-        KeyPair keyPair = encryptor.generateKey();
+        KeyPair keyPair = encrypter.generateKey();
 
         print( keyPair );
 
         printLine();
 
-        String encrypt = encryptor.encrypt( plainText, keyPair.getPublicKey() );
-        String decrypt = encryptor.decrypt( encrypt, keyPair.getPrivateKey() );
+        String encrypt = encrypter.encrypt( plainText, keyPair.getPublicKey() );
+        String decrypt = encrypter.decrypt( encrypt, keyPair.getPrivateKey() );
 
         log.debug( encrypt );
         log.debug( decrypt );

@@ -1,11 +1,10 @@
 package com.github.nayasis.basica.cipher;
 
-import com.github.nayasis.basica.cipher.vo.KeyPair;
-import com.github.nayasis.basica.exception.unchecked.NoSuchAlgorithmException;
 import com.github.nayasis.basica.base.Strings;
+import com.github.nayasis.basica.cipher.vo.KeyPair;
 import com.github.nayasis.basica.exception.unchecked.DecryptionException;
 import com.github.nayasis.basica.exception.unchecked.EncryptionException;
-import org.apache.commons.codec.binary.Base64;
+import com.github.nayasis.basica.exception.unchecked.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -18,6 +17,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -56,7 +56,7 @@ public class RsaEncrypter {
             Cipher cipher = getCipher( publicKey );
             for( String word : byteSplit(value, ENCRYPTION_SPLIT_BYTE) ) {
                 byte[] encrypted = cipher.doFinal( word.getBytes() );
-                sb.append( Base64.encodeBase64String( encrypted ) );
+                sb.append( Base64.getEncoder().encodeToString( encrypted ) );
             }
             return sb.toString();
         } catch( IllegalBlockSizeException | BadPaddingException e ) {
@@ -75,7 +75,7 @@ public class RsaEncrypter {
         try {
             Cipher cipher = getCipher( privateKey );
             for( String word : sizeSplit(value, DECRYPTION_SPLIT_SIZE ) ) {
-                byte[] bytes     = Base64.decodeBase64( word.getBytes() );
+                byte[] bytes     = Base64.getDecoder().decode( word.getBytes() );
                 byte[] decrypted = cipher.doFinal( bytes );
                 sb.append( new String( decrypted ) );
             }
