@@ -27,6 +27,7 @@ public class Cloner {
         return cloneObject( object, new HashMap<>() );
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T cloneObject( T object, Map<Object,Object> cloned ) {
 
         if( object == null ) return null;
@@ -61,6 +62,7 @@ public class Cloner {
 
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T cloneArray( T object, Map<Object,Object> cloned ) {
 
         Class<?> klass   = object.getClass();
@@ -123,6 +125,7 @@ public class Cloner {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void copyArray( Object source, Object target ) {
 
         if ( ! Types.isArray(target) )
@@ -131,7 +134,7 @@ public class Cloner {
         Class srcType = source.getClass().getComponentType();
         Class trgType = target.getClass().getComponentType();
 
-        for (int i = 0, iCnt = Array.getLength(source); i < iCnt; i++ ) {
+        for ( int i = 0, iCnt = Array.getLength(source); i < iCnt; i++ ) {
 
             Object srcVal = Array.get( source, i );
 

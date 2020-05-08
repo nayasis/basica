@@ -33,6 +33,7 @@ import static java.math.BigDecimal.ONE;
  * @since 2015-08-20
  */
 @UtilityClass
+@SuppressWarnings("unchecked")
 public class Types {
 
     private final static Set<Class<?>> IMMUTABLE = new HashSet() {{

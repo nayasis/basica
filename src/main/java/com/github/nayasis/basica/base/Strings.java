@@ -753,6 +753,7 @@ public class Strings {
      * @throws UncheckedIOException if I/O exception occurs.
      * @throws UncheckedClassNotFoundException if class is not found in class loader.
      */
+	@SuppressWarnings("unchecked")
     public <T> T decode( String value ) throws UncheckedIOException {
 		if( value == null ) return null;
 

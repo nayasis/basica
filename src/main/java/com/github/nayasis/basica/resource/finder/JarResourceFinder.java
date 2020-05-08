@@ -44,6 +44,7 @@ public class JarResourceFinder {
      * @throws IOException in case of I/O errors
      * @since 4.3
      */
+    @SuppressWarnings("unchecked")
     public Set<Resource> find( Resource root, URL rootDir, String pattern ) throws IOException {
 
         URLConnection conn = rootDir.openConnection();

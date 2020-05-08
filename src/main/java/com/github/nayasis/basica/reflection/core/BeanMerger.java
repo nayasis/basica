@@ -14,6 +14,7 @@ import java.util.*;
  * @author nayasis@gmail.com
  * @since 2017-03-30
  */
+@SuppressWarnings("unchecked")
 public class BeanMerger {
 
     /**

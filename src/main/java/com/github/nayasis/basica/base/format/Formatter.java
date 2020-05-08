@@ -144,6 +144,7 @@ public class Formatter {
 
     }
 
+    @SuppressWarnings("unchecked")
     private Map toParam( Object ... parameters ) {
 
         Map params = new HashMap();

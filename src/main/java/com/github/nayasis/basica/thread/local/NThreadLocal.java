@@ -41,6 +41,7 @@ public class NThreadLocal {
 	 * @param <T> This is the type parameter
 	 * @return value to store
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T get( String key ) {
 		Object val = getThreadLocal().get( key );
 		return val == null ? null : (T) val;

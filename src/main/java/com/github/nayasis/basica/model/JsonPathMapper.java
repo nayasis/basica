@@ -23,6 +23,7 @@ public class JsonPathMapper {
      * @param map map value
      * @return map has serialized key
      */
+    @SuppressWarnings("unchecked")
     public NMap toJsonPath( Map map ) {
 
         NMap newMap = new NMap();
@@ -36,6 +37,7 @@ public class JsonPathMapper {
 
     }
 
+    @SuppressWarnings("unchecked")
     private Object convertValue( Object value ) {
 
         if( value == null || Types.isImmutable(value) ) return value;

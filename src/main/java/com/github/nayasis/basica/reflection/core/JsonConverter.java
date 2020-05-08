@@ -30,7 +30,7 @@ import java.util.Map;
  * @author nayasis@gmail.com
  * @since 2017-11-27
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class JsonConverter {
 
     private ObjectMapper objectMapper;

@@ -154,6 +154,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @param keys  keys
      * @return  self instance
      */
+    @SuppressWarnings("unchecked")
     public NList addKey( Collection keys ) {
         if( Validator.isNotEmpty(keys) ) {
             keys.forEach( key -> addKey(key) );
@@ -241,6 +242,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @param value value
      * @return self instance
      */
+    @SuppressWarnings("unchecked")
     public NList addData( Object key, Object value ) {
 
     	int dataSize  = size( key );
@@ -513,6 +515,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @param value     value
      * @return self instance
      */
+    @SuppressWarnings("unchecked")
     public NList setDataByKey( int row, Object key, Object value ) throws IndexOutOfBoundsException {
         Assert.beTrue( containsKey(key), "key({}) is not exist.", key );
         NMap data = body.get( row );
@@ -630,6 +633,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @param <T> 	expected class of return
      * @return values corresponding key
      */
+    @SuppressWarnings("unchecked")
     public <T> List<T> toList( String key, Class<T> type ) {
 
         List<T> result = new ArrayList<>();
@@ -676,6 +680,7 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @param <T> 	             expected class of return
      * @return converted list
      */
+    @SuppressWarnings("unchecked")
     public <T> List<T> toList( Class<T> type, boolean ignoreException ) {
 
         List<T> result = new ArrayList<T>();

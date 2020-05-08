@@ -23,6 +23,7 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
      *
      * @param value	initial value
      */
+    @SuppressWarnings("unchecked")
     public NMap( Map value ) {
         super( value );
     }
@@ -42,6 +43,7 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
      * @param beanOrMapOrJson	bind value (Bean or Map or JSON text)
      * @return self instance
      */
+    @SuppressWarnings("unchecked")
     public NMap bind( Object beanOrMapOrJson ) {
         super.putAll( Reflector.toMapFrom( beanOrMapOrJson ) );
         return this;
@@ -113,6 +115,7 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
      * @see <a href="https://github.com/jayway/JsonPath">json path example</a>
      * @return value(s) extracted by json path
      */
+    @SuppressWarnings("unchecked")
     public <T> T getByJsonPath( String jsonPath ) {
         Object val = null;
         if( containsKey( jsonPath ) ) {

@@ -318,6 +318,7 @@ public class Reflector {
 	 * @param <T> 			expected class of return
 	 * @return	proxy bean to wrap
 	 */
+	@SuppressWarnings("unchecked")
     public <T> T wrapProxy( T bean, Class<?>[] interfaces, MethodInvoker methodInvoker ) {
     	return (T) Proxy.newProxyInstance( bean.getClass().getClassLoader(), interfaces, new Invoker<>( bean, methodInvoker ) );
     }
@@ -329,6 +330,7 @@ public class Reflector {
 	 * @return	original bean
 	 * @throws UncheckedClassCastException if bean is not proxy bean.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T unwrapProxy( T bean ) {
 		if( bean == null || ! Proxy.isProxyClass( bean.getClass() ) ) {
 			return bean;

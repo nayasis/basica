@@ -352,19 +352,20 @@ public class Validator {
         return Types.isPositiveInt( value );
     }
 
-     /**
-     * Let you replace null (or empty)  with another value.
-     *
-     * if value is null or empty, examine replaceValue.
-     * if replaceValue is null, examine next anotherReplaceValue.
-     * if anotherReplaceValue is not null, it is returned as result.
-     *
-     * @param value                 value to examine not null or not empty.
-     * @param replaceValue          other value to examine not null.
-     * @param anotherReplaceValue   another values to examine not null.
-     * @param <T> 			        expected class of return
-     * @return not null value from begin with.
-     */
+    /**
+    * Let you replace null (or empty)  with another value.
+    *
+    * if value is null or empty, examine replaceValue.
+    * if replaceValue is null, examine next anotherReplaceValue.
+    * if anotherReplaceValue is not null, it is returned as result.
+    *
+    * @param value                 value to examine not null or not empty.
+    * @param replaceValue          other value to examine not null.
+    * @param anotherReplaceValue   another values to examine not null.
+    * @param <T> 			        expected class of return
+    * @return not null value from begin with.
+    */
+    @SafeVarargs
     public static <T> T nvl( T value, T replaceValue, T... anotherReplaceValue ) {
         if( isNotEmpty(value) )       return value;
         if( isNotNull(replaceValue) ) return replaceValue;

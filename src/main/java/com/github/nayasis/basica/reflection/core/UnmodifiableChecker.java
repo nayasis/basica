@@ -18,6 +18,7 @@ public class UnmodifiableChecker {
 
     private static LruCache<Class,Boolean> CACHE = new LruCache<>( 64 );
 
+    @SuppressWarnings("unchecked")
     public static boolean isUnmodifiable( Map map ) {
 
         if( map == null ) return true;
@@ -38,6 +39,7 @@ public class UnmodifiableChecker {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static boolean isUnmodifiable( Collection collection ) {
 
         if( collection == null ) return true;

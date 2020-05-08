@@ -201,6 +201,7 @@ public class Classes {
         }
 	}
 
+	@SuppressWarnings("unchecked")
     public <T> T createInstance( Type type ) throws ClassNotFoundException {
 		return (T) createInstance( getClass(type) );
 	}

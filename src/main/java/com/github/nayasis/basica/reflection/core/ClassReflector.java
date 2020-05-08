@@ -53,6 +53,7 @@ public class ClassReflector {
      * @param <T> This is the type parameter
      * @return  field's value
      */
+    @SuppressWarnings("unchecked")
     public <T> T getValue( Object target, Field field ) throws UncheckedIllegalAccessException {
 
         final Object[] val = new Object[1];
