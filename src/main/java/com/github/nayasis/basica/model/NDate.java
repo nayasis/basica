@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TimeZone;
 
 import static java.util.Calendar.MILLISECOND;
 
@@ -610,6 +611,33 @@ public class NDate implements Serializable {
         return this;
     }
 
+    /**
+     * set timezone
+     * @param id    timezone id
+     * @return  itself
+     */
+    public NDate setTimezone( ZoneId id ) {
+        return setTimezone( TimeZone.getTimeZone( id ) );
+    }
+
+    /**
+     * set timezone
+     * @param id    timezone id
+     * @return  itself
+     */
+    public NDate setTimezone( String id ) {
+        return setTimezone( TimeZone.getTimeZone(id) );
+    }
+
+    /**
+     * set timezone
+     * @param timezone timezone
+     * @return  itself
+     */
+    public NDate setTimezone( TimeZone timezone ) {
+        currentTime.setTimeZone( timezone );
+        return this;
+    }
 
     /**
      * get beginning of month date from current date.
