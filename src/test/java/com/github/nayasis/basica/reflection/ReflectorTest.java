@@ -2,7 +2,6 @@ package com.github.nayasis.basica.reflection;
 
 import com.github.nayasis.basica.base.Strings;
 import com.github.nayasis.basica.model.NDate;
-import com.github.nayasis.basica.reflection.Reflector;
 import com.github.nayasis.basica.validation.Validator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -118,7 +117,7 @@ public class ReflectorTest {
         Person p1 = new Person().name("nayasis").birth(new NDate("1977-01-22") );
         Person p2 = new Person().name("jake").birth(new NDate("2011-04-25") );
 
-        Account account = new Account().address("seoul").age(40).balance(new BigDecimal(1_000));
+        Account account = new Account().address("seoul").age(40).balance(new BigDecimal(1_000)).regDt(ZonedDateTime.now());
 
         p1.children().add( p2 );
         p1.account( account );
@@ -139,6 +138,23 @@ public class ReflectorTest {
         assertTrue( map2.containsKey("account.address") );
         assertTrue( map2.containsKey("account.age") );
         assertTrue( map2.containsKey("account.balance") );
+
+    }
+
+    @Test
+    public void toJson() {
+
+        Person  person  = new Person().name("jake").birth(new NDate("2011-04-25") );
+        Account account = new Account().address("seoul").age(40).balance(new BigDecimal(1_000)).regDt(person.birth().toZonedDateTime());
+
+        log.debug( "{}", person );
+        log.debug( "{}", account );
+
+        log.debug( Reflector.toJson( person ) );
+        log.debug( Reflector.toJson( account ) );
+
+        assertEquals( "{\"birth\":\"2011-04-24T15:00:00.000+00:00\",\"children\":[],\"name\":\"jake\"}", Reflector.toJson(person) );
+        assertEquals( "{\"address\":\"seoul\",\"age\":40,\"balance\":1000,\"regDt\":\"2011-04-25T00:00:00+09:00\"}", Reflector.toJson(account) );
 
     }
 
@@ -235,7 +251,7 @@ public class ReflectorTest {
         Account jake = new Account()
             .name("jake")
             .age( 9 )
-            .regDt(LocalDateTime.now())
+            .regDt(ZonedDateTime.now())
             .address("Jeongja, Sung-Nam si")
             .balance(BigDecimal.ZERO)
             ;
@@ -290,7 +306,7 @@ public class ReflectorTest {
         private Integer       age;
         private String        address;
         private BigDecimal    balance;
-        private LocalDateTime regDt;
+        private ZonedDateTime regDt;
     }
 
     @Data
