@@ -158,9 +158,9 @@ public class PathMatchingResourceLoader implements ResourcePatternResolver {
 	 * <p>ex. "classpath:/WEB-INF/*.xml" returns "classpath:/WEB-INF"
 	 *
 	 * @param path
-	 * @return
+	 * @return root directory
 	 */
-	public String getRootDir( String path ) {
+	private String getRootDir( String path ) {
 
 		int prefixEnd  = path.indexOf(':') + 1;
 		int rootDirEnd = path.length();

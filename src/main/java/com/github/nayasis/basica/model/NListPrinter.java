@@ -66,7 +66,7 @@ public class NListPrinter {
      * set max column width to print
      *
      * @param maxColumnWidth    width (default: 255)
-     * @return
+     * @return self instance
      */
     public NListPrinter maxColumnWidth( int maxColumnWidth ) {
         if( maxColumnWidth > 0 )

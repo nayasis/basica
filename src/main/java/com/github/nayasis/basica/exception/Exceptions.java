@@ -1,7 +1,7 @@
 package com.github.nayasis.basica.exception;
 
-import com.github.nayasis.basica.validation.Validator;
 import com.github.nayasis.basica.exception.helper.ProxyThrowables;
+import com.github.nayasis.basica.validation.Validator;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,8 +9,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.github.nayasis.basica.validation.Validator.isFound;
 
 /**
  * Throwable Utility
@@ -99,7 +97,7 @@ public class Exceptions {
      * convert to string
      *
      * @param exception
-     * @return
+     * @return string stacktraces printed
      */
     public String toString( Throwable exception ) {
 
