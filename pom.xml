@@ -252,6 +252,35 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>bintray</id>
+      <distributionManagement>
+        <repository>
+          <id>bintray-nayasis</id>
+          <url>https://bintray.com/api/v1/maven/nayasis/utility/basica/;publish=1</url>
+        </repository>
+      </distributionManagement>
+      <repositories>
+        <repository>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <id>bintray-nayasis-utility</id>
+          <name>bintray</name>
+          <url>https://dl.bintray.com/nayasis/utility</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <id>bintray-nayasis-utility</id>
+          <name>bintray-plugins</name>
+          <url>https://dl.bintray.com/nayasis/utility</url>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
   </profiles>
 
 </project>
