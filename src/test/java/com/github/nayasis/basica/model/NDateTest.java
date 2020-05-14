@@ -1,7 +1,6 @@
 package com.github.nayasis.basica.model;
 
 import com.github.nayasis.basica.file.Files;
-import com.github.nayasis.basica.model.NDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -149,6 +148,20 @@ public class NDateTest {
         log.debug( truncate.compareTo( ndate ) + "" );
 
         assertEquals( 0, truncate.compareTo( ndate ) );
+
+    }
+
+    @Test
+    public void localDate() {
+
+        NDate a = new NDate("2020-05-14");
+        NDate b = new NDate("2020-05-14");
+
+        log.debug( "a : {}, {}", a.toLocalDate(), a.toLocalDate().hashCode() );
+        log.debug( "b : {}, {}", b.toLocalDate(), b.toLocalDate().hashCode() );
+
+        assertEquals( a.toLocalDate(), b.toLocalDate() );
+
 
     }
 
