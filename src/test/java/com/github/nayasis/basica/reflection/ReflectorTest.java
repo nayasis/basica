@@ -262,7 +262,9 @@ public class ReflectorTest {
 
         String regDt = (String) map.get("regDt");
 
-        assertTrue( Validator.isMatched(regDt, "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+"));
+        log.debug( regDt );
+
+        assertTrue( Validator.isMatched(regDt, "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+\\+\\d{2}:\\d{2}"));
 
     }
 
