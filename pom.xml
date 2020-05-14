@@ -1,15 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.nayasis</groupId>
+  <groupId>com.github.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.3.2</version>
-  <packaging>jar</packaging>
-
+  <version>0.3.3</version>
   <name>basica</name>
-  <description>basic utility</description>
+  <description>
+    basic utility components
+  </description>
   <url>http://github.com/nayasis/basica</url>
-
   <licenses>
     <license>
       <name>Apache-2.0</name>
@@ -19,26 +18,28 @@
   </licenses>
   <developers>
     <developer>
-      <name>nayasis</name>
+      <name>Jung Hwasu</name>
       <email>nayasis@gmail.com</email>
+      <roles>
+        <role>author</role>
+        <role>developer</role>
+      </roles>
     </developer>
   </developers>
   <scm>
-    <url>https://github.com/nayasis/basica</url>
+    <url>github.com/nayasis/basica.git</url>
+    <connection>scm:git:ssh://github.com/nayasis/basica.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/nayasis/basica.git</developerConnection>
   </scm>
-  <distributionManagement>
-    <repository>
-      <id>bintray-nayasis</id>
-      <url>https://bintray.com/api/v1/maven/nayasis/utility/basica/;publish=1</url>
-    </repository>
-  </distributionManagement>
-
+  <issueManagement>
+    <system>GitHub Issue Management</system>
+    <url>https://github.com/nayasis/basica/issues</url>
+  </issueManagement>
 
   <properties>
     <java.version>1.8</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <maven.javadoc.skip>true</maven.javadoc.skip>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
   </properties>
@@ -52,17 +53,12 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.10.4</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>2.9.10</version>
+      <version>2.11.0</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>2.9.10</version>
+      <version>2.11.0</version>
     </dependency>
     <dependency>
       <groupId>com.googlecode.juniversalchardet</groupId>
@@ -93,16 +89,10 @@
       <version>1.2.3</version>
       <optional>true</optional>
     </dependency>
-    <dependency> <!-- zip -->
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <version>1.19</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency> <!-- excel -->
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi-ooxml</artifactId>
-      <version>4.1.2</version>
       <optional>true</optional>
     </dependency>
 
@@ -128,11 +118,18 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.0.0-M4</version>
+        <configuration>
+          <argLine>-Dfile.encoding=UTF-8</argLine>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
+        <configuration>
+          <compilerArgument>-Xlint:unchecked</compilerArgument>
+          <compilerArgument>-Xlint:deprecation</compilerArgument>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -155,11 +152,14 @@
         <executions>
           <execution>
             <id>attach-javadocs</id>
-            <phase>verify</phase>
+            <phase>deploy</phase>
             <goals>
               <goal>jar</goal>
             </goals>
             <configuration>
+              <additionalOptions>
+                <additionalOption>-Xdoclint:none</additionalOption>
+              </additionalOptions>
               <encoding>${project.build.sourceEncoding}</encoding>
             </configuration>
           </execution>
@@ -181,5 +181,106 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>github-private</id>
+      <properties>
+        <github.global.server>github-private</github.global.server>
+      </properties>
+      <distributionManagement>
+        <repository>
+          <id>internal.repo</id>
+          <name>Temporary Staging Repository</name>
+          <url>file://${project.build.directory}/mvn-repo</url>
+        </repository>
+      </distributionManagement>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.github.github</groupId>
+            <artifactId>site-maven-plugin</artifactId>
+            <version>0.12</version>
+            <configuration>
+              <merge>true</merge>
+              <includes>
+                <include>**/*</include>
+              </includes>
+              <message>${project.version}</message>                                  <!-- git commit message -->
+              <noJekyll>true</noJekyll>                                              <!-- disable webpage processing -->
+              <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
+              <branch>refs/heads/master</branch>                                     <!-- remote branch name -->
+              <repositoryName>UnofficialMavenRepository</repositoryName>             <!-- github repository name -->
+              <repositoryOwner>nayasis</repositoryOwner>                             <!-- github username  -->
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>site</goal>
+                </goals>
+                <phase>deploy</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>local-nexus</id>
+      <distributionManagement>
+        <repository>
+          <id>team-store-snapshots</id>
+          <name>Store Maven Repository - Snapshots</name>
+          <url>http://mvn.onestorecorp.com/content/repositories/team-store-snapshots/</url>
+        </repository>
+      </distributionManagement>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>bintray</id>
+      <distributionManagement>
+        <repository>
+          <id>bintray-nayasis</id>
+          <url>https://bintray.com/api/v1/maven/nayasis/utility/basica/;publish=1</url>
+        </repository>
+      </distributionManagement>
+      <repositories>
+        <repository>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <id>bintray-nayasis-utility</id>
+          <name>bintray</name>
+          <url>https://dl.bintray.com/nayasis/utility</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <id>bintray-nayasis-utility</id>
+          <name>bintray-plugins</name>
+          <url>https://dl.bintray.com/nayasis/utility</url>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
 
 </project>
