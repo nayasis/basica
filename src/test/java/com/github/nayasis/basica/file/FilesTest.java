@@ -1,15 +1,16 @@
 package com.github.nayasis.basica.file;
 
 import com.github.nayasis.basica.base.Classes;
-import com.github.nayasis.basica.file.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class FilesTest {
@@ -85,5 +86,42 @@ public class FilesTest {
 
     }
 
+    @Test
+    public void copy() {
+
+        String root = Files.getUserHome() + "/basica/filetest";
+
+        String src       = root + "/src";
+        String trg       = root + "/trg";
+        String file      = root + "/sample.txt";
+        String emptyFile = root + "/sample2.txt";
+        String emptyTrg  = root + "/trg2";;
+
+        log.debug( "root : {}", root );
+
+        Files.makeDir( src );
+        Files.makeDir( trg );
+        Files.writeTo( file, "merong" );
+
+        Files.copy( src, trg, true );
+        Files.copy( file, src, true );
+        Files.copy( src, emptyTrg, true );
+        Files.copy( file, emptyFile, true );
+
+        assertTrue( Files.isFile( emptyFile ) );
+        assertTrue( Files.isFile( src + "/sample.txt" ) );
+        assertTrue( Files.isDirectory( emptyTrg ) );
+        assertTrue( Files.isDirectory( trg + "/src" ) );
+        assertTrue( Files.isFile( trg + "/src/sample.txt" ) );
+
+    }
+
+    @Test
+    public void toPath() {
+
+        Path p = Files.toPath( "a.txt" );
+        log.debug( "{}", p );
+
+    }
 
 }
