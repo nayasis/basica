@@ -104,7 +104,7 @@ public class NDateTest {
     @Test
     public void serializeViaFile() {
 
-        String file = Files.getRootPath() + "/test.serialized.obj";
+        String file = Files.rootPath() + "/test.serialized.obj";
 
         SampleVo vo = new SampleVo( "nayasis", new NDate( "1977-01-22" ) );
 

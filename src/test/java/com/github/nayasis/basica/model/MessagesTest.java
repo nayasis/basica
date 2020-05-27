@@ -1,7 +1,6 @@
 package com.github.nayasis.basica.model;
 
 import com.github.nayasis.basica.file.Files;
-import com.github.nayasis.basica.model.Messages;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +19,7 @@ public class MessagesTest {
     @Test
     public void loadFromFile() {
 
-        String path = Files.getRootPath(this.getClass()) + "/message/message.en.prop";
+        String path = Files.rootPath(this.getClass()) + "/message/message.en.prop";
 
         Messages.loadFromFile( path );
 

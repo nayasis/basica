@@ -208,7 +208,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public String getFilename() {
-		return Files.getName(this.path);
+		return Files.name(this.path);
 	}
 
 	/**

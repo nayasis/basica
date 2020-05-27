@@ -1,8 +1,6 @@
 package com.github.nayasis.basica.xml;
 
 import com.github.nayasis.basica.file.Files;
-import com.github.nayasis.basica.xml.Xml;
-import com.github.nayasis.basica.xml.XmlDeformed;
 import com.github.nayasis.basica.xml.node.Node;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +14,7 @@ public class DeformedXmlTest {
 	@Test
 	public void read() {
 
-		Xml xml = new XmlDeformed( new File(Files.getRootPath(getClass()) + "/xml/Deformed.xml") );
+		Xml xml = new XmlDeformed( new File(Files.rootPath(getClass()) + "/xml/Deformed.xml") );
 
 		Assertions.assertTrue( ! xml.toString().isEmpty() );
 
