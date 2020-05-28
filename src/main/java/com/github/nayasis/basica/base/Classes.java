@@ -388,7 +388,7 @@ public class Classes {
 	public boolean isRunningInJar( Class klass ) {
 		URL location = getRootLocation( klass );
 		if( Validator.isMatched( location.getProtocol(), "(?i)^(jar|war)$" ) ) return true;
-		if( Validator.isMatched( Files.getExtension( location.getPath() ), "(?i)^(jar|war)$" ) ) return true;
+		if( Validator.isMatched( Files.extension( location.getPath() ), "(?i)^(jar|war)$" ) ) return true;
 		return false;
 	}
 

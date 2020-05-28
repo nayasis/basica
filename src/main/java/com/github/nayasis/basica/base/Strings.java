@@ -39,7 +39,7 @@ public class Strings {
 
 	private Pattern    PATTERN_CAMEL = Pattern.compile( "(_[a-zA-Z])" );
 	private Pattern    PATTERN_SNAKE = Pattern.compile( "([A-Z])" );
-	private Formatter formatter     = new Formatter();
+	private Formatter  formatter     = new Formatter();
 
 	/**
 	 * get display length applying character's font width. <br>

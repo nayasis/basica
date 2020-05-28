@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class ZipFileHandler {
 
-    private void uncompress( ArchiveInputStream input, File outputDirectory ) {
+    private void decompress( ArchiveInputStream input, File outputDirectory ) {
 
         ArchiveEntry entry ;
 
@@ -56,7 +56,7 @@ public class ZipFileHandler {
         try {
             ArchiveInputStream stream = new ZipArchiveInputStream(
                 new FileInputStream(target), charset.name(), true );
-            uncompress( stream, directory );
+            decompress( stream, directory );
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
         }
@@ -85,7 +85,7 @@ public class ZipFileHandler {
 
             for( File file : files ) {
 
-                String       name  = Files.toRelativePath( basePath, file.getPath() );
+                String       name  = Files.relativePath( basePath, file.getPath() );
                 ArchiveEntry entry = zos.createArchiveEntry( file, name );
 
                 zos.putArchiveEntry( entry );
@@ -113,13 +113,13 @@ public class ZipFileHandler {
 
     }
 
-    public void zip( File fileOrDirectoryToZip, File targetFile, Charset charset ) {
+    public void zip( File source, File zipfile, Charset charset ) {
         try {
 
-            ZipArchiveOutputStream stream = new ZipArchiveOutputStream( targetFile );
+            ZipArchiveOutputStream stream = new ZipArchiveOutputStream( zipfile );
             stream.setEncoding( charset.name() );
             stream.setCreateUnicodeExtraFields( ZipArchiveOutputStream.UnicodeExtraFieldPolicy.ALWAYS );
-            compress( fileOrDirectoryToZip, stream );
+            compress( source, stream );
 
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
