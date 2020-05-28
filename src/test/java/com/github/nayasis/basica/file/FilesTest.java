@@ -1,21 +1,58 @@
 package com.github.nayasis.basica.file;
 
 import com.github.nayasis.basica.base.Classes;
+import com.github.nayasis.basica.exception.unchecked.InvalidArgumentException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class FilesTest {
 
     private String ROOT = Files.userHome() + "/basica/filetest";
+
+    @Test
+    public void checkParameterTypeToPath() {
+
+        Files.toPath( "/user/home" );
+        Files.toPath( new StringBuffer("/user/home") );
+        Files.toPath( new StringBuilder("/user/home") );
+        Files.toPath( new File("/user/home") );
+        Files.toPath( Paths.get("/user/home") );
+        Files.toPath( null );
+
+        assertThrows( InvalidArgumentException.class, () -> {
+            Files.toPath( LocalDate.now() );
+        });
+
+    }
+
+    @Test
+    public void checkParameterTypeToURL() throws MalformedURLException {
+
+        Files.toURL( new URL( "https://www.google.com" ) );
+        Files.toURL( "/user/home" );
+        Files.toURL( new StringBuffer("/user/home") );
+        Files.toURL( new StringBuilder("/user/home") );
+        Files.toURL( new File("/user/home") );
+        Files.toURL( Paths.get("/user/home") );
+        Files.toURL( null );
+
+        assertThrows( InvalidArgumentException.class, () -> {
+            Files.toURL( LocalDate.now() );
+        });
+
+    }
 
     @Test
     public void readFromResource() throws MalformedURLException {
@@ -102,23 +139,27 @@ public class FilesTest {
             String src       = root + "/src";
             String trg       = root + "/trg";
             String file      = root + "/sample.txt";
-            String emptyFile = root + "/sample2.txt";
-            String emptyTrg  = root + "/trg2";
 
             Files.makeDir( src );
             Files.makeDir( trg );
             Files.writeTo( file, "merong" );
 
             Files.copy( file, src );
-            Files.copy( src, trg );
-            Files.copy( src, emptyTrg );
-            Files.copy( file, emptyFile );
-
-            assertTrue( Files.isFile( emptyFile ) );
             assertTrue( Files.isFile( src + "/sample.txt" ) );
-            assertTrue( Files.isDirectory( emptyTrg ) );
+
+            Files.copy( src, trg );
             assertTrue( Files.isDirectory( trg + "/src" ) );
             assertTrue( Files.isFile( trg + "/src/sample.txt" ) );
+
+            Files.copy( src, root + "/trg2" );
+            assertTrue( Files.isDirectory( root + "/trg2" ) );
+
+            Files.copy( file, root + "/sample2.txt" );
+            assertTrue( Files.isFile( root + "/sample2.txt" ) );
+
+            Files.copy( file, root + "/new/child/clone.txt" );
+            assertTrue( Files.isFile( root + "/new/child/clone.txt" ) );
+
 
         } finally {
             Files.delete( root );
@@ -184,6 +225,86 @@ public class FilesTest {
             assertTrue( Files.isDirectory( trg + "/1" ) );
             assertTrue( Files.isDirectory( trg + "/2" ) );
             assertTrue( Files.isFile( trg + "/2/sample.txt" ) );
+
+        } finally {
+            Files.delete( root );
+        }
+
+    }
+
+    @Test
+    public void moveDir() {
+
+        String root = ROOT + "/move-dir";
+
+        log.debug( "root : {}", root );
+
+        String src  = root + "/src";
+        String trg  = root + "/trg";
+        String file = root + "/src/sample.txt";
+
+        try {
+
+            Files.writeTo( file, "merong" );
+            Files.makeDir( trg );
+
+            Files.move( src, trg );
+
+            assertTrue( Files.isFile( trg + "/src/sample.txt" ) );
+
+        } finally {
+            Files.delete( root );
+        }
+
+    }
+
+    @Test
+    public void moveDirToNotExist() {
+
+        String root = ROOT + "/move-dir-not-exist";
+
+        log.debug( "root : {}", root );
+
+        String src  = root + "/src";
+        String trg  = root + "/trg";
+        String file = root + "/src/sample.txt";
+
+        try {
+
+            Files.writeTo( file, "merong" );
+
+            Files.move( src, trg );
+
+            assertTrue( Files.isFile( trg + "/sample.txt" ) );
+
+        } finally {
+            Files.delete( root );
+        }
+
+    }
+
+    @Test
+    public void moveFile() {
+
+        String root = ROOT + "/move-file";
+
+        log.debug( "root : {}", root );
+
+        String src   = root + "/src";
+        String trg   = root + "/trg";
+        String file1 = root + "/src/sample1.txt";
+        String file2 = root + "/src/sample2.txt";
+
+        try {
+
+            Files.writeTo( file1, "merong" );
+            Files.writeTo( file2, "merong" );
+
+            Files.move( file1, trg + "/sample1.txt" );
+            Files.move( file2, trg + "/children/sample2.txt" );
+
+            assertTrue( Files.isFile( trg + "/sample1.txt" ) );
+            assertTrue( Files.isFile( trg + "/children/sample2.txt" ) );
 
         } finally {
             Files.delete( root );
