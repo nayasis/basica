@@ -1,6 +1,7 @@
 package com.github.nayasis.basica.base;
 
 import com.github.nayasis.basica.model.NList;
+import com.github.nayasis.basica.validation.Validator;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Array;
@@ -341,6 +342,14 @@ public class Types {
         }
     }
 
+    public Integer toInt( Object value, Integer defaultValue ) {
+        try {
+            return Validator.nvl( toInt(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
+        }
+    }
+
     public Integer toInt( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return (Integer)value;
@@ -357,6 +366,14 @@ public class Types {
             return Integer.parseInt( value.toString() );
         } catch ( NumberFormatException e ) {
             return null;
+        }
+    }
+
+    public Long toLong( Object value, Long defaultValue ) {
+        try {
+            return Validator.nvl( toLong(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
         }
     }
 
@@ -379,6 +396,14 @@ public class Types {
         }
     }
 
+    public Float toFloat( Object value, Float defaultValue ) {
+        try {
+            return Validator.nvl( toFloat(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
+        }
+    }
+
     public Float toFloat( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return ((Integer)value).floatValue();
@@ -395,6 +420,14 @@ public class Types {
             return Float.parseFloat( value.toString() );
         } catch ( NumberFormatException e ) {
             return null;
+        }
+    }
+
+    public Double toDouble( Object value, Double defaultValue ) {
+        try {
+            return Validator.nvl( toDouble(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
         }
     }
 
@@ -417,6 +450,14 @@ public class Types {
         }
     }
 
+    public Byte toByte( Object value, Byte defaultValue ) {
+        try {
+            return Validator.nvl( toByte(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
+        }
+    }
+
     public Byte toByte( Object value ) throws NumberFormatException {
         if( value == null ) return null;
         if( isInt(value)        ) return ((Integer)value).byteValue();
@@ -433,6 +474,14 @@ public class Types {
             return Byte.parseByte( value.toString() );
         } catch ( NumberFormatException e ) {
             return null;
+        }
+    }
+
+    public Short toShort( Object value, Short defaultValue ) {
+        try {
+            return Validator.nvl( toShort(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
         }
     }
 
@@ -455,6 +504,14 @@ public class Types {
         }
     }
 
+    public Character toChar( Object value, Character defaultValue ) {
+        try {
+            return Validator.nvl( toChar(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
+        }
+    }
+
     public Character toChar( Object value ) {
         if( value == null ) return null;
         if( isInt(value)        ) return Character.valueOf((char)((Integer)value).intValue());
@@ -469,6 +526,14 @@ public class Types {
         if( isBoolean(value)    ) return Character.valueOf((char)(toInt(value).intValue()));
         String string = value.toString();
         return  string.isEmpty() ? null : string.charAt(0);
+    }
+
+    public BigDecimal toBigDecimal( Object value, BigDecimal defaultValue ) {
+        try {
+            return Validator.nvl( toBigDecimal(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
+        }
     }
 
     public BigDecimal toBigDecimal( Object value ) {
@@ -487,6 +552,14 @@ public class Types {
             return new BigDecimal( value.toString() );
         } catch( Exception e ) {
             return null;
+        }
+    }
+
+    public BigInteger toBigInteger( Object value, BigInteger defaultValue ) {
+        try {
+            return Validator.nvl( toBigInteger(value), defaultValue );
+        } catch ( Exception e ) {
+            return defaultValue;
         }
     }
 
