@@ -3,6 +3,7 @@ package com.github.nayasis.basica.file;
 import com.github.nayasis.basica.base.Classes;
 import com.github.nayasis.basica.base.Strings;
 import com.github.nayasis.basica.base.Types;
+import com.github.nayasis.basica.exception.unchecked.InvalidArgumentException;
 import com.github.nayasis.basica.exception.unchecked.UncheckedClassNotFoundException;
 import com.github.nayasis.basica.exception.unchecked.UncheckedIOException;
 import com.github.nayasis.basica.exception.unchecked.UncheckedMalformedUrlException;
@@ -64,15 +65,13 @@ import static java.nio.file.FileVisitResult.CONTINUE;
 @SuppressWarnings( "rawtypes" )
 public class Files {
 
-    public final String FOLDER_SEPARATOR         = "/";
-    public final String FOLDER_SEPARATOR_WINDOWS = "\\";
+    public final String FOLDER_SEPARATOR          = "/";
+    public final String FOLDER_SEPARATOR_WINDOWS  = "\\";
 
     private final String UTF_8                    = StandardCharsets.UTF_8.toString();
     private final String CHARSET_AUTO_DETECT      = "";
     private final String REGEX_SEPARATOR_MULTIPLE = "(?!^)" + FOLDER_SEPARATOR + "+";
     private final String REGEX_SEPARATOR_LAST     = "(.+)" + FOLDER_SEPARATOR + "$";
-
-    private final Path   NOT_PATH = Paths.get( "" );
 
     /**
      * delete file or directory
@@ -82,9 +81,9 @@ public class Files {
      */
 	public void delete( Object path ) throws UncheckedIOException {
 
-	    Path p = toPath( path );
+        if( notExists(path) ) return;
 
-		if( notExists(p) ) return;
+        Path p = toPath( path );
 
 		try {
             if( isDirectory(p) ) {
@@ -115,7 +114,7 @@ public class Files {
      */
     public String extension( Object filepath ) {
 
-        String fileName = Strings.nvl( filepath ).trim();
+        String fileName = Strings.trim( filepath );
 
         int index = fileName.lastIndexOf( '.' );
         if( index < 0 ) return "";
@@ -133,10 +132,9 @@ public class Files {
      * @param filePath  file name or full path
      * @return pure file name
      */
-    public String name( String filePath ) {
-        if( Validator.isEmpty(filePath) ) return "";
+    public String name( Object filePath ) {
+        Path p = toPath( filePath );
         try {
-            Path p = toPath( filePath );
             return p.getName( p.getNameCount() - 1 ).toString();
         } catch ( Exception e ) {
             return Strings.trim( filePath );
@@ -151,7 +149,7 @@ public class Files {
      */
     public Path parent( Object path ) {
         Path p = toPath( path );
-        return (p == null || p == NOT_PATH) ? null : p.getParent();
+        return p == null ? null : p.getParent();
     }
     
     /**
@@ -435,7 +433,7 @@ public class Files {
     public boolean exists( Object path, LinkOption... options ) {
         try {
             Path p = toPath( path );
-            return p != null && p != NOT_PATH && java.nio.file.Files.exists( p, options );
+            return p != null && java.nio.file.Files.exists( p, options );
         } catch ( InvalidPathException e ) {
             return false;
         }
@@ -599,14 +597,15 @@ public class Files {
         Path trg = toPath( target );
 
         try {
-            if( isDirectory(src) ) {
-                java.nio.file.Files.move( src, trg, option );
-            } else {
-                if( isDirectory(trg) ) {
-                    java.nio.file.Files.move( src, trg.resolve( src.getFileName() ), option );
+            if( isDirectory(src) && exists(trg) ) {
+                if( isFile(trg) ) {
+                    throw new UncheckedIOException( "cannot overwrite non-directory '{}' with directory '{}'", target, source );
                 } else {
-                    java.nio.file.Files.move( src, trg, option );
+                    java.nio.file.Files.move( src, trg.resolve(src.getFileName()), option );
                 }
+            } else {
+                makeDir( parent(trg) );
+                java.nio.file.Files.move( src, trg, option );
             }
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
@@ -648,7 +647,7 @@ public class Files {
         try {
             if( isDirectory(src) ) {
                 if( isFile(trg) )
-                    throw new UncheckedIOException( "target({}) must be directory when source({}) is directory.", target, source );
+                    throw new UncheckedIOException( "cannot overwrite non-directory '{}' with directory '{}'", target, source );
                 if( exists(trg) ) {
                     copyTree( src, makeDir(trg.resolve(src.getFileName())), overwrite );
                 } else {
@@ -658,6 +657,7 @@ public class Files {
                 if( isDirectory(trg) ) {
                     java.nio.file.Files.copy( src, trg.resolve( src.getFileName() ), option );
                 } else {
+                    makeDir( parent(trg) );
                     java.nio.file.Files.copy( src, trg, option );
                 }
             }
@@ -1440,12 +1440,16 @@ public class Files {
      * @return converted path
      * @throws InvalidPathException if path expression is not valid.
      */
-    public Path toPath( Object path ) throws InvalidPathException {
+    public Path toPath( Object path ) throws InvalidPathException, InvalidArgumentException {
+
         if( path == null ) return null;
+
         if( path instanceof Path ) return (Path) path;
         if( path instanceof File ) return ((File)path).toPath();
         if( Types.isStringLike(path) ) return Paths.get(path.toString().trim());
-        return NOT_PATH;
+
+        throw new InvalidArgumentException( "Invalid type.(current: {}, acceptable: Path,File,String)", path.getClass() );
+
     }
 
     /**
@@ -1455,16 +1459,26 @@ public class Files {
      * @return
      * @throws UncheckedMalformedUrlException
      */
-    public URL toURL( Object path ) throws UncheckedMalformedUrlException {
+    public URL toURL( Object path ) throws UncheckedMalformedUrlException, InvalidArgumentException {
+
         if( path == null ) return null;
+
         if( path instanceof URL ) return (URL) path;
-        Path p = toPath( path );
-        if( p == null || p == NOT_PATH ) return null;
+
+        Path p;
+        try {
+            p = toPath( path );
+        } catch ( InvalidPathException e ) {
+            throw new InvalidArgumentException( "Invalid type.(current: {}, acceptable: URL,Path,File,String)", path.getClass() );
+        }
+        if( p == null ) return null;
+
         try {
             return p.toUri().toURL();
         } catch ( MalformedURLException e ) {
             throw new UncheckedMalformedUrlException(e);
         }
+
     }
 
 }
