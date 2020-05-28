@@ -1439,6 +1439,7 @@ public class Files {
      * @param path  file or directory path (acceptable: File,Path,String,StringBuffer,StringBuilder)
      * @return converted path
      * @throws InvalidPathException if path expression is not valid.
+     * @throws InvalidArgumentException if type of path parameter is not acceptable.
      */
     public Path toPath( Object path ) throws InvalidPathException, InvalidArgumentException {
 
@@ -1457,7 +1458,8 @@ public class Files {
      *
      * @param path  URL path (acceptable: URL,File,Path,String,StringBuffer,StringBuilder)
      * @return
-     * @throws UncheckedMalformedUrlException
+     * @throws UncheckedMalformedUrlException   if URL is malformed.
+     * @throws InvalidArgumentException if type of path parameter is not acceptable.
      */
     public URL toURL( Object path ) throws UncheckedMalformedUrlException, InvalidArgumentException {
 
