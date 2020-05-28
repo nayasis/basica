@@ -185,7 +185,7 @@ public class XmlTest {
 
     @Test
     public void readXmlTolerantly() throws UncheckedIOException, ParseException {
-        Xml xml = new XmlDeformed( Classes.getResource( "/xml/Grammer.xml") );
+        Xml xml = new XmlDeformed( Classes.getResource( "/xml/Grammar.xml") );
         assertTrue( ! xml.toString().isEmpty() );
     }
 

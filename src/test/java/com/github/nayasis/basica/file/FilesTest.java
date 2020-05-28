@@ -34,7 +34,7 @@ public class FilesTest {
     @Test
     public void readFromFile() {
 
-        String path = Files.rootPath(getClass()) + "/xml/Grammer.xml";
+        String path = Files.rootPath(getClass()) + "/xml/Grammar.xml";
 
         String txt1 = Files.readFrom( path, "UTF-8" );
         String txt2 = Files.readFrom( path );
