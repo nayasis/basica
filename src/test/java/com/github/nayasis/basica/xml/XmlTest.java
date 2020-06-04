@@ -4,8 +4,6 @@ import com.github.nayasis.basica.base.Classes;
 import com.github.nayasis.basica.exception.unchecked.ParseException;
 import com.github.nayasis.basica.exception.unchecked.UncheckedIOException;
 import com.github.nayasis.basica.file.Files;
-import com.github.nayasis.basica.xml.Xml;
-import com.github.nayasis.basica.xml.XmlDeformed;
 import com.github.nayasis.basica.xml.node.Node;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,7 @@ public class XmlTest {
     @Test
     public void basicParse() {
 
-        Xml xml02 = new Xml( Paths.get( Files.getRootPath(this.getClass()), "/xml/common.xml") );
+        Xml xml02 = new Xml( Paths.get( Files.rootPath(this.getClass()), "/xml/common.xml") );
 
         xml02.setDocType( "MERONG", "http://struts.apache.org/dtds/struts-2.0.dtd" );
 
@@ -187,7 +185,7 @@ public class XmlTest {
 
     @Test
     public void readXmlTolerantly() throws UncheckedIOException, ParseException {
-        Xml xml = new XmlDeformed( Classes.getResource( "/xml/Grammer.xml") );
+        Xml xml = new XmlDeformed( Classes.getResource( "/xml/Grammar.xml") );
         assertTrue( ! xml.toString().isEmpty() );
     }
 
