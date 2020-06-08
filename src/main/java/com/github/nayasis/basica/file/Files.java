@@ -130,7 +130,7 @@ public class Files {
      * get file name
      *
      * @param filePath  file name or full path
-     * @return pure file name
+     * @return file name only
      */
     public String name( Object filePath ) {
         Path p = toPath( filePath );
@@ -477,11 +477,11 @@ public class Files {
      * @return created directory
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public File makeDir( Object path ) throws UncheckedIOException {
+    public Path makeDir( Object path ) throws UncheckedIOException {
         Path p = toPath( path );
-    	if( isDirectory(p) ) return p.toFile();
+    	if( isDirectory(p) ) return p;
     	try {
-    		return java.nio.file.Files.createDirectories(p).toFile();
+    		return java.nio.file.Files.createDirectories(p);
     	} catch( IOException e ) {
     		throw new UncheckedIOException( e );
     	}
@@ -494,12 +494,12 @@ public class Files {
      * @return created file
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public File makeFile( Object filepath ) throws UncheckedIOException {
+    public Path makeFile( Object filepath ) throws UncheckedIOException {
         Path p = toPath( filepath );
-        if( isFile(p) ) return p.toFile();
+        if( isFile(p) ) return p;
         makeDir( p.getParent() );
     	try {
-    		return java.nio.file.Files.createFile(p).toFile();
+    		return java.nio.file.Files.createFile(p);
     	} catch( IOException e ) {
     		throw new UncheckedIOException( e );
     	}
@@ -513,7 +513,7 @@ public class Files {
      * @return symbolic link
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public File makeSymbolicLink( Object source, Object target ) throws UncheckedIOException {
+    public Path makeSymbolicLink( Object source, Object target ) throws UncheckedIOException {
         return makeSymbolicLink( source, target, false );
     }
 
@@ -526,7 +526,7 @@ public class Files {
      * @return symbolic link
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public File makeSymbolicLink( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
+    public Path makeSymbolicLink( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
 
         if( notExists(source) )
             throw new UncheckedIOException( "source({}) must be existed", source );
@@ -535,7 +535,7 @@ public class Files {
 
         try {
             makeDir( parent(target) );
-            return java.nio.file.Files.createSymbolicLink(toPath(target), toPath(source)).toFile();
+            return java.nio.file.Files.createSymbolicLink(toPath(target), toPath(source));
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
         }
@@ -550,7 +550,7 @@ public class Files {
      * @return hard link
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public File makeHardLink( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
+    public Path makeHardLink( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
 
         if( notExists(source) )
             throw new UncheckedIOException( "source({}) must be existed", source );
@@ -558,7 +558,7 @@ public class Files {
         if( overwrite ) delete( target );
         try {
             makeDir( parent(target) );
-            return java.nio.file.Files.createLink(toPath(target), toPath(source)).toFile();
+            return java.nio.file.Files.createLink(toPath(target), toPath(source));
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
         }
@@ -570,10 +570,11 @@ public class Files {
      *
      * @param  source     file or directory path to move
      * @param  target     file or directory path of target
+     * @return target path
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void move( Object source, Object target ) throws UncheckedIOException {
-        move( source, target, false );
+    public Path move( Object source, Object target ) throws UncheckedIOException {
+        return move( source, target, false );
     }
 
     /**
@@ -582,9 +583,10 @@ public class Files {
      * @param  source     file or directory path to move
      * @param  target     file or directory path of target
      * @param  overwrite  overwrite if the target file exists
+     * @return target path
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void move( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
+    public Path move( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
 
         if( notExists(source) )
             throw new UncheckedIOException( "source({}) must be existed", source );
@@ -601,11 +603,11 @@ public class Files {
                 if( isFile(trg) ) {
                     throw new UncheckedIOException( "cannot overwrite non-directory '{}' with directory '{}'", target, source );
                 } else {
-                    java.nio.file.Files.move( src, trg.resolve(src.getFileName()), option );
+                    return java.nio.file.Files.move( src, trg.resolve(src.getFileName()), option );
                 }
             } else {
                 makeDir( parent(trg) );
-                java.nio.file.Files.move( src, trg, option );
+                return java.nio.file.Files.move( src, trg, option );
             }
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
@@ -618,10 +620,11 @@ public class Files {
      *
      * @param  source     file or directory path to copy
      * @param  target     file or directory path of target
+     * @return target path
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void copy( Object source, Object target ) throws UncheckedIOException {
-        copy( source, target, false );
+    public Path copy( Object source, Object target ) throws UncheckedIOException {
+        return copy( source, target, false );
     }
 
     /**
@@ -630,9 +633,10 @@ public class Files {
      * @param  source     file or directory path to copy
      * @param  target     file or directory path of target
      * @param  overwrite  overwrite if the target file exists
+     * @return target path
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void copy( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
+    public Path copy( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
 
         if( notExists(source) )
             throw new UncheckedIOException( "source({}) is not existed.", source );
@@ -649,16 +653,16 @@ public class Files {
                 if( isFile(trg) )
                     throw new UncheckedIOException( "cannot overwrite non-directory '{}' with directory '{}'", target, source );
                 if( exists(trg) ) {
-                    copyTree( src, makeDir(trg.resolve(src.getFileName())), overwrite );
+                    return copyTree( src, makeDir(trg.resolve(src.getFileName())), overwrite );
                 } else {
-                    copyTree( src, makeDir(trg), overwrite );
+                    return copyTree( src, makeDir(trg), overwrite );
                 }
             } else {
                 if( isDirectory(trg) ) {
-                    java.nio.file.Files.copy( src, trg.resolve( src.getFileName() ), option );
+                    return java.nio.file.Files.copy( src, trg.resolve( src.getFileName() ), option );
                 } else {
                     makeDir( parent(trg) );
-                    java.nio.file.Files.copy( src, trg, option );
+                    return java.nio.file.Files.copy( src, trg, option );
                 }
             }
         } catch( IOException e ) {
@@ -668,25 +672,27 @@ public class Files {
     }
 
     /**
-     * Copy directory
+     * Copy directory tree
      *
      * @param  source     root directory to copy
      * @param  target     root directory to be copied
+     * @return target path
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void copyTree( Object source, Object target ) throws UncheckedIOException {
-        copyTree( source, target, false );
+    public Path copyTree( Object source, Object target ) throws UncheckedIOException {
+        return copyTree( source, target, false );
     }
 
     /**
-     * Copy directory
+     * Copy directory tree
      *
      * @param  source     root directory to copy
      * @param  target     root directory to be copied
      * @param  overwrite  overwrite if the target file exists
+     * @return target path
      * @throws UncheckedIOException if an I/O error occurs
      */
-    public void copyTree( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
+    public Path copyTree( Object source, Object target, boolean overwrite ) throws UncheckedIOException {
 
         if( ! isDirectory(source) )
             throw new UncheckedIOException( "source path({}) must be directory", source );
@@ -709,6 +715,9 @@ public class Files {
                     return CONTINUE;
                 }
             });
+
+            return trg;
+
         } catch( IOException e ) {
             throw new UncheckedIOException( e );
         }
@@ -890,7 +899,7 @@ public class Files {
      */
     public FileOutputStream toOutputStream( Object file ) {
         try {
-            return new FileOutputStream( makeFile(file) );
+            return new FileOutputStream( makeFile(file).toFile() );
         } catch( FileNotFoundException e ) {
             throw new UncheckedIOException(e);
         }
@@ -1100,7 +1109,7 @@ public class Files {
     public void writeTo( Object filepath, byte[] binary ) throws UncheckedIOException {
     	FileOutputStream stream = null;
     	try {
-    		stream = new FileOutputStream( makeFile( filepath ) );
+    		stream = new FileOutputStream( makeFile(filepath).toFile() );
     	    stream.write( binary );
     	} catch( IOException e ) {
 	        throw new UncheckedIOException(e);
@@ -1200,7 +1209,7 @@ public class Files {
      * @param charset   character set (default : OS default)
      */
     public void zip( Object source, Object zipfile, Charset charset ) {
-        zipHandler().zip( toPath(source).toFile(), makeFile(zipfile), Validator.nvl(charset,Charset.defaultCharset()) );
+        zipHandler().zip( toPath(source).toFile(), makeFile(zipfile).toFile(), Validator.nvl(charset,Charset.defaultCharset()) );
     }
 
     /**
@@ -1221,7 +1230,7 @@ public class Files {
      * @param charset       character set (default : OS default)
      */
     public void unzip( Object zipfile, Object decompressDir, Charset charset ) {
-        zipHandler().unzip( toPath(zipfile).toFile(), makeDir(decompressDir), Validator.nvl(charset,Charset.defaultCharset()) );
+        zipHandler().unzip( toPath(zipfile).toFile(), makeDir(decompressDir).toFile(), Validator.nvl(charset,Charset.defaultCharset()) );
     }
 
     /**
