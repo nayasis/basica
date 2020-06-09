@@ -27,9 +27,13 @@ public class StopWatch implements Serializable {
 		if ( this.taskName != null ) {
 			this.stop();
 		}
-		this.taskName = taskName;
+		this.taskName  = taskName;
 		this.startTime = System.nanoTime();
 		return this;
+	}
+
+	public boolean isStarted() {
+		return startTime != 0;
 	}
 
 	public String currentTaskName() {
@@ -37,8 +41,9 @@ public class StopWatch implements Serializable {
 	}
 
 	public StopWatch stop() throws IllegalStateException {
+
 		if ( this.taskName == null ) {
-			String error = null;
+			String error;
 			if( id == null ) {
 				error = "StopWatch is not running.";
 			} else {
