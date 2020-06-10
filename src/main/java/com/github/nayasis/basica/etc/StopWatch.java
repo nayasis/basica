@@ -1,6 +1,9 @@
 package com.github.nayasis.basica.etc;
 
 import com.github.nayasis.basica.model.NList;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,8 +13,13 @@ public class StopWatch implements Serializable {
 
 	private String       id        = null;
 	private long         startTime = 0;
-	private String       taskName  = null;
 	private List<Log>    logs      = new ArrayList<>();
+
+	@Getter @Setter @Accessors(fluent=true)
+	private String taskName = null;
+
+	@Getter @Setter @Accessors(fluent=true)
+	private boolean enableLog = true;
 
 	public StopWatch() {}
 
@@ -27,16 +35,21 @@ public class StopWatch implements Serializable {
 		if ( this.taskName != null ) {
 			this.stop();
 		}
-		this.taskName = taskName;
+		this.taskName  = taskName;
 		this.startTime = System.nanoTime();
 		return this;
 	}
 
-	public String currentTaskName() {
-		return taskName;
+	public boolean isRunning() {
+		return startTime != 0;
+	}
+
+	public boolean isNotRunning() {
+		return ! isRunning();
 	}
 
 	public StopWatch stop() throws IllegalStateException {
+
 		if ( this.taskName == null ) {
 			String error = null;
 			if( id == null ) {
@@ -47,7 +60,8 @@ public class StopWatch implements Serializable {
 			throw new IllegalStateException( error );
 		}
 
-		logs.add( new Log(taskName, elapsedMiliSeconds()) );
+		if( enableLog )
+			logs.add( new Log(taskName, elapsedMiliSeconds()) );
 
 		this.taskName  = null;
 		this.startTime = 0;
@@ -58,10 +72,14 @@ public class StopWatch implements Serializable {
 
 
 	public long elapsedNanoSeconds() throws IllegalStateException {
-		if( startTime == 0 ) {
+		if( isNotRunning() ) {
 			throw new IllegalStateException( "StopWatch is not running." );
 		}
 		return System.nanoTime() - startTime;
+	}
+
+	public long elapsedMicroSeconds() throws IllegalStateException {
+		return elapsedNanoSeconds() / 1_000;
 	}
 
 	public long elapsedMiliSeconds() throws IllegalStateException {
@@ -73,7 +91,7 @@ public class StopWatch implements Serializable {
 	}
 
 	public StopWatch reset() {
-	    startTime = System.nanoTime();
+	    startTime = 0;
 		logs.clear();
 	    return this;
 	}
