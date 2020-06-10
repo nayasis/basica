@@ -1,7 +1,9 @@
 package com.github.nayasis.basica.etc;
 
+import com.github.nayasis.basica.base.Strings;
 import com.github.nayasis.basica.model.NList;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -9,33 +11,31 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
 public class StopWatch implements Serializable {
 
-	private String       id        = null;
-	private long         startTime = 0;
-	private List<Log>    logs      = new ArrayList<>();
+	private long      startTime = 0;
+	private List<Log> logs      = new ArrayList<>();
 
 	@Getter @Setter @Accessors(fluent=true)
-	private String taskName = null;
+	private String task = null;
 
 	@Getter @Setter @Accessors(fluent=true)
-	private boolean enableLog = true;
+	private boolean logEnable = true;
 
-	public StopWatch() {}
-
-	public StopWatch( String id ) {
-		this.id = id;
+	public StopWatch simple() {
+		return logEnable(false).start();
 	}
 
-	public StopWatch start() throws IllegalStateException {
-		return start( "" );
+	public StopWatch start() {
+		stop();
+		this.startTime = System.nanoTime();
+		return this;
 	}
 
-	public StopWatch start( String taskName ) throws IllegalStateException {
-		if ( this.taskName != null ) {
-			this.stop();
-		}
-		this.taskName  = taskName;
+	public StopWatch start( String task ) {
+		stop();
+		this.task      = task;
 		this.startTime = System.nanoTime();
 		return this;
 	}
@@ -48,28 +48,19 @@ public class StopWatch implements Serializable {
 		return ! isRunning();
 	}
 
-	public StopWatch stop() throws IllegalStateException {
+	public StopWatch stop() {
 
-		if ( this.taskName == null ) {
-			String error = null;
-			if( id == null ) {
-				error = "StopWatch is not running.";
-			} else {
-				error = String.format( "StopWatch[%s] is not running.", id );
-			}
-			throw new IllegalStateException( error );
-		}
+		if( isNotRunning() ) return this;
 
-		if( enableLog )
-			logs.add( new Log(taskName, elapsedMiliSeconds()) );
+		if( logEnable )
+			logs.add( new Log( task, elapsedMilliSeconds()) );
 
-		this.taskName  = null;
+		this.task = null;
 		this.startTime = 0;
 
 		return this;
 
 	}
-
 
 	public long elapsedNanoSeconds() throws IllegalStateException {
 		if( isNotRunning() ) {
@@ -82,7 +73,7 @@ public class StopWatch implements Serializable {
 		return elapsedNanoSeconds() / 1_000;
 	}
 
-	public long elapsedMiliSeconds() throws IllegalStateException {
+	public long elapsedMilliSeconds() throws IllegalStateException {
 		return elapsedNanoSeconds() / 1_000_000;
 	}
 
@@ -98,47 +89,57 @@ public class StopWatch implements Serializable {
 
 	public String toString() {
 
-		double total = 0.;
+		if( logEnable ) {
 
-		for( Log log : logs )
-			total += log.timeMillis;
+			double total = 0.;
 
-		int remainPercent = 100;
+			for( Log log : logs )
+				total += log.milisec;
 
-		for( int i = 0, last = logs.size() - 1; i <= last; i++ ) {
-			Log log = logs.get( i );
-			if( i == last ) {
-				log.percent = remainPercent;
+			int remainPercent = 100;
+
+			for( int i = 0, last = logs.size() - 1; i <= last; i++ ) {
+				Log log = logs.get( i );
+				if( i == last ) {
+					log.percent = remainPercent;
+				} else {
+					log.percent = (int) ( log.milisec / total * 100 );
+					remainPercent -= log.percent;
+				}
+			}
+
+			NList list = new NList();
+			for( Log log : logs ) {
+				list.addData( "ms",   String.format( "%6d", log.milisec ) );
+				list.addData( "%",    String.format("%3d",  log.percent ) );
+				list.addData( "Task", log.task );
+			}
+
+			list.addData( "ms",   String.format( "%6d", (long) total ) );
+			list.addData( "%",    ""                                   );
+			list.addData( "Task", "TOTAL"                              );
+
+			return list.toString( true, true );
+
+		} else {
+			if( task != null ) {
+				return String.format( "%s : %d ms", task, elapsedMilliSeconds() );
 			} else {
-				log.percent = (int) ( log.timeMillis / total * 100 );
-				remainPercent -= log.percent;
+				return String.format( "%d ms", elapsedMilliSeconds() );
 			}
 		}
-
-		NList list = new NList();
-		for( Log log : logs ) {
-			list.addData( "ms",   String.format( "%6d", log.timeMillis ) );
-			list.addData( "%",    String.format("%3d", log.percent )     );
-			list.addData( "Task", log.taskName );
-		}
-
-		list.addData( "ms",   String.format( "%6d", (long) total ) );
-		list.addData( "%",    ""                                   );
-		list.addData( "Task", "TOTAL"                              );
-
-		return list.toString( true, true );
 
 	}
 
 	private static class Log implements Serializable {
 
-		public long   timeMillis;
-		public String taskName;
+		public long   milisec;
+		public String task;
 		public int    percent;
 
-		public Log( String taskName, long timeMillis ) {
-			this.taskName = taskName;
-			this.timeMillis = timeMillis;
+		public Log( String task, long millis ) {
+			this.task    = Strings.nvl( task );
+			this.milisec = millis;
 		}
 
 	}
