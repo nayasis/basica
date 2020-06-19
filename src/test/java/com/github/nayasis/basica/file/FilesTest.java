@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 
@@ -177,7 +178,7 @@ public class FilesTest {
         String src         = root + "/src";
         String trgNotExist = root + "/trg-not-exist";
         String trgExist    = root + "/trg-exist";
-        String file        = src  + "/sample.txt";
+        String file        = root + "/src/sample.txt";
 
         try {
 
@@ -185,13 +186,16 @@ public class FilesTest {
             Files.makeDir( trgExist );
 
             // copy [src] to [trgNotExist]
-            Files.copy( src, trgNotExist );
+            Path target1 = Files.copy( src, trgNotExist );
 
             // copy [src] to [trgExist/src]
-            Files.copy( src, trgExist );
+            Path target2 = Files.copy( src, trgExist );
 
             assertTrue( Files.isFile( trgExist + "/src/sample.txt" ) );
             assertTrue( Files.isFile( trgNotExist + "/sample.txt" ) );
+
+            assertEquals( trgNotExist, Files.normalizeSeparator(target1) );
+            assertEquals( trgExist + "/src", Files.normalizeSeparator(target2) );
 
         } finally {
             Files.delete( root );
@@ -248,9 +252,11 @@ public class FilesTest {
             Files.writeTo( file, "merong" );
             Files.makeDir( trg );
 
-            Files.move( src, trg );
+            Path target = Files.move( src, trg );
 
             assertTrue( Files.isFile( trg + "/src/sample.txt" ) );
+
+            assertEquals( trg + "/src", Files.normalizeSeparator(target) );
 
         } finally {
             Files.delete( root );
@@ -273,9 +279,11 @@ public class FilesTest {
 
             Files.writeTo( file, "merong" );
 
-            Files.move( src, trg );
+            Path target = Files.move( src, trg );
 
             assertTrue( Files.isFile( trg + "/sample.txt" ) );
+
+            assertEquals( trg, Files.normalizeSeparator(target) );
 
         } finally {
             Files.delete( root );

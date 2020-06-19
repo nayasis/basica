@@ -179,6 +179,7 @@ public class StringsTest {
     @Test
     public void tokenize() {
 
+        assertEquals( "[test,  ,  ,  , a]", Strings.tokenize("test   a", " ,-()", true).toString() );
         assertEquals( "[I , m ,  boy || you , re ,  girl]", Strings.tokenize( "I am a boy || you are a girl", "a" ).toString() );
         assertEquals( "[I am a boy ,  you are a girl]", Strings.tokenize( "I am a boy || you are a girl", "||" ).toString() );
         assertEquals( "[I am a boy || ZAyou are a girl]", Strings.tokenize( "I am a boy || ZAyou are a girl", "" ).toString() );
