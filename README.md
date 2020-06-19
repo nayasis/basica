@@ -8,8 +8,8 @@ basic utility components
 
 ```xml
 <dependency>
-  <groupId>io.nayasis</groupId>
+  <groupId>com.github.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.3.1</version>
+  <version>0.3.4</version>
 </dependency>
 ```
