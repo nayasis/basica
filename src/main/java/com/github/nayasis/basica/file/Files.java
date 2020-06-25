@@ -1179,8 +1179,8 @@ public class Files {
      * @return absolute path
      * @throws UncheckedIOException base path is not existed
      */
-    public String resolvePath( Object basePath, String targetPath ) throws UncheckedIOException {
-    	return normalizeSeparator( toPath(basePath).resolve(targetPath).normalize().toString() );
+    public String resolvePath( Object basePath, Object targetPath ) throws UncheckedIOException {
+    	return normalizeSeparator( toPath(basePath).resolve(Strings.trim(targetPath)).normalize().toString() );
     }
 
     /**
