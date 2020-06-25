@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.3.4-SNAPSHOT</version>
+  <version>0.3.5-SNAPSHOT</version>
   <name>basica</name>
   <description>basic utility</description>
   <url>http://github.com/nayasis/basica</url>
