@@ -1,6 +1,7 @@
 package com.github.nayasis.basica.exception.unchecked;
 
 import com.github.nayasis.basica.base.Strings;
+import com.github.nayasis.basica.model.Messages;
 
 import java.io.Serializable;
 
@@ -40,7 +41,7 @@ public class BaseRuntimeException extends RuntimeException implements Serializab
      * @param parameters  parameters binding with '{}' phrase
      */
     public BaseRuntimeException( String format, Object... parameters ) {
-        super( Strings.format(format, parameters) );
+        super( Messages.get(format, parameters) );
     }
 
     /**
@@ -51,7 +52,7 @@ public class BaseRuntimeException extends RuntimeException implements Serializab
      * @param parameters  parameters binding with '{}' phrase
      */
     public BaseRuntimeException( Throwable cause, String format, Object... parameters ) {
-        super( Strings.format(format, parameters), cause );
+        super( Messages.get(format, parameters), cause );
     }
 
     /**
