@@ -1,8 +1,8 @@
 package com.github.nayasis.basica.model;
 
-import com.github.nayasis.basica.exception.unchecked.UncheckedIOException;
 import com.github.nayasis.basica.base.Classes;
 import com.github.nayasis.basica.base.Strings;
+import com.github.nayasis.basica.exception.unchecked.UncheckedIOException;
 import com.github.nayasis.basica.file.Files;
 import lombok.experimental.UtilityClass;
 
@@ -14,6 +14,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static com.github.nayasis.basica.validation.Validator.nvl;
 
 /**
  * Message utility class based on message code
@@ -99,6 +101,36 @@ public class Messages {
     }
 
     /**
+     * put message code
+     *
+     * @param locale    locale (if null, use system's default)
+     * @param code      message code
+     * @param message   message
+     */
+    public void put( Locale locale, Object code, Object message ) {
+
+        String cd = Strings.trim( code );
+
+        if( ! pool.containsKey(code) ) {
+            pool.put( cd, new HashMap<>() );
+        }
+
+        Map<Locale,String> messages = pool.get( cd );
+        messages.put( nvl(locale,Locale.getDefault()), Strings.trim( message ) );
+
+    }
+
+    /**
+     * put message code
+     *
+     * @param code      message code
+     * @param message   message
+     */
+    public void put( Object code, Object message ) {
+        put( null, code, message );
+    }
+
+    /**
      * get message from repository
      *
      * @param code      message code
@@ -107,7 +139,7 @@ public class Messages {
      */
     private String getMessage( Object code, Locale locale ) {
 
-        String cd = Strings.nvl( code );
+        String cd = Strings.trim( code );
 
         if( cd.isEmpty() || pool.isEmpty() ) return cd;
 
