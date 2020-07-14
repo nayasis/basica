@@ -79,7 +79,7 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
     }
 
     @Override
-    public NMap clone() {
+    public NMap<K,V> clone() {
         return (NMap) super.clone();
     }
 
