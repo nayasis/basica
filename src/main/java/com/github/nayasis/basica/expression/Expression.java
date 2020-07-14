@@ -22,6 +22,10 @@ public class Expression {
     private byte[]       expZip;
     private Serializable compiled;
 
+    public static Expression of( String expression ) {
+        return new Expression( expression );
+    }
+
     /**
      * constructor
      *
