@@ -326,14 +326,14 @@ public class Strings {
     }
 
     /**
-     * return replace value if value is null.
+     * return replace value if value is null or empty.
      *
      * @param value 		value to check
      * @param replaceValue	substitutive value
      * @return itself if value is not null, replace value if value is not null
      */
     public String nvl( Object value, Object replaceValue ) {
-    	return ( value == null ) ? nvl( replaceValue ) : value.toString();
+    	return isEmpty(value) ? nvl(replaceValue) : value.toString();
     }
 
     /**
