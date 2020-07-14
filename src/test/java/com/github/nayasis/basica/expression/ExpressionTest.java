@@ -2,12 +2,14 @@ package com.github.nayasis.basica.expression;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class ExpressionTest {
 
     @Test
