@@ -311,4 +311,12 @@ public class StringsTest {
 
     }
 
+    @Test
+    public void nvl() {
+        assertEquals( "", Strings.nvl(null) );
+        assertEquals( "", Strings.nvl("") );
+        assertEquals( "nayasis", Strings.nvl(null,"nayasis") );
+        assertEquals( "nayasis", Strings.nvl("","nayasis") );
+    }
+
  }
