@@ -26,6 +26,7 @@ public class Expression {
      * constructor
      *
      * @param expression    MVEL expression language
+     * @see <a href="http://mvel.documentnode.com/#basic-syntax">MVEL language guide</a>
      */
     public Expression( String expression ) {
 
