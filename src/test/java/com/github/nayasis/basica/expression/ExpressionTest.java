@@ -23,12 +23,12 @@ public class ExpressionTest {
 
     @Test
     public void contains() {
-        Assertions.assertTrue( new Expression("['nayasis','jake'].contains(name)").test(param()) );
+        Assertions.assertTrue( Expression.of("['nayasis','jake'].contains(name)").test(param()) );
     }
 
     @Test
     public void like() {
-        Assertions.assertTrue( new Expression("name.matches('.+?sis$')").test(param()) );
+        Assertions.assertTrue( Expression.of("name.matches('.+?sis$')").test(param()) );
     }
 
     @Test
@@ -49,11 +49,11 @@ public class ExpressionTest {
 
     @Test
     public void print() {
-        Assertions.assertEquals( "1 == '1'"            , new Expression( "1 == '1'" ).toString() );
-        Assertions.assertEquals( "1 + (2 * 3) == '7'"  , new Expression( "1 + (2 * 3) == '7'" ).toString() );
-        Assertions.assertEquals( "1 + 'a' == '1a'"     , new Expression( "1 + 'a' == '1a'" ).toString() );
-        Assertions.assertEquals( "1 + '2' == '3'"      , new Expression( "1 + '2' == '3'" ).toString() );
-        Assertions.assertEquals( "1 + (int)'2' == '3'" , new Expression( "1 + (int)'2' == '3'" ).toString() );
+        Assertions.assertEquals( "1 == '1'"            , new Expression( "1 == '1'"            , true ).toString() );
+        Assertions.assertEquals( "1 + (2 * 3) == '7'"  , new Expression( "1 + (2 * 3) == '7'"  , true ).toString() );
+        Assertions.assertEquals( "1 + 'a' == '1a'"     , new Expression( "1 + 'a' == '1a'"     , true ).toString() );
+        Assertions.assertEquals( "1 + '2' == '3'"      , new Expression( "1 + '2' == '3'"      , true ).toString() );
+        Assertions.assertEquals( "1 + (int)'2' == '3'" , new Expression( "1 + (int)'2' == '3'" , true ).toString() );
     }
 
     private Person param() {

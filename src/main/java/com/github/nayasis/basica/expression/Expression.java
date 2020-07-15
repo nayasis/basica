@@ -2,6 +2,7 @@ package com.github.nayasis.basica.expression;
 
 import com.github.nayasis.basica.base.Strings;
 import lombok.extern.slf4j.Slf4j;
+import org.mvel2.compiler.CompiledExpression;
 
 import java.io.Serializable;
 
@@ -14,8 +15,25 @@ public class Expression {
     private String       raw;
     private Serializable compiled;
 
+    /**
+     * obtains an instance of {@code Expression}
+     *
+     * @param expression    MVEL expression language
+     * @see <a href="http://mvel.documentnode.com/#basic-syntax">MVEL language guide</a>
+     */
     public static Expression of( String expression ) {
         return new Expression( expression );
+    }
+
+    /**
+     * obtains an instance of {@code Expression}
+     *
+     * @param expression    MVEL expression language
+     * @param preserve      preserve original expression
+     * @see <a href="http://mvel.documentnode.com/#basic-syntax">MVEL language guide</a>
+     */
+    public static Expression of( String expression, boolean preserve ) {
+        return new Expression( expression, preserve );
     }
 
     /**
@@ -25,9 +43,21 @@ public class Expression {
      * @see <a href="http://mvel.documentnode.com/#basic-syntax">MVEL language guide</a>
      */
     public Expression( String expression ) {
+        this( expression, false );
+    }
+
+    /**
+     * constructor
+     *
+     * @param expression    MVEL expression language
+     * @param preserve      preserve original expression
+     * @see <a href="http://mvel.documentnode.com/#basic-syntax">MVEL language guide</a>
+     */
+    public Expression( String expression, boolean preserve ) {
         expression = Strings.trim( expression );
-        raw        = expression;
         compiled   = ExpressionCore.compile( expression );
+        if( preserve )
+            raw = expression;
     }
 
     /**
@@ -67,7 +97,16 @@ public class Expression {
     }
 
     public String toString() {
-        return raw;
+        if( raw != null ) return raw;
+        if( compiled instanceof CompiledExpression ) {
+            try {
+                return new String( ((CompiledExpression) compiled).getFirstNode().getExpr() );
+            } catch ( Exception e ) {
+                return compiled.toString();
+            }
+        } else {
+            return compiled.toString();
+        }
     }
 
 }
