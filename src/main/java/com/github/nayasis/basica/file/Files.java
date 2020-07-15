@@ -1111,6 +1111,7 @@ public class Files {
     	try {
     		stream = new FileOutputStream( makeFile(filepath).toFile() );
     	    stream.write( binary );
+    	    stream.flush();
     	} catch( IOException e ) {
 	        throw new UncheckedIOException(e);
         } finally {
