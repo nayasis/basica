@@ -19,6 +19,7 @@ import org.mozilla.universalchardet.UniversalDetector;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,6 +34,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -139,6 +142,18 @@ public class Files {
         } catch ( Exception e ) {
             return Strings.trim( filePath );
         }
+    }
+
+    /**
+     * get file name without it's file extension.
+     *
+     * @param filePath  file name or full path
+     * @return file name only
+     */
+    public String nameWithoutExtension( Object filePath ) {
+        String filename = name( filePath );
+        int dot = filename.lastIndexOf( '.' );
+        return dot < 0 ? filename : filename.substring( 0, dot );
     }
 
     /**
@@ -383,7 +398,7 @@ public class Files {
      * @return  file or directory paths
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public List<Path> find( Object searchDir, int scanDepth, String... matchingPattern ) throws UncheckedIOException {
+    public List<Path> findAll( Object searchDir, int scanDepth, String... matchingPattern ) throws UncheckedIOException {
         return find( searchDir, true, true, scanDepth, matchingPattern );
     }
 
@@ -503,6 +518,24 @@ public class Files {
     	} catch( IOException e ) {
     		throw new UncheckedIOException( e );
     	}
+    }
+
+    /**
+     * create empty file or update 'last updated timestamp' on file
+     *
+     * @param path  file path
+     * @return  touched file
+     * @throws UncheckedIOException if an I/O error occurs
+     */
+    public Path touchFile( Object path ) throws UncheckedIOException {
+        Path p = toPath( path );
+        if( notExists(p) ) {
+            makeFile(p);
+        } else {
+            if( ! p.toFile().setLastModified( System.currentTimeMillis() ) );
+                throw new UncheckedIOException( "Unable to modify timestamp of [{}]", p );
+        }
+        return p;
     }
 
     /**
@@ -1120,6 +1153,21 @@ public class Files {
     }
 
     /**
+     * read byte array from stream
+     *
+     * @param path  file path or URL
+     * @return byte array
+     * @throws UncheckedIOException if I/O error occurs.
+     */
+    public byte[] readBytes( Object path ) throws UncheckedIOException {
+        try {
+            return java.nio.file.Files.readAllBytes( toPath(path) );
+        } catch ( IOException e ) {
+            throw new UncheckedIOException( e );
+        }
+    }
+
+    /**
      * Write data as CSV file
      *
      * @param filepath  file to write
@@ -1418,27 +1466,14 @@ public class Files {
     }
 
     /**
-     * close stream
+     * close the given closable and swallow I/O exception that may occur.
      *
-     * @param stream   stream to close
+     * @param c closeable
      */
-    public void close( InputStream stream ) {
-        if( stream != null ) {
+    public void close( Closeable c ) {
+        if( c != null ) {
             try {
-                stream.close();
-            } catch ( IOException ignored ) {}
-        }
-    }
-
-    /**
-     * close stream
-     *
-     * @param stream   stream to close
-     */
-    public void close( OutputStream stream ) {
-        if( stream != null ) {
-            try {
-                stream.close();
+                c.close();
             } catch ( IOException ignored ) {}
         }
     }
@@ -1458,6 +1493,13 @@ public class Files {
         if( path instanceof Path ) return (Path) path;
         if( path instanceof File ) return ((File)path).toPath();
         if( Types.isStringLike(path) ) return Paths.get(path.toString().trim());
+
+        if( path instanceof URI ) return Paths.get( ((URI)path) );
+        try {
+            if( path instanceof URL  ) return Paths.get( ((URL)path).toURI() );
+        } catch ( URISyntaxException e ) {
+            throw new InvalidArgumentException( "Could not cast to Path type (from:{})", path );
+        }
 
         throw new InvalidArgumentException( "Invalid type.(current: {}, acceptable: Path,File,String)", path.getClass() );
 
