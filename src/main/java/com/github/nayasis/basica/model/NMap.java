@@ -149,4 +149,34 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
         return val == null ? defaultValue : val;
     }
 
+    /**
+     * check if this map could be tested by MVEL.
+     * @param expression MVEL test expression
+     * @return true if MVEL expression executed successfully.
+     */
+    public boolean containsByPath( String expression ) {
+        return containsKey( Expression.of(expression) );
+    }
+
+    /**
+     * get value specified by MVEL
+     *
+     * @param expression    MVEL expression
+     * @return specified value or null
+     */
+    public V getByPath( String expression ) {
+        return get( Expression.of(expression) );
+    }
+
+    /**
+     * get value specified by MVEL
+     *
+     * @param expression    MVEL test expression
+     * @param defaultValue  substitutive value when return value is null.
+     * @return specified value or default value.
+     */
+    public V getOrDefaultByPath( String expression, V defaultValue ) {
+        return getOrDefault( Expression.of(expression), defaultValue );
+    }
+
 }
