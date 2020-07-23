@@ -33,7 +33,7 @@ public class ClassesTest {
             log.debug( "url : {}", url );
             InputStream inputStream = Classes.getResourceStream(url);
             Assertions.assertNotNull( inputStream );
-            Assertions.assertTrue( Strings.isNotEmpty(Files.readLine(inputStream)) );
+            Assertions.assertTrue( Strings.isNotEmpty(Files.read(inputStream)) );
         }
 
         urls = Classes.findResources( "*" );

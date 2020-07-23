@@ -878,8 +878,8 @@ public class Files {
      * @return text
      * @throws UncheckedIOException if I/O error occurs
      */
-    public String readLine( Object path ) throws UncheckedIOException {
-        return readLine( toInputStream(path), UTF_8 );
+    public String read( Object path ) throws UncheckedIOException {
+        return read( toInputStream(path), UTF_8 );
     }
 
     /**
@@ -890,8 +890,8 @@ public class Files {
      * @return text
      * @throws UncheckedIOException if I/O error occurs
      */
-    public String readLine( Object path, String charset ) throws UncheckedIOException {
-        return readLine( toInputStream(path), charset );
+    public String read( Object path, String charset ) throws UncheckedIOException {
+        return read( toInputStream(path), charset );
     }
 
     /**
@@ -911,8 +911,8 @@ public class Files {
      * @param reader    reader to treat line in text
      * @throws UncheckedIOException if I/O error occurs
      */
-    public void readLine( Object path, LineReader reader ) throws UncheckedIOException {
-        readLine( toInputStream(path), reader, UTF_8 );
+    public void read( Object path, LineReader reader ) throws UncheckedIOException {
+        read( toInputStream(path), reader, UTF_8 );
     }
 
     /**
@@ -933,8 +933,8 @@ public class Files {
      * @param charset   character set (UTF-8, EUC-KR, ... )
      * @throws UncheckedIOException if I/O error occurs
      */
-    public void readLine( Object path, LineReader reader, String charset ) throws UncheckedIOException {
-        readLine( toInputStream(path), reader, charset );
+    public void read( Object path, LineReader reader, String charset ) throws UncheckedIOException {
+        read( toInputStream(path), reader, charset );
     }
 
     /**
@@ -985,8 +985,8 @@ public class Files {
      * @return whole text contents
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public String readLine( InputStream inputStream ) throws UncheckedIOException {
-        return readLine( inputStream, UTF_8 );
+    public String read( InputStream inputStream ) throws UncheckedIOException {
+        return read( inputStream, UTF_8 );
     }
 
     /**
@@ -997,9 +997,9 @@ public class Files {
      * @return whole text contents
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public String readLine( InputStream inputStream, String charset ) throws UncheckedIOException {
+    public String read( InputStream inputStream, String charset ) throws UncheckedIOException {
         StringBuilder sb = new StringBuilder();
-        readLine( inputStream, readLine -> sb.append( readLine ).append( '\n' ), charset );
+        read( inputStream, readLine -> sb.append( readLine ).append( '\n' ), charset );
         return sb.toString();
     }
 
@@ -1010,8 +1010,8 @@ public class Files {
      * @param reader        worker to read line text
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public void readLine( InputStream inputStream, LineReader reader ) throws UncheckedIOException {
-        readLine( inputStream, reader, null );
+    public void read( InputStream inputStream, LineReader reader ) throws UncheckedIOException {
+        read( inputStream, reader, null );
     }
 
     /**
@@ -1022,7 +1022,7 @@ public class Files {
      * @param charset       character set (default: auto detect)
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public void readLine( InputStream inputStream, LineReader reader, String charset ) throws UncheckedIOException {
+    public void read( InputStream inputStream, LineReader reader, String charset ) throws UncheckedIOException {
 
         if( inputStream == null ) return;
 
@@ -1089,7 +1089,7 @@ public class Files {
     public void readResource( Object url, LineReader reader, String charset ) {
         InputStream inputStream = toResourceStream( url );
         if( inputStream != null ) {
-            readLine( inputStream, reader, charset );
+            read( inputStream, reader, charset );
         }
     }
 

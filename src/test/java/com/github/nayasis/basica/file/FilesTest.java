@@ -60,8 +60,8 @@ public class FilesTest {
 
         URL path = Classes.getResource( "/xml/Deformed.xml" );
 
-        String txt1 = Files.readLine( path, "UTF-8" );
-        String txt2 = Files.readLine( path );
+        String txt1 = Files.read( path, "UTF-8" );
+        String txt2 = Files.read( path );
 
         assertFalse( txt1.isEmpty() );
         assertFalse( txt2.isEmpty() );
@@ -74,8 +74,8 @@ public class FilesTest {
 
         String path = Files.rootPath(getClass()) + "/xml/Grammar.xml";
 
-        String txt1 = Files.readLine( path, "UTF-8" );
-        String txt2 = Files.readLine( path );
+        String txt1 = Files.read( path, "UTF-8" );
+        String txt2 = Files.read( path );
 
         assertFalse( txt1.isEmpty() );
         assertFalse( txt2.isEmpty() );
@@ -95,7 +95,7 @@ public class FilesTest {
                 writer.write( "nayasis" );
             });
 
-            String written = Files.readLine( tempFile );
+            String written = Files.read( tempFile );
 
             assertEquals( "merong-nayasis", written.trim() );
 
@@ -363,7 +363,7 @@ public class FilesTest {
             Files.write( src, "changed" );
 
             // if contents of original file are changed, contents of hardlink file must be changed.
-            assertEquals( "changed", Files.readLine(trg).trim() );
+            assertEquals( "changed", Files.read(trg).trim() );
 
         } finally {
             Files.delete( root );
