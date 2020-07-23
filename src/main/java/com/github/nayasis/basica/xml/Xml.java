@@ -690,7 +690,7 @@ public class Xml {
 	 */
 	public void writeTo( File file, boolean prettyFormat ) throws ParseException, UncheckedFileNotFoundException, UncheckedIOException {
 		Assert.exists( file, "File[{}] is not exists", file );
-		Files.writeTo( file, toString( prettyFormat ) );
+		Files.write( file, toString( prettyFormat ) );
 	}
 
 	/**

@@ -1,7 +1,5 @@
 package com.github.nayasis.basica.base;
 
-import com.github.nayasis.basica.base.Classes;
-import com.github.nayasis.basica.base.Strings;
 import com.github.nayasis.basica.file.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -35,7 +33,7 @@ public class ClassesTest {
             log.debug( "url : {}", url );
             InputStream inputStream = Classes.getResourceStream(url);
             Assertions.assertNotNull( inputStream );
-            Assertions.assertTrue( Strings.isNotEmpty(Files.readFrom(inputStream)) );
+            Assertions.assertTrue( Strings.isNotEmpty(Files.readLine(inputStream)) );
         }
 
         urls = Classes.findResources( "*" );

@@ -16,15 +16,15 @@ public class DeformedXmlReader {
 	}
 
 	public String readFrom( Path path ) {
-		return toXml( Files.readFrom( path ) );
+		return toXml( Files.readLine( path ) );
 	}
 
 	public String readFrom( URL url ) {
-		return toXml( Files.readFrom( url ) );
+		return toXml( Files.readLine( url ) );
 	}
 
     public String readFrom( File file ) {
-		return toXml( Files.readFrom( file ) );
+		return toXml( Files.readLine( file ) );
 	}
 
     private String toXml( String deformedXml ) {
