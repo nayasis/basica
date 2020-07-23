@@ -900,7 +900,7 @@ public class Files {
      * <pre>
      *   StringBuilder sb = new StringBuilder();
      *
-     *   readFrom( filePath, readLine -&gt; {
+     *   readLine( filePath, readLine -&gt; {
      *     sb.append( readLine ).append( '\n' );
      *   });
      *
@@ -921,7 +921,7 @@ public class Files {
      * <pre>
      *   StringBuilder sb = new StringBuilder();
      *
-     *   readFrom( filePath, readLine -&gt; {
+     *   readLine( filePath, readLine -&gt; {
      *     sb.append( readLine ).append( '\n' );
      *   }, charset );
      *
@@ -1109,7 +1109,7 @@ public class Files {
      * Write text to file
      *
      * <pre>
-     *  writeTo( filePath, writer -&gt; {
+     *  write( filePath, writer -&gt; {
      *    writer.write( text );
      *  }, "EUC-KR" );
      * </pre>
@@ -1136,7 +1136,7 @@ public class Files {
      * Write text to file (encoding character set is "UTF-8")
      *
      * <pre>
-     *  writeTo( filePath, writer -&gt; {
+     *  write( filePath, writer -&gt; {
      *    writer.write( text );
      *  });
      * </pre>
@@ -1216,8 +1216,8 @@ public class Files {
      * @param charset   character set
      * @throws UncheckedIOException if an I/O exception occurs
      */
-    public void writeCsvTo( Object filepath, List data, String delimiter, String charset ) throws UncheckedIOException {
-        writeCsvTo( filepath, new NList( data ), delimiter, charset );
+    public void writeCsv( Object filepath, List data, String delimiter, String charset ) throws UncheckedIOException {
+        writeCsv( filepath, new NList( data ), delimiter, charset );
     }
 
     /**
@@ -1229,7 +1229,7 @@ public class Files {
      * @param charset   character set
      * @throws UncheckedIOException if an I/O exception occurs
      */
-    public void writeCsvTo( Object file, NList data, String delimiter, String charset ) throws UncheckedIOException {
+    public void writeCsv( Object file, NList data, String delimiter, String charset ) throws UncheckedIOException {
 
     	write( file, writer -> {
 
