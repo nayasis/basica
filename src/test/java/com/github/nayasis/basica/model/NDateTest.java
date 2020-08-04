@@ -129,6 +129,7 @@ public class NDateTest {
         NDate date = new NDate( "2019-10-16 16:51:43" );
         assertEquals( "2019-10-16 16:51:43", date.toString() );
         assertEquals( "2019-10-16T16:51:43", date.toString("YYYY-MM-DD'T'HH:MI:SS") );
+        assertEquals( "20191016235959", date.toString("YYYYMMDD235959") );
     }
 
     @Test
