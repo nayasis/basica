@@ -169,8 +169,9 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      * @return key
      */
     public Object getKey( int column ) {
-        if( 0 > column || column >= keySize() )
-            throw new IndexOutOfBoundsException( String.format( "Header index[%d] is out of bounds from 0 to %d", column, keySize() ) );
+        if( 0 > column || column >= keySize() ) {
+            return null;
+        }
         Iterator<Object> iterator = header.keySet().iterator();
         for( int i = 0; i < column; i++ )
             iterator.next();
@@ -500,10 +501,17 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
     }
 
     private void setRowFromNMap( int rowIndex, NMap map ) {
+        try {
+            body.get( rowIndex );
+        } catch ( IndexOutOfBoundsException e ) {
+            for( int i=Math.min(body.size() -1,0); i < rowIndex; i++ ) {
+                body.add( new NMap() );
+            }
+        }
         body.set( rowIndex, map );
         for( Object key : map.keySet() ) {
             if( ! containsKey(key) )
-                header.put( key, rowIndex + 1 );
+                setTotalCount( key, rowIndex );
         }
     }
 
@@ -517,16 +525,22 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      */
     @SuppressWarnings("unchecked")
     public NList setDataByKey( int row, Object key, Object value ) throws IndexOutOfBoundsException {
-        Assert.beTrue( containsKey(key), "key({}) is not exist.", key );
-        NMap data = body.get( row );
-        if( data == null ) {
+        NMap data;
+        try {
+            data = body.get( row );
+        } catch ( IndexOutOfBoundsException e ) {
             data = new NMap();
-            body.set( row, data );
+            setRowFromNMap( row, data );
         }
         data.put( key, value );
-        header.put( key, Math.max(header.get(key), row + 1) );
+        setTotalCount( key, row );
         return this;
     }
+
+    private void setTotalCount( Object key, int rowIndex ) {
+        header.put( key, Math.max(header.getOrDefault(key,0), rowIndex + 1) );
+    }
+
 
     /**
      * set data
@@ -538,7 +552,9 @@ public class NList implements Serializable, Cloneable, Iterable<NMap> {
      */
     public NList setData( int row, int column, Object value ) {
         Object key = getKey( column );
-        Assert.notNull( key, "column(index:{}) is not exist.", column );
+        if( key == null ) {
+            header.put( column, column );
+        }
         return setDataByKey( row, key, value );
     }
 

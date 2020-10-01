@@ -49,13 +49,13 @@ public class StringsTest {
         String json = "{'a':1, 'b':2, 'c':'abcd'}";
         BeanA param = Reflector.toBeanFrom(json, BeanA.class);
 
-        assertEquals( "Bean(a=1, b=2, c=abcd)", Strings.format("{}", param) );
+        assertEquals( "StringsTest.BeanA(a=1, b=2, c=abcd)", Strings.format("{}", param) );
         assertEquals( "1 is 2 or abcd", Strings.format("{a} is {b} or {c}", param) );
 
     }
 
     @Data
-    class BeanA {
+    public static class BeanA {
         private int    a;
         private int    b;
         private String c;

@@ -2,12 +2,14 @@ package com.github.nayasis.basica.file;
 
 import com.github.nayasis.basica.base.Classes;
 import com.github.nayasis.basica.exception.unchecked.InvalidArgumentException;
+import com.github.nayasis.basica.exception.unchecked.UncheckedIOException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -332,12 +334,17 @@ public class FilesTest {
 
         try {
 
-            Files.write( src, "merong" );
+            Files.write(src, "merong");
 
-            Files.makeSymbolicLink( src, trg, true );
+            Files.makeSymbolicLink(src, trg, true);
 
-            assertTrue( Files.isSymbolicLink(trg) );
-
+            assertTrue(Files.isSymbolicLink(trg));
+        } catch ( UncheckedIOException e ) {
+            if( e.getCause() instanceof FileSystemException ) {
+                log.error( e.getMessage(), e );
+            } else {
+                throw e;
+            }
         } finally {
             Files.delete( root );
         }
