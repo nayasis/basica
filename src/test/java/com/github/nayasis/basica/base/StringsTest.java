@@ -47,18 +47,18 @@ public class StringsTest {
     public void formatFromBean() {
 
         String json = "{'a':1, 'b':2, 'c':'abcd'}";
-        Bean param = Reflector.toBeanFrom(json, Bean.class);
+        BeanA param = Reflector.toBeanFrom(json, BeanA.class);
 
         assertEquals( "Bean(a=1, b=2, c=abcd)", Strings.format("{}", param) );
         assertEquals( "1 is 2 or abcd", Strings.format("{a} is {b} or {c}", param) );
 
-        @Data
-        class Bean {
-            private int    a;
-            private int    b;
-            private String c;
-        }
+    }
 
+    @Data
+    class BeanA {
+        private int    a;
+        private int    b;
+        private String c;
     }
 
     @Test
