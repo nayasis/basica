@@ -1,6 +1,5 @@
 package com.github.nayasis.basica.model;
 
-import com.github.nayasis.basica.base.Classes;
 import com.github.nayasis.basica.base.Strings;
 import com.github.nayasis.basica.exception.unchecked.UncheckedIOException;
 import com.github.nayasis.basica.file.Files;
@@ -25,33 +24,24 @@ public class NProperties extends Properties {
     }
 
     public NProperties( String resourcePath ) {
-        load( resourcePath );
+        loadProperties( Files.toInputStream(resourcePath), Files.detectCharset(resourcePath) );
     }
 
     public NProperties( URL url ) {
-        load( url );
+        loadProperties( Files.toInputStream(url), Files.detectCharset(url) );
     }
 
-    public NProperties load( String filePath ) throws UncheckedIOException {
-        return loadProperties( Files.toInputStream(filePath) );
+    public NProperties( File file ) {
+        loadProperties( Files.toInputStream(file), Files.detectCharset(file) );
     }
 
-    public NProperties load( URL url ) throws UncheckedIOException {
-        return loadProperties( Classes.getResourceStream(url) );
+    public NProperties( Path path ) {
+        loadProperties( Files.toInputStream(path), Files.detectCharset(path) );
     }
 
-    public NProperties load( File file ) throws UncheckedIOException {
-        return loadProperties( Files.toInputStream(file) );
-    }
-
-    public NProperties load( Path path ) throws UncheckedIOException {
-        return loadProperties( Files.toInputStream(path) );
-    }
-
-    private NProperties loadProperties( InputStream inputStream ) throws UncheckedIOException {
+    private NProperties loadProperties( InputStream inputStream, String charset ) throws UncheckedIOException {
         if( inputStream == null ) return this;
         try {
-            String charset = Files.detectCharset( inputStream );
             load( new BufferedReader( new InputStreamReader( inputStream, charset ) ) );
             return this;
         } catch ( IOException e ) {
