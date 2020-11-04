@@ -46,4 +46,22 @@ public class ClassesTest {
 
     }
 
+    @Test
+    public void grepResources() {
+
+        // grep from root path
+        printResources("*.properties");
+        printResources("**.properties");
+
+        // grep from all path
+        printResources("**/*.properties");
+        printResources("/**/*.properties");
+
+    }
+
+    private void printResources( String pattern ) {
+        log.debug( ">> FIND PATTERN !! : {}", pattern );
+        Classes.findResources( pattern).forEach(url -> { log.debug("- {}",url);});
+    }
+
 }
