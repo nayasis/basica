@@ -24,16 +24,17 @@
       </roles>
     </developer>
   </developers>
-  <scm>
-    <url>https://github.com/nayasis/basica</url>
-    <connection>scm:git:git://github.com/nayasis/basica.git</connection>
-    <developerConnection>scm:git:git@github.com:nayasis/basica.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
   <issueManagement>
     <system>GitHub Issue Management</system>
     <url>https://github.com/nayasis/basica/issues</url>
   </issueManagement>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
 
   <properties>
     <java.version>1.8</java.version>
