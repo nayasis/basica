@@ -310,6 +310,22 @@ public class Reflector {
 	}
 
 	/**
+	 * convert as Map from source
+	 *
+	 * @param source        json text (type can be String, StringBuffer, StringBuilder), Map or bean to convert
+	 * @param returnType    return map type
+	 * @param keyType       key's type
+	 * @param valueType     value's type
+	 * @param <K>           key type of return Map
+	 * @param <V>           value type of return Map
+	 * @return converted map
+	 * @throws JsonMappingException  when json parsing error raised
+	 */
+	public <K,V> Map<K,V> toMapFrom( Object source, Class<? extends Map> returnType, Class<K> keyType, Class<V> valueType ) throws JsonMappingException {
+		return mapperNullable.toMapFrom( source, returnType, keyType, valueType );
+	}
+
+	/**
 	 * wrap bean's method in proxy
 	 *
 	 * @param bean			target bean to wrap method
