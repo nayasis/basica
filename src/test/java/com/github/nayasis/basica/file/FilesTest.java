@@ -2,12 +2,14 @@ package com.github.nayasis.basica.file;
 
 import com.github.nayasis.basica.base.Classes;
 import com.github.nayasis.basica.exception.unchecked.InvalidArgumentException;
+import com.github.nayasis.basica.exception.unchecked.UncheckedIOException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystemException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -60,8 +62,8 @@ public class FilesTest {
 
         URL path = Classes.getResource( "/xml/Deformed.xml" );
 
-        String txt1 = Files.readFrom( path, "UTF-8" );
-        String txt2 = Files.readFrom( path );
+        String txt1 = Files.read( path, "UTF-8" );
+        String txt2 = Files.read( path );
 
         assertFalse( txt1.isEmpty() );
         assertFalse( txt2.isEmpty() );
@@ -70,12 +72,12 @@ public class FilesTest {
     }
 
     @Test
-    public void readFromFile() {
+    public void readLineFile() {
 
         String path = Files.rootPath(getClass()) + "/xml/Grammar.xml";
 
-        String txt1 = Files.readFrom( path, "UTF-8" );
-        String txt2 = Files.readFrom( path );
+        String txt1 = Files.read( path, "UTF-8" );
+        String txt2 = Files.read( path );
 
         assertFalse( txt1.isEmpty() );
         assertFalse( txt2.isEmpty() );
@@ -90,12 +92,12 @@ public class FilesTest {
 
         try {
 
-            Files.writeTo( tempFile, writer -> {
+            Files.write( tempFile, writer -> {
                 writer.write( "merong-" );
                 writer.write( "nayasis" );
             });
 
-            String written = Files.readFrom( tempFile );
+            String written = Files.read( tempFile );
 
             assertEquals( "merong-nayasis", written.trim() );
 
@@ -143,7 +145,7 @@ public class FilesTest {
 
             Files.makeDir( src );
             Files.makeDir( trg );
-            Files.writeTo( file, "merong" );
+            Files.write( file, "merong" );
 
             Files.copy( file, src );
             assertTrue( Files.isFile( src + "/sample.txt" ) );
@@ -182,7 +184,7 @@ public class FilesTest {
 
         try {
 
-            Files.writeTo( file, "merong" );
+            Files.write( file, "merong" );
             Files.makeDir( trgExist );
 
             // copy [src] to [trgNotExist]
@@ -221,7 +223,7 @@ public class FilesTest {
             Files.makeDir( srcSub1 );
             Files.makeDir( srcSub2 );
             Files.makeDir( trg );
-            Files.writeTo( file, "merong" );
+            Files.write( file, "merong" );
 
             // copy [src] to [trgNotExist]
             Files.copyTree( src, trg );
@@ -249,7 +251,7 @@ public class FilesTest {
 
         try {
 
-            Files.writeTo( file, "merong" );
+            Files.write( file, "merong" );
             Files.makeDir( trg );
 
             Path target = Files.move( src, trg );
@@ -277,7 +279,7 @@ public class FilesTest {
 
         try {
 
-            Files.writeTo( file, "merong" );
+            Files.write( file, "merong" );
 
             Path target = Files.move( src, trg );
 
@@ -305,8 +307,8 @@ public class FilesTest {
 
         try {
 
-            Files.writeTo( file1, "merong" );
-            Files.writeTo( file2, "merong" );
+            Files.write( file1, "merong" );
+            Files.write( file2, "merong" );
 
             Files.move( file1, trg + "/sample1.txt" );
             Files.move( file2, trg + "/children/sample2.txt" );
@@ -332,12 +334,17 @@ public class FilesTest {
 
         try {
 
-            Files.writeTo( src, "merong" );
+            Files.write(src, "merong");
 
-            Files.makeSymbolicLink( src, trg, true );
+            Files.makeSymbolicLink(src, trg, true);
 
-            assertTrue( Files.isSymbolicLink(trg) );
-
+            assertTrue(Files.isSymbolicLink(trg));
+        } catch ( UncheckedIOException e ) {
+            if( e.getCause() instanceof FileSystemException ) {
+                log.error( e.getMessage(), e );
+            } else {
+                throw e;
+            }
         } finally {
             Files.delete( root );
         }
@@ -356,14 +363,14 @@ public class FilesTest {
 
         try {
 
-            Files.writeTo( src, "merong" );
+            Files.write( src, "merong" );
 
             Files.makeHardLink( src, trg, true );
 
-            Files.writeTo( src, "changed" );
+            Files.write( src, "changed" );
 
             // if contents of original file are changed, contents of hardlink file must be changed.
-            assertEquals( "changed", Files.readFrom(trg).trim() );
+            assertEquals( "changed", Files.read(trg).trim() );
 
         } finally {
             Files.delete( root );

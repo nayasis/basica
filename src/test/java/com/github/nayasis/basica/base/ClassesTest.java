@@ -1,7 +1,5 @@
 package com.github.nayasis.basica.base;
 
-import com.github.nayasis.basica.base.Classes;
-import com.github.nayasis.basica.base.Strings;
 import com.github.nayasis.basica.file.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -35,7 +33,7 @@ public class ClassesTest {
             log.debug( "url : {}", url );
             InputStream inputStream = Classes.getResourceStream(url);
             Assertions.assertNotNull( inputStream );
-            Assertions.assertTrue( Strings.isNotEmpty(Files.readFrom(inputStream)) );
+            Assertions.assertTrue( Strings.isNotEmpty(Files.read(inputStream)) );
         }
 
         urls = Classes.findResources( "*" );
@@ -46,6 +44,24 @@ public class ClassesTest {
 //        List<URL> urls = Classes.findResources( "**/LICENSE.md" );
 //        List<URL> urls = Classes.findResources( "/META-INF/LICENSE.md" );
 
+    }
+
+    @Test
+    public void grepResources() {
+
+        // grep from root path
+        printResources("*.properties");
+        printResources("**.properties");
+
+        // grep from all path
+        printResources("**/*.properties");
+        printResources("/**/*.properties");
+
+    }
+
+    private void printResources( String pattern ) {
+        log.debug( ">> FIND PATTERN !! : {}", pattern );
+        Classes.findResources( pattern).forEach(url -> { log.debug("- {}",url);});
     }
 
 }

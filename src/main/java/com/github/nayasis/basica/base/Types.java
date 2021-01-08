@@ -589,6 +589,43 @@ public class Types {
         return Strings.toBoolean( value, emptyToTrue );
     }
 
+    public byte[] toPrimitive( Byte[] array ) {
+        if( array == null ) return new byte[0];
+        byte[] rs = new byte[ array.length ];
+        for( int i = 0; i < array.length; i++ ) {
+            rs[i] = array[i].byteValue();
+        }
+        return rs;
+    }
+
+    public Byte[] toBoxed( byte[] array ) {
+        if( array == null ) return new Byte[0];
+        Byte[] rs = new Byte[ array.length ];
+        for( int i = 0, iCnt = array.length; i < iCnt; i++) {
+            rs[i] = Byte.valueOf(array[i]);
+        }
+        return rs;
+
+    }
+
+    public char[] toPrimitive( Character[] array ) {
+        if( array == null ) return new char[0];
+        char[] rs = new char[ array.length ];
+        for( int i = 0; i < array.length; i++ ) {
+            rs[i] = array[i];
+        }
+        return rs;
+    }
+
+    public Character[] toBoxed( char[] array ) {
+        if( array == null ) return new Character[0];
+        Character[] rs = new Character[ array.length ];
+        for( int i = 0, iCnt = array.length; i < iCnt; i++) {
+            rs[i] = Character.valueOf(array[i]);
+        }
+        return rs;
+    }
+
     public <T> T castPrimitive( Object val, Class<T> castType ) {
 
         if( isString(castType) ) {

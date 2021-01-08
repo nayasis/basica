@@ -47,18 +47,18 @@ public class StringsTest {
     public void formatFromBean() {
 
         String json = "{'a':1, 'b':2, 'c':'abcd'}";
-        Bean param = Reflector.toBeanFrom(json, Bean.class);
+        BeanA param = Reflector.toBeanFrom(json, BeanA.class);
 
-        assertEquals( "Bean(a=1, b=2, c=abcd)", Strings.format("{}", param) );
+        assertEquals( "StringsTest.BeanA(a=1, b=2, c=abcd)", Strings.format("{}", param) );
         assertEquals( "1 is 2 or abcd", Strings.format("{a} is {b} or {c}", param) );
 
-        @Data
-        class Bean {
-            private int    a;
-            private int    b;
-            private String c;
-        }
+    }
 
+    @Data
+    public static class BeanA {
+        private int    a;
+        private int    b;
+        private String c;
     }
 
     @Test
@@ -309,6 +309,14 @@ public class StringsTest {
         Characters.fullwidth( 2.0 );
         assertEquals( 9, Strings.getDisplayLength( value ) );
 
+    }
+
+    @Test
+    public void nvl() {
+        assertEquals( "", Strings.nvl(null) );
+        assertEquals( "", Strings.nvl("") );
+        assertEquals( "nayasis", Strings.nvl(null,"nayasis") );
+        assertEquals( "nayasis", Strings.nvl("","nayasis") );
     }
 
  }

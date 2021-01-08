@@ -1,6 +1,6 @@
 package com.github.nayasis.basica.model;
 
-import com.jayway.jsonpath.JsonPath;
+import com.github.nayasis.basica.expression.Expression;
 import com.github.nayasis.basica.reflection.Reflector;
 
 import java.util.LinkedHashMap;
@@ -79,7 +79,7 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
     }
 
     @Override
-    public NMap clone() {
+    public NMap<K,V> clone() {
         return (NMap) super.clone();
     }
 
@@ -108,37 +108,14 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
     }
 
     /**
-     * Get value by json path
-     *
-     * @param jsonPath json path
-     * @param <T> This is the type parameter
-     * @see <a href="https://github.com/jayway/JsonPath">json path example</a>
-     * @return value(s) extracted by json path
+     * check if this map could be tested by MVEL.
+     * @param expression MVEL test expression
+     * @return true if MVEL expression executed successfully.
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getByJsonPath( String jsonPath ) {
-        Object val = null;
-        if( containsKey( jsonPath ) ) {
-            val = get( jsonPath );
-        } else {
-            try {
-                val = JsonPath.read( this, jsonPath );
-            } catch ( Exception ignored ) {}
-        }
-        return val == null ? null : (T) val;
-    }
-
-    /**
-     * return true if this map contains a mapping for the specified json path.
-     *
-     * @param jsonPath  json path
-     * @see <a href="https://github.com/jayway/JsonPath">json path example</a>
-     * @return true if this map contains a maaping for the specified key.
-     */
-    public boolean containsJsonPath( String jsonPath ) {
-        if( containsKey(jsonPath) ) return true;
+    public boolean containsKey( Expression expression ) {
+        if( expression == null ) return false;
         try {
-            JsonPath.read( this, jsonPath );
+            expression.run( this );
             return true;
         } catch ( Exception e ) {
             return false;
@@ -146,15 +123,60 @@ public class NMap<K,V> extends LinkedHashMap<K,V> {
     }
 
     /**
-     * rebuild key for JsonPath. <br><br>
+     * get value specified by MVEL
      *
-     * This map could contain POJO so JsonPath could not working because JsonPath could work well only in entire Map structure.
-     * it change all POJO value to Map.
-     *
-     * @return self instance
+     * @param expression    MVEL expression
+     * @return specified value or null
      */
-    public NMap buildKeyToJsonPath() {
-        return new JsonPathMapper().toJsonPath( this );
+    public V get( Expression expression ) {
+        if( expression == null ) return null;
+        try {
+            return expression.run( this );
+        } catch ( Exception e ) {
+            return null;
+        }
+    }
+
+    /**
+     * get value specified by MVEL
+     *
+     * @param expression    MVEL test expression
+     * @param defaultValue  substitutive value when return value is null.
+     * @return specified value or default value.
+     */
+    public V getOrDefault( Expression expression, V defaultValue ) {
+        V val = get( expression );
+        return val == null ? defaultValue : val;
+    }
+
+    /**
+     * check if this map could be tested by MVEL.
+     * @param expression MVEL test expression
+     * @return true if MVEL expression executed successfully.
+     */
+    public boolean containsByPath( String expression ) {
+        return containsKey( Expression.of(expression) );
+    }
+
+    /**
+     * get value specified by MVEL
+     *
+     * @param expression    MVEL expression
+     * @return specified value or null
+     */
+    public V getByPath( String expression ) {
+        return get( Expression.of(expression) );
+    }
+
+    /**
+     * get value specified by MVEL
+     *
+     * @param expression    MVEL test expression
+     * @param defaultValue  substitutive value when return value is null.
+     * @return specified value or default value.
+     */
+    public V getOrDefaultByPath( String expression, V defaultValue ) {
+        return getOrDefault( Expression.of(expression), defaultValue );
     }
 
 }

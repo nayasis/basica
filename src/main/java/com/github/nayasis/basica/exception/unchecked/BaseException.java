@@ -7,21 +7,21 @@ import java.io.Serializable;
 
 
 /**
- * Base RuntimeException
+ * Base Exception
  *
  * @author nayasis@gmail.com
  *
  */
-public class BaseRuntimeException extends RuntimeException implements Serializable {
+public class BaseException extends Exception implements Serializable {
 
-    private static final long serialVersionUID = -7789633699277626783L;
+    private static final long serialVersionUID = -5215600263628541536L;
 
     /**
      * Error Code
      */
     private String errorCode = "";
 
-    public BaseRuntimeException() {
+    public BaseException() {
         super();
     }
 
@@ -30,7 +30,7 @@ public class BaseRuntimeException extends RuntimeException implements Serializab
      *
      * @param cause root cause
      */
-    public BaseRuntimeException( Throwable cause ) {
+    public BaseException( Throwable cause ) {
         super( cause );
     }
 
@@ -40,7 +40,7 @@ public class BaseRuntimeException extends RuntimeException implements Serializab
      * @param format      error message format
      * @param parameters  parameters binding with '{}' phrase
      */
-    public BaseRuntimeException( String format, Object... parameters ) {
+    public BaseException( String format, Object... parameters ) {
         super( Messages.get(format, parameters) );
     }
 
@@ -51,7 +51,7 @@ public class BaseRuntimeException extends RuntimeException implements Serializab
      * @param format      error message format
      * @param parameters  parameters binding with '{}' phrase
      */
-    public BaseRuntimeException( Throwable cause, String format, Object... parameters ) {
+    public BaseException( Throwable cause, String format, Object... parameters ) {
         super( Messages.get(format, parameters), cause );
     }
 

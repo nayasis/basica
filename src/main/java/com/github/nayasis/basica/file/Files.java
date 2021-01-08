@@ -19,9 +19,9 @@ import org.mozilla.universalchardet.UniversalDetector;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +33,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +43,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.InvalidPathException;
 import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -69,7 +72,6 @@ public class Files {
     public final String FOLDER_SEPARATOR_WINDOWS  = "\\";
 
     private final String UTF_8                    = StandardCharsets.UTF_8.toString();
-    private final String CHARSET_AUTO_DETECT      = "";
     private final String REGEX_SEPARATOR_MULTIPLE = "(?!^)" + FOLDER_SEPARATOR + "+";
     private final String REGEX_SEPARATOR_LAST     = "(.+)" + FOLDER_SEPARATOR + "$";
 
@@ -139,6 +141,18 @@ public class Files {
         } catch ( Exception e ) {
             return Strings.trim( filePath );
         }
+    }
+
+    /**
+     * get file name without it's file extension.
+     *
+     * @param filePath  file name or full path
+     * @return file name only
+     */
+    public String nameWithoutExtension( Object filePath ) {
+        String filename = name( filePath );
+        int dot = filename.lastIndexOf( '.' );
+        return dot < 0 ? filename : filename.substring( 0, dot );
     }
 
     /**
@@ -383,7 +397,7 @@ public class Files {
      * @return  file or directory paths
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public List<Path> find( Object searchDir, int scanDepth, String... matchingPattern ) throws UncheckedIOException {
+    public List<Path> findAll( Object searchDir, int scanDepth, String... matchingPattern ) throws UncheckedIOException {
         return find( searchDir, true, true, scanDepth, matchingPattern );
     }
 
@@ -503,6 +517,24 @@ public class Files {
     	} catch( IOException e ) {
     		throw new UncheckedIOException( e );
     	}
+    }
+
+    /**
+     * create empty file or update 'last updated timestamp' on file
+     *
+     * @param path  file path
+     * @return  touched file
+     * @throws UncheckedIOException if an I/O error occurs
+     */
+    public Path touchFile( Object path ) throws UncheckedIOException {
+        Path p = toPath( path );
+        if( notExists(p) ) {
+            makeFile(p);
+        } else {
+            if( ! p.toFile().setLastModified( System.currentTimeMillis() ) );
+                throw new UncheckedIOException( "Unable to modify timestamp of [{}]", p );
+        }
+        return p;
     }
 
     /**
@@ -805,14 +837,49 @@ public class Files {
     }
 
     /**
+     * read line stream from file
+     *
+     * @param path      file path
+     * @return line stream
+     * @throws UncheckedIOException if I/O error occurs
+     */
+    public Stream<String> lines( Object path ) throws UncheckedIOException {
+        return lines( path, UTF_8 );
+    }
+
+    /**
+     * read line stream from file
+     *
+     * @param path      file path
+     * @param charset   decoding charset (if empty, do auto-detect)
+     * @return line stream
+     * @throws UncheckedIOException if I/O error occurs
+     */
+    public Stream<String> lines( Object path, String charset ) throws UncheckedIOException {
+
+        Path p = toPath( path );
+
+        if( Strings.isEmpty(charset) ) {
+            charset = detectCharset( p );
+        }
+
+        try {
+            return java.nio.file.Files.lines( p, Charset.forName(charset) );
+        } catch ( IOException e ) {
+            throw new UncheckedIOException( e );
+        }
+
+    }
+
+    /**
      * Read text from file
      *
      * @param path file path or URL or inputstream
      * @return text
      * @throws UncheckedIOException if I/O error occurs
      */
-    public String readFrom( Object path ) throws UncheckedIOException {
-        return readFrom( toInputStream(path), CHARSET_AUTO_DETECT );
+    public String read( Object path ) throws UncheckedIOException {
+        return read( toInputStream(path), UTF_8 );
     }
 
     /**
@@ -823,8 +890,8 @@ public class Files {
      * @return text
      * @throws UncheckedIOException if I/O error occurs
      */
-    public String readFrom( Object path, String charset ) throws UncheckedIOException {
-        return readFrom( toInputStream(path), charset );
+    public String read( Object path, String charset ) throws UncheckedIOException {
+        return read( toInputStream(path), charset );
     }
 
     /**
@@ -833,7 +900,7 @@ public class Files {
      * <pre>
      *   StringBuilder sb = new StringBuilder();
      *
-     *   readFrom( filePath, readLine -&gt; {
+     *   readLine( filePath, readLine -&gt; {
      *     sb.append( readLine ).append( '\n' );
      *   });
      *
@@ -844,8 +911,8 @@ public class Files {
      * @param reader    reader to treat line in text
      * @throws UncheckedIOException if I/O error occurs
      */
-    public void readFrom( Object path, LineReader reader ) throws UncheckedIOException {
-        readFrom( toInputStream(path), reader, CHARSET_AUTO_DETECT );
+    public void read( Object path, LineReader reader ) throws UncheckedIOException {
+        read( toInputStream(path), reader, UTF_8 );
     }
 
     /**
@@ -854,7 +921,7 @@ public class Files {
      * <pre>
      *   StringBuilder sb = new StringBuilder();
      *
-     *   readFrom( filePath, readLine -&gt; {
+     *   readLine( filePath, readLine -&gt; {
      *     sb.append( readLine ).append( '\n' );
      *   }, charset );
      *
@@ -866,17 +933,18 @@ public class Files {
      * @param charset   character set (UTF-8, EUC-KR, ... )
      * @throws UncheckedIOException if I/O error occurs
      */
-    public void readFrom( Object path, LineReader reader, String charset ) throws UncheckedIOException {
-        readFrom( toInputStream(path), reader, charset );
+    public void read( Object path, LineReader reader, String charset ) throws UncheckedIOException {
+        read( toInputStream(path), reader, charset );
     }
 
     /**
      * convert to inputstream
      *
-     * @param path  filepath or URL
+     * @param path      filepath or URL
+     * @param options   options specifying how the file is opened
      * @return inputstream
      */
-    public InputStream toInputStream( Object path ) {
+    public InputStream toInputStream( Object path, OpenOption... options ) {
         if( Validator.isEmpty(path) ) return null;
         try {
             if( path instanceof InputStream ) {
@@ -884,7 +952,7 @@ public class Files {
             } else if( path instanceof URL ) {
                 return ((URL)path).openStream();
             } else {
-                return new FileInputStream( Strings.trim(path) );
+                return java.nio.file.Files.newInputStream( toPath(path), options );
             }
         } catch ( IOException e ) {
             throw new UncheckedIOException(e);
@@ -894,13 +962,18 @@ public class Files {
     /**
      * convert to outputstream
      *
-     * @param file filepath (if file is not exist, makes new one.)
+     * @param path      filepath (if path is not exist, makes new one.)
+     * @param options   options specifying how the file is opened
      * @return outputstream
      */
-    public FileOutputStream toOutputStream( Object file ) {
+    public OutputStream toOutputStream( Object path, OpenOption... options ) {
         try {
-            return new FileOutputStream( makeFile(file).toFile() );
-        } catch( FileNotFoundException e ) {
+            if( path instanceof OutputStream ) {
+                return (OutputStream) path;
+            } else {
+                return java.nio.file.Files.newOutputStream( toPath(path), options );
+            }
+        } catch( IOException e ) {
             throw new UncheckedIOException(e);
         }
     }
@@ -912,8 +985,8 @@ public class Files {
      * @return whole text contents
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public String readFrom( InputStream inputStream ) throws UncheckedIOException {
-        return readFrom( inputStream, CHARSET_AUTO_DETECT );
+    public String read( InputStream inputStream ) throws UncheckedIOException {
+        return read( inputStream, UTF_8 );
     }
 
     /**
@@ -924,9 +997,9 @@ public class Files {
      * @return whole text contents
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public String readFrom( InputStream inputStream, String charset ) throws UncheckedIOException {
+    public String read( InputStream inputStream, String charset ) throws UncheckedIOException {
         StringBuilder sb = new StringBuilder();
-        readFrom( inputStream, readLine -> sb.append( readLine ).append( '\n' ), charset );
+        read( inputStream, readLine -> sb.append( readLine ).append( '\n' ), charset );
         return sb.toString();
     }
 
@@ -937,8 +1010,8 @@ public class Files {
      * @param reader        worker to read line text
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public void readFrom( InputStream inputStream, LineReader reader ) throws UncheckedIOException {
-        readFrom( inputStream, reader, null );
+    public void read( InputStream inputStream, LineReader reader ) throws UncheckedIOException {
+        read( inputStream, reader, null );
     }
 
     /**
@@ -949,14 +1022,14 @@ public class Files {
      * @param charset       character set (default: auto detect)
      * @throws UncheckedIOException if I/O error occurs.
      */
-    public void readFrom( InputStream inputStream, LineReader reader, String charset ) throws UncheckedIOException {
+    public void read( InputStream inputStream, LineReader reader, String charset ) throws UncheckedIOException {
 
         if( inputStream == null ) return;
 
         BufferedInputStream mis = new BufferedInputStream( inputStream );
 
         if( Strings.isEmpty(charset) ) {
-            charset = getCharset( mis );
+            charset = detectCharset( mis );
         }
 
         try(
@@ -979,8 +1052,8 @@ public class Files {
      * @param url  classloader URL or URL path
      * @return whole text contents
      */
-    public String readResourceFrom( Object url ) {
-        return readResourceFrom( url, CHARSET_AUTO_DETECT );
+    public String readResource( Object url ) {
+        return readResource( url, UTF_8 );
     }
 
     /**
@@ -990,9 +1063,9 @@ public class Files {
      * @param charset   character set (default: auto detect)
      * @return whole text contents
      */
-    public String readResourceFrom( Object url, String charset ) {
+    public String readResource( Object url, String charset ) {
         StringBuilder sb = new StringBuilder();
-        readResourceFrom( url, readLine -> sb.append( readLine ).append( '\n' ), charset );
+        readResource( url, readLine -> sb.append( readLine ).append( '\n' ), charset );
         return sb.toString();
     }
 
@@ -1002,8 +1075,8 @@ public class Files {
      * @param url       classloader URL or URL path
      * @param reader    worker to read line text
      */
-    public void readResourceFrom( Object url, LineReader reader ) {
-        readResourceFrom( url, reader, CHARSET_AUTO_DETECT );
+    public void readResource( Object url, LineReader reader ) {
+        readResource( url, reader, UTF_8 );
     }
 
     /**
@@ -1013,10 +1086,10 @@ public class Files {
      * @param reader    worker to read line text
      * @param charset   character set (default: auto detect)
      */
-    public void readResourceFrom( Object url, LineReader reader, String charset ) {
+    public void readResource( Object url, LineReader reader, String charset ) {
         InputStream inputStream = toResourceStream( url );
         if( inputStream != null ) {
-            readFrom( inputStream, reader, charset );
+            read( inputStream, reader, charset );
         }
     }
 
@@ -1036,7 +1109,7 @@ public class Files {
      * Write text to file
      *
      * <pre>
-     *  writeTo( filePath, writer -&gt; {
+     *  write( filePath, writer -&gt; {
      *    writer.write( text );
      *  }, "EUC-KR" );
      * </pre>
@@ -1046,7 +1119,7 @@ public class Files {
      * @param charset   encoding character set (default : UTF-8)
      * @throws UncheckedIOException if an I/O exception occurs
      */
-    public void writeTo( Object filePath, BufferWriter writer, String charset ) throws UncheckedIOException {
+    public void write( Object filePath, BufferWriter writer, String charset ) throws UncheckedIOException {
         makeFile( filePath );
         try(
             FileOutputStream fos    = new FileOutputStream( toPath(filePath).toFile() );
@@ -1063,7 +1136,7 @@ public class Files {
      * Write text to file (encoding character set is "UTF-8")
      *
      * <pre>
-     *  writeTo( filePath, writer -&gt; {
+     *  write( filePath, writer -&gt; {
      *    writer.write( text );
      *  });
      * </pre>
@@ -1072,8 +1145,8 @@ public class Files {
      * @param writer   writer to write line
      * @throws UncheckedIOException if an I/O exception occurs
      */
-    public void writeTo( Object filePath, BufferWriter writer ) throws UncheckedIOException {
-        writeTo( filePath, writer, null );
+    public void write( Object filePath, BufferWriter writer ) throws UncheckedIOException {
+        write( filePath, writer, null );
     }
 
     /**
@@ -1083,8 +1156,8 @@ public class Files {
      * @param text      text to write
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public void writeTo( Object filePath, String text ) throws UncheckedIOException {
-        writeTo( filePath, text, null );
+    public void write( Object filePath, String text ) throws UncheckedIOException {
+        write( filePath, text, null );
     }
 
     /**
@@ -1095,8 +1168,8 @@ public class Files {
      * @param charset   encoding character set
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public void writeTo( Object filePath, final String text, String charset ) throws UncheckedIOException {
-        writeTo( filePath, writer -> writer.write( text ), charset );
+    public void write( Object filePath, final String text, String charset ) throws UncheckedIOException {
+        write( filePath, writer -> writer.write(text), charset );
     }
 
     /**
@@ -1106,16 +1179,32 @@ public class Files {
      * @param binary    binary data to write
      * @throws UncheckedIOException  if an I/O error occurs
      */
-    public void writeTo( Object filepath, byte[] binary ) throws UncheckedIOException {
+    public void write( Object filepath, byte[] binary ) throws UncheckedIOException {
     	FileOutputStream stream = null;
     	try {
     		stream = new FileOutputStream( makeFile(filepath).toFile() );
     	    stream.write( binary );
+    	    stream.flush();
     	} catch( IOException e ) {
 	        throw new UncheckedIOException(e);
         } finally {
     	    close( stream );
     	}
+    }
+
+    /**
+     * read byte array from stream
+     *
+     * @param path  file path or URL
+     * @return byte array
+     * @throws UncheckedIOException if I/O error occurs.
+     */
+    public byte[] readBytes( Object path ) throws UncheckedIOException {
+        try {
+            return java.nio.file.Files.readAllBytes( toPath(path) );
+        } catch ( IOException e ) {
+            throw new UncheckedIOException( e );
+        }
     }
 
     /**
@@ -1127,8 +1216,8 @@ public class Files {
      * @param charset   character set
      * @throws UncheckedIOException if an I/O exception occurs
      */
-    public void writeCsvTo( Object filepath, List data, String delimiter, String charset ) throws UncheckedIOException {
-        writeCsvTo( filepath, new NList( data ), delimiter, charset );
+    public void writeCsv( Object filepath, List data, String delimiter, String charset ) throws UncheckedIOException {
+        writeCsv( filepath, new NList( data ), delimiter, charset );
     }
 
     /**
@@ -1140,9 +1229,9 @@ public class Files {
      * @param charset   character set
      * @throws UncheckedIOException if an I/O exception occurs
      */
-    public void writeCsvTo( Object file, NList data, String delimiter, String charset ) throws UncheckedIOException {
+    public void writeCsv( Object file, NList data, String delimiter, String charset ) throws UncheckedIOException {
 
-    	writeTo( file, writer -> {
+    	write( file, writer -> {
 
             writer.write( Strings.join( data.keySet(), delimiter ) );
             writer.write( '\n' );
@@ -1179,8 +1268,8 @@ public class Files {
      * @return absolute path
      * @throws UncheckedIOException base path is not existed
      */
-    public String resolvePath( Object basePath, String targetPath ) throws UncheckedIOException {
-    	return normalizeSeparator( toPath(basePath).resolve(targetPath).normalize().toString() );
+    public String resolvePath( Object basePath, Object targetPath ) throws UncheckedIOException {
+    	return normalizeSeparator( toPath(basePath).resolve(Strings.trim(targetPath)).normalize().toString() );
     }
 
     /**
@@ -1310,11 +1399,11 @@ public class Files {
      * @param filePath  file path
      * @return  detected character set (UTF-8, EUC-KR, EUC-JP, ... )
      */
-    public String getCharset( Object filePath ) throws UncheckedIOException {
+    public String detectCharset( Object filePath ) throws UncheckedIOException {
         InputStream inputStream = null;
         try {
             inputStream = toInputStream( filePath );
-            return getCharset( new BufferedInputStream(inputStream) );
+            return detectCharset( new BufferedInputStream(inputStream) );
         } finally {
             close( inputStream );
         }
@@ -1326,7 +1415,7 @@ public class Files {
      * @param inputStream  input stream
      * @return  detected character set (UTF-8, EUC-KR, EUC-JP, ... )
      */
-    public String getCharset( InputStream inputStream ) throws UncheckedIOException {
+    public String detectCharset( InputStream inputStream ) throws UncheckedIOException {
 
         byte[] buf = new byte[4096];
 
@@ -1417,27 +1506,14 @@ public class Files {
     }
 
     /**
-     * close stream
+     * close the given closable and swallow I/O exception that may occur.
      *
-     * @param stream   stream to close
+     * @param c closeable
      */
-    public void close( InputStream stream ) {
-        if( stream != null ) {
+    public void close( Closeable c ) {
+        if( c != null ) {
             try {
-                stream.close();
-            } catch ( IOException ignored ) {}
-        }
-    }
-
-    /**
-     * close stream
-     *
-     * @param stream   stream to close
-     */
-    public void close( OutputStream stream ) {
-        if( stream != null ) {
-            try {
-                stream.close();
+                c.close();
             } catch ( IOException ignored ) {}
         }
     }
@@ -1457,6 +1533,13 @@ public class Files {
         if( path instanceof Path ) return (Path) path;
         if( path instanceof File ) return ((File)path).toPath();
         if( Types.isStringLike(path) ) return Paths.get(path.toString().trim());
+
+        if( path instanceof URI ) return Paths.get( ((URI)path) );
+        try {
+            if( path instanceof URL  ) return Paths.get( ((URL)path).toURI() );
+        } catch ( URISyntaxException e ) {
+            throw new InvalidArgumentException( "Could not cast to Path type (from:{})", path );
+        }
 
         throw new InvalidArgumentException( "Invalid type.(current: {}, acceptable: Path,File,String)", path.getClass() );
 
