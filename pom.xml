@@ -197,7 +197,7 @@
             <artifactId>site-maven-plugin</artifactId>
             <version>0.12</version>
             <configuration>
-              <merge>false</merge>
+              <merge>true</merge>
               <includes>
                 <include>**/*</include>
               </includes>
