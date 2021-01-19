@@ -180,9 +180,9 @@
 
   <profiles>
     <profile>
-      <id>github</id>
+      <id>github-private</id>
       <properties>
-        <github.global.server>github</github.global.server>
+        <github.global.server>github-private</github.global.server>
       </properties>
       <distributionManagement>
         <repository>
