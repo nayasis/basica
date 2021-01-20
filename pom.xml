@@ -204,7 +204,7 @@
               <message>${project.version}</message>
               <noJekyll>true</noJekyll>
               <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-              <branch>refs/heads/master</branch>
+              <branch>refs/origin/mvn-repo</branch>
               <repositoryName>maven-repo</repositoryName>
               <repositoryOwner>nayasis</repositoryOwner>
             </configuration>
