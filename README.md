@@ -24,7 +24,7 @@ basic utility components
 </dependency>
 ```
 
-#### maven repository
+#### repository setting
 
 - snapshot
 ```xml
