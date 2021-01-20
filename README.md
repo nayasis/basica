@@ -6,15 +6,25 @@ basic utility components
 
 ### maven
 
+- snapshot
 ```xml
 <dependency>
   <groupId>com.github.nayasis</groupId>
   <artifactId>basica</artifactId>
-  <version>0.3.4</version>
+  <version>0.3.6-SNAPSHOT</version>
 </dependency>
 ```
 
-#### repository
+- release
+```xml
+<dependency>
+  <groupId>com.github.nayasis</groupId>
+  <artifactId>basica</artifactId>
+  <version>0.3.5</version>
+</dependency>
+```
+
+#### maven repository
 
 - snapshot
 ```xml
