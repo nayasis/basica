@@ -220,6 +220,15 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>local-nexus</id>
+      <distributionManagement>
+        <repository>
+          <id>team-store-snapshots</id>
+          <url>${snapshot-repository}</url>
+        </repository>
+      </distributionManagement>
+    </profile>
   </profiles>
 
 </project>
