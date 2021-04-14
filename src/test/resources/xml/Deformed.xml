@@ -3,7 +3,7 @@
 <root>
 
 <sql id="Merong"
- pooled unique like="1"
+ like="1"
  possibleToError>
   <!-- Merong -->
   <!--Merong
