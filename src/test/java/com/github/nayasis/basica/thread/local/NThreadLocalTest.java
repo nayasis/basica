@@ -23,7 +23,7 @@ public class NThreadLocalTest {
         threadA.start();
         threadB.start();
 
-        Thread.sleep( 1_000 );
+        Thread.sleep( 5_000 );
 
         assertEquals( 10, (int) result.get( "A-10" ) );
         assertEquals(  5, (int) result.get( "A-5"  ) );

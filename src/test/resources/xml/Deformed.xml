@@ -3,8 +3,7 @@
 <root>
 
 <sql id="Merong"
- pooled unique like="1"
- possibleToError>
+ like="1" >
   <!-- Merong -->
   <!--Merong
    -->
@@ -12,13 +11,13 @@
   FROM    tb_dp_dataset_frame A
   WHERE   tenant_id = 'S02'
   <if test="#{id} is empty ">
-  AND     dataset_id < A.test
+  AND     dataset_id &lt; A.test
     <if test="#{id} > 3">
     AND   dataset_id > 1.2
     </if>
   </if>
   <if test="#{id} = 2">
-  AND     dataset_id < 2.1
+  AND     dataset_id &lt; 2.1
     <if test="#{id} > 3">
     AND   dataset_id > 2.2
     </if>

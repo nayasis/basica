@@ -283,7 +283,7 @@
     </if>
 
     <!-- you can use '<' instead '&lt;' -->
-    <elseif test="40 <= #{age} and #{age} <= 50">
+    <elseif test="40 &lt;= #{age} and #{age} &lt;= 50">
       AND age = 'RATHER OLD'
     </elseif>
 
