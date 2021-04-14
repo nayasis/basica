@@ -3,8 +3,7 @@
 <root>
 
 <sql id="Merong"
- like="1"
- possibleToError>
+ like="1" >
   <!-- Merong -->
   <!--Merong
    -->
