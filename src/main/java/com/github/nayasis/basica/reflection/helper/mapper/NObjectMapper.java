@@ -38,7 +38,6 @@ public class NObjectMapper extends ObjectMapper {
 		configure( DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES,    false );
 		configure( MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS,           true  ); // private 변수라도 강제로 매핑
 		configure( DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY,   true  );
-		configure( SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS,        true  ); // only applied to Map ( not to bean )
 
 //		if( ignoreNull ) {
 //			setSerializationInclusion( NON_NULL );
