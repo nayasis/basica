@@ -180,47 +180,6 @@
 
   <profiles>
     <profile>
-      <id>github-private</id>
-      <properties>
-        <github.global.server>github-private</github.global.server>
-      </properties>
-      <distributionManagement>
-        <repository>
-          <id>internal.repo</id>
-          <url>file://${project.build.directory}/mvn-repo</url>
-        </repository>
-      </distributionManagement>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.github.github</groupId>
-            <artifactId>site-maven-plugin</artifactId>
-            <version>0.12</version>
-            <configuration>
-              <merge>true</merge>
-              <includes>
-                <include>**/*</include>
-              </includes>
-              <message>${project.version}</message>
-              <noJekyll>true</noJekyll>
-              <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-              <branch>refs/origin/mvn-repo</branch>
-              <repositoryName>maven-repo</repositoryName>
-              <repositoryOwner>nayasis</repositoryOwner>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>site</goal>
-                </goals>
-                <phase>deploy</phase>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
       <id>local-nexus</id>
       <distributionManagement>
         <repository>

@@ -1,42 +1,12 @@
 # Basica
-basic utility components
-
+basic utility
 
 ## Dependency
 
 ### maven
 
-- snapshot
-```xml
-<dependency>
-  <groupId>com.github.nayasis</groupId>
-  <artifactId>basica</artifactId>
-  <version>0.3.6-SNAPSHOT</version>
-</dependency>
-```
+1. add repository in **pom.xml**.
 
-- release
-```xml
-<dependency>
-  <groupId>com.github.nayasis</groupId>
-  <artifactId>basica</artifactId>
-  <version>0.3.5</version>
-</dependency>
-```
-
-#### repository setting
-
-- snapshot
-```xml
-<repositories>
-  <repository>
-    <id>nayasis-maven-repo</id>
-    <url>https://raw.github.com/nayasis/maven-repo/mvn-repo</url>
-  </repository>
-</repositories>
-```
-
-- release
 ```xml
 <repositories>
   <repository>
@@ -45,3 +15,30 @@ basic utility components
   </repository>
 </repositories>
 ```
+
+2. add dependency in **pom.xml**.
+
+```xml
+<dependency>
+  <groupId>com.github.nayasis</groupId>
+  <artifactId>basica</artifactId>
+  <version>0.3.6</version>
+</dependency>
+```
+
+### gradle
+
+1. add repository in **build.gradle.kts**.
+
+```kotlin
+repositories {
+  maven { url = uri("https://jitpack.io") }
+}
+```
+
+2. add dependency in **build.gradle.kts**.
+
+```kotlin
+dependencies {
+  implementation( "com.github.nayasis:basica:0.3.6" )
+}
