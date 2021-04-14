@@ -42,4 +42,3 @@ repositories {
 dependencies {
   implementation( "com.github.nayasis:basica:0.3.6" )
 }
-```
